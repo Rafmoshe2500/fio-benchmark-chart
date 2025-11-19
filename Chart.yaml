@@ -1,0 +1,18 @@
+---
+apiVersion: v2
+name: fio-benchmark
+description: A Helm chart for deploying FIO storage benchmarks on OpenShift/Kubernetes
+type: application
+version: 1.0.0
+appVersion: "3.41"
+keywords:
+  - fio
+  - benchmark
+  - storage
+  - performance
+maintainers:
+  - name: Your Name
+    email: your.email@example.com
+home: https://github.com/yourusername/fio-benchmark-chart
+sources:
+  - https://github.com/axboe/fio

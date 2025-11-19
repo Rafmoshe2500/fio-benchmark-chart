@@ -1,0 +1,71 @@
+---
+{{- range $i := until (int .Values.replicaCount) }}
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: {{ $.Values.namePrefix }}-{{ $i }}
+  namespace: {{ $.Values.namespace }}
+  labels:
+    {{- include "fio-benchmark.labels" $ | nindent 4 }}
+    pod-index: "{{ $i }}"
+  {{- with $.Values.podAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  restartPolicy: {{ $.Values.restartPolicy }}
+  {{- with $.Values.imagePullSecrets }}
+  imagePullSecrets:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $.Values.securityContext }}
+  securityContext:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  containers:
+  - name: fio
+    image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
+    imagePullPolicy: {{ $.Values.image.pullPolicy }}
+    command: ["/bin/bash", "-c"]
+    args:
+      - |
+        echo "Starting FIO benchmark on pod {{ $i }}..."
+        cp /fio-config/fio.job /tmp/fio.job
+        sed -i 's|directory=.*|directory={{ $.Values.mountPath }}|g' /tmp/fio.job
+        echo "FIO Configuration:"
+        cat /tmp/fio.job
+        echo "---"
+        fio /tmp/fio.job
+        echo "FIO benchmark completed on pod {{ $i }}"
+    volumeMounts:
+    {{- if $.Values.pvc.enabled }}
+    - name: fio-data
+      mountPath: {{ $.Values.mountPath }}
+    {{- end }}
+    - name: fio-config
+      mountPath: /fio-config
+    resources:
+      {{- toYaml $.Values.resources | nindent 6 }}
+  volumes:
+  {{- if $.Values.pvc.enabled }}
+  - name: fio-data
+    persistentVolumeClaim:
+      claimName: {{ $.Values.namePrefix }}-pvc-{{ $i }}
+  {{- end }}
+  - name: fio-config
+    configMap:
+      name: {{ include "fio-benchmark.fullname" $ }}-config
+  {{- with $.Values.nodeSelector }}
+  nodeSelector:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $.Values.affinity }}
+  affinity:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- with $.Values.tolerations }}
+  tolerations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

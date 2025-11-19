@@ -1,0 +1,24 @@
+---
+{{- if .Values.pvc.enabled }}
+{{- range $i := until (int .Values.replicaCount) }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $.Values.namePrefix }}-pvc-{{ $i }}
+  namespace: {{ $.Values.namespace }}
+  labels:
+    {{- include "fio-benchmark.labels" $ | nindent 4 }}
+    pod-index: "{{ $i }}"
+spec:
+  accessModes:
+    - {{ $.Values.pvc.accessMode }}
+  resources:
+    requests:
+      storage: {{ $.Values.pvc.size }}
+  {{- if $.Values.pvc.storageClassName }}
+  storageClassName: {{ $.Values.pvc.storageClassName }}
+  {{- end }}
+{{- end }}
+{{- end }}
+

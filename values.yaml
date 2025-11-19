@@ -1,0 +1,88 @@
+---
+# Default values for fio-benchmark chart
+
+# Number of FIO benchmark pods to deploy
+replicaCount: 3
+
+# FIO container image configuration
+image:
+  repository: your-registry.example.com/fio
+  tag: "3.41"
+  pullPolicy: IfNotPresent
+
+# Optional: Image pull secrets for private registries
+imagePullSecrets: []
+# - name: registry-secret
+
+# OpenShift/Kubernetes namespace
+namespace: default
+
+# Persistent Volume Claim configuration
+pvc:
+  enabled: true
+  size: 10Gi
+  storageClassName: ""  # Leave empty for default storage class
+  accessMode: ReadWriteOnce
+
+# Mount path for the PVC inside the pod
+mountPath: /mnt/fio-data
+
+# FIO job configuration
+# You can either provide inline FIO job content or use an external file
+fioJob:
+  # Inline FIO job configuration (will be overridden by file if provided)
+  content: |
+    [global]
+    ioengine=libaio
+    direct=1
+    size=1G
+    runtime=60
+    time_based=1
+    group_reporting=1
+    
+    [random-read]
+    rw=randread
+    bs=4k
+    iodepth=32
+    numjobs=4
+
+# Resource limits and requests for FIO pods
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "500m"
+  limits:
+    memory: "2Gi"
+    cpu: "2000m"
+
+# Pod restart policy
+restartPolicy: Never
+
+# Labels to apply to all resources
+labels:
+  app: fio-benchmark
+  component: storage-test
+
+# Annotations for pods
+podAnnotations: {}
+
+# Node selector for pod scheduling
+nodeSelector: {}
+
+# Tolerations for pod scheduling
+tolerations: []
+
+# Affinity rules for pod scheduling
+affinity: {}
+
+# Security context for pods
+securityContext: {}
+  # runAsUser: 1000
+  # runAsGroup: 1000
+  # fsGroup: 1000
+
+# Whether to create unique names for each pod and PVC
+uniqueNames: true
+
+# Prefix for resource names
+namePrefix: "fio-benchmark"
