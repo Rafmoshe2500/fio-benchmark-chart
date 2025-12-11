@@ -1,0 +1,26 @@
+[global]
+ioengine=libaio
+direct=1
+group_reporting
+directory=/mnt/fio-data
+time_based
+
+# --- The "Steady State" Background Load ---
+[steady_workload]
+rw=randread
+bs=64k
+size=10G
+runtime=600
+numjobs=4
+iodepth=16
+
+# --- The "Burst" Intruder ---
+[burst_writer]
+new_group
+startdelay=300
+runtime=60
+rw=write
+bs=1MB
+numjobs=8
+iodepth=32
+size=10G

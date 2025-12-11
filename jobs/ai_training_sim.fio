@@ -1,0 +1,28 @@
+[global]
+ioengine=libaio
+direct=1
+group_reporting
+directory=/mnt/fio-data
+time_based
+runtime=300
+ramp_time=10
+randrepeat=0
+refill_buffers
+
+# --- Simulation of Data Loaders (Reading Dataset) ---
+[dataloaders_read]
+rw=randread
+bs=1M
+size=10G
+numjobs=16
+iodepth=4
+
+# --- Simulation of Checkpointing (Saving Model) ---
+[checkpoint_writer]
+rw=write
+bs=4M
+size=50G
+numjobs=1
+iodepth=16
+fsync_on_close=1
+stonewall
