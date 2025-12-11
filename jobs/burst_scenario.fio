@@ -4,6 +4,8 @@ direct=1
 group_reporting
 directory=/mnt/fio-data
 time_based
+randrepeat=0
+refill_buffers
 
 # --- The "Steady State" Background Load ---
 [steady_workload]
