@@ -1,0 +1,17 @@
+[global]
+ioengine=libaio
+direct=1
+size=10G
+runtime=600
+time_based=1
+group_reporting=1
+directory=/mnt/fio-data
+numjobs=8
+iodepth=32
+
+[test4-50k-5050-32k]
+rw=randrw
+rwmixread=50
+bs=32k
+# Target 5000 IOPS per pod. 5000 / 8 jobs = 625 IOPS per thread
+rate_iops=625

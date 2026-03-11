@@ -6,7 +6,7 @@ replicaCount: 3
 
 # FIO container image configuration
 image:
-  repository: your-registry.example.com/fio
+  repository: rafmoshe2500/fio
   tag: "3.41"
   pullPolicy: IfNotPresent
 

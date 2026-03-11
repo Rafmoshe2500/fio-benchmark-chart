@@ -1,0 +1,17 @@
+[global]
+ioengine=libaio
+direct=1
+size=20G
+runtime=900
+time_based=1
+group_reporting=1
+directory=/mnt/fio-data
+numjobs=8
+iodepth=16
+
+[test17-mixed-256k]
+rw=randrw
+rwmixread=50
+bs=256k
+# 2,000 IOPS per pod / 8 threads = 250 IOPS per thread
+rate_iops=250
