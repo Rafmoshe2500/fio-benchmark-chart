@@ -132,7 +132,7 @@ def parse_fio_log(filepath: str) -> dict:
 
         # ── IOPS per-job stats (stddev) ───────────────────────────────────
         # "   iops        : min=  2, max= 608, avg=100.99, stdev=16.58, samples=..."
-        m = re.match(r'\s+iops\s*:\s*min=\s*[\d\.]+,\s*max=\s*[\d\.]+,\s*avg=[\d\.]+,\s*stdev=([\d\.]+)', raw)
+        m = re.match(r'\s+iops\s*:\s*min=\s*[\d\.]+,\s*max=\s*[\d\.]+,\s*avg=[\d\.]+,\s*stdev=\s*([\d\.]+)', raw)
         if m and not metrics[pfx + 'iops_stdev']:
             metrics[pfx + 'iops_stdev'] = float(m.group(1))
 
@@ -152,6 +152,52 @@ def make_table(rows, headers, col_widths, fmt_row):
         lines.append(fmt_row(r, col_widths))
     lines.append(sep)
     return lines
+
+# ---------------------------------------------------------------------------
+# Status evaluation — tweak thresholds here to match your SLA
+# ---------------------------------------------------------------------------
+
+# IOPS stability: σ as % of avg IOPS
+STABILITY_WARN_PCT  = 15.0   # % — above this is a warning
+STABILITY_FAIL_PCT  = 30.0   # % — above this is a failure
+
+# P99 latency absolute thresholds (ms)
+P99_WARN_MS         = 50.0   # ms
+P99_FAIL_MS         = 200.0  # ms
+
+# P99 / clat_avg ratio (how extreme the tail is relative to average)
+TAIL_RATIO_WARN     = 10.0   # P99 > 10x avg → warning
+TAIL_RATIO_FAIL     = 50.0   # P99 > 50x avg → failure
+
+
+def pod_status(m: dict) -> tuple:
+    """
+    Returns (stability_r%, stability_w%, tail_ratio_r, tail_ratio_w, status)
+    status is one of: PASS / WARN / FAIL
+    """
+    def stab(iops, stdev):
+        return (stdev / iops * 100.0) if iops > 0 else 0.0
+
+    def tail(p99, clat):
+        return (p99 / clat) if clat > 0 else 0.0
+
+    sr = stab(m['read_iops'],  m['read_iops_stdev'])
+    sw = stab(m['write_iops'], m['write_iops_stdev'])
+    tr = tail(m['read_p99_ms'],  m['read_clat_ms'])
+    tw = tail(m['write_p99_ms'], m['write_clat_ms'])
+
+    # Determine worst status
+    status = 'PASS'
+    if (max(sr, sw) >= STABILITY_FAIL_PCT or
+        max(m['read_p99_ms'], m['write_p99_ms']) >= P99_FAIL_MS or
+        max(tr, tw) >= TAIL_RATIO_FAIL):
+        status = 'FAIL'
+    elif (max(sr, sw) >= STABILITY_WARN_PCT or
+          max(m['read_p99_ms'], m['write_p99_ms']) >= P99_WARN_MS or
+          max(tr, tw) >= TAIL_RATIO_WARN):
+        status = 'WARN'
+
+    return round(sr, 1), round(sw, 1), round(tr, 1), round(tw, 1), status
 
 
 # ---------------------------------------------------------------------------
@@ -242,37 +288,81 @@ def main():
           f'{avg("read_p99_ms",cnt_read):<{lat_widths[5]}.3f} | {avg("write_p99_ms",cnt_write):<{lat_widths[6]}.3f}')
     print(sep2)
 
+    # ── Status Summary Table ──────────────────────────────────────────────
+    st_headers = ['Pod Name', 'R-Stability%', 'W-Stability%', 'R-Tail(P99/avg)', 'W-Tail(P99/avg)', 'Status']
+    st_widths  = [28, 13, 13, 16, 16, 8]
+    STATUS_ICON = {'PASS': '✅ PASS', 'WARN': '⚠️  WARN', 'FAIL': '❌ FAIL'}
+
+    def fmt_status(row, w):
+        pod, m = row
+        sr, sw, tr, tw, status = pod_status(m)
+        return (f'{pod:<{w[0]}} | {sr:<{w[1]}.1f} | {sw:<{w[2]}.1f} | '
+                f'{tr:<{w[3]}.1f} | {tw:<{w[4]}.1f} | {STATUS_ICON.get(status, status)}')
+
+    print("\n=== STATUS ===")
+    for line in make_table(rows, st_headers, st_widths, fmt_status):
+        print(line)
+
+    all_statuses = [pod_status(m)[4] for _, m in rows]
+    overall = 'FAIL' if 'FAIL' in all_statuses else ('WARN' if 'WARN' in all_statuses else 'PASS')
+    avg_sr = sum(pod_status(m)[0] for _, m in rows) / len(rows)
+    avg_sw = sum(pod_status(m)[1] for _, m in rows) / len(rows)
+    avg_tr = sum(pod_status(m)[2] for _, m in rows) / len(rows)
+    avg_tw = sum(pod_status(m)[3] for _, m in rows) / len(rows)
+    sep3 = '-' * (sum(st_widths) + 3 * (len(st_widths)-1))
+    print(f'{"OVERALL":<{st_widths[0]}} | {avg_sr:<{st_widths[1]}.1f} | {avg_sw:<{st_widths[2]}.1f} | '
+          f'{avg_tr:<{st_widths[3]}.1f} | {avg_tw:<{st_widths[4]}.1f} | {STATUS_ICON.get(overall, overall)}')
+    print(sep3)
+
+
     # ── CSV Export ────────────────────────────────────────────────────────
     csv_file = os.path.join(results_dir, "summary_report.csv")
     csv_cols = [
         'Pod Name',
         'Read IOPS','Write IOPS','Read IOPS Stddev','Write IOPS Stddev',
+        'R-Stability %','W-Stability %',
         'Read BW (MB/s)','Write BW (MB/s)',
         'Read Lat Avg (ms)','Write Lat Avg (ms)',
         'Read Clat Avg (ms)','Write Clat Avg (ms)',
         'Read P99 (ms)','Write P99 (ms)',
+        'R-Tail Ratio (P99/avg)','W-Tail Ratio (P99/avg)',
+        'Status',
     ]
     with open(csv_file, 'w', newline='') as csvfile:
         w = csv.writer(csvfile)
         w.writerow(csv_cols)
         for pod, m in rows:
+            sr, sw, tr, tw, status = pod_status(m)
             w.writerow([
                 pod,
-                round(m['read_iops']),       round(m['write_iops']),
+                round(m['read_iops']),        round(m['write_iops']),
                 round(m['read_iops_stdev'],2), round(m['write_iops_stdev'],2),
+                sr, sw,
                 round(m['read_bw_mbps'],3),   round(m['write_bw_mbps'],3),
                 round(m['read_lat_ms'],3),    round(m['write_lat_ms'],3),
                 round(m['read_clat_ms'],3),   round(m['write_clat_ms'],3),
                 round(m['read_p99_ms'],3),    round(m['write_p99_ms'],3),
+                tr, tw,
+                status,
             ])
+        # Summary row (status is overall worst)
+        all_statuses = [pod_status(m)[4] for _, m in rows]
+        overall = 'FAIL' if 'FAIL' in all_statuses else ('WARN' if 'WARN' in all_statuses else 'PASS')
+        avg_sr = sum(pod_status(m)[0] for _, m in rows) / len(rows)
+        avg_sw = sum(pod_status(m)[1] for _, m in rows) / len(rows)
+        avg_tr = sum(pod_status(m)[2] for _, m in rows) / len(rows)
+        avg_tw = sum(pod_status(m)[3] for _, m in rows) / len(rows)
         w.writerow([
             'TOTAL / AVG',
             round(totals['read_iops']),       round(totals['write_iops']),
             round(avg('read_iops_stdev',cnt_read),2), round(avg('write_iops_stdev',cnt_write),2),
+            round(avg_sr,1), round(avg_sw,1),
             round(totals['read_bw_mbps'],3),  round(totals['write_bw_mbps'],3),
             round(avg('read_lat_ms',cnt_read),3),   round(avg('write_lat_ms',cnt_write),3),
             round(avg('read_clat_ms',cnt_read),3),  round(avg('write_clat_ms',cnt_write),3),
             round(avg('read_p99_ms',cnt_read),3),   round(avg('write_p99_ms',cnt_write),3),
+            round(avg_tr,1), round(avg_tw,1),
+            overall,
         ])
 
     print(f"\nCSV saved to: {csv_file}")

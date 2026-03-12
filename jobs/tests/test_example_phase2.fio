@@ -14,4 +14,4 @@ rw=randrw
 rwmixread=70
 bs=8k
 # 500 IOPS per pod / 2 threads = 250 IOPS per thread
-rate_iops=250
+rate_iops=700,700
