@@ -25,7 +25,7 @@ case $TEST_ID in
     helm install "$HELM_RELEASE" "$CHART_DIR" -n "$NAMESPACE" --create-namespace \
       --set replicaCount=$REPLICAS \
       --set namePrefix="fio-$TEST_ID" \
-      --set-file fioJob.content="$CHART_DIR/jobs/tests/$TEST_ID.fio"
+      --set-file fioJob.content="$CHART_DIR/jobs/tests/$HELM_RELEASE.fio"
     ;;
   
   *test10_burst_write*)
