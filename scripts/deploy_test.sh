@@ -13,105 +13,142 @@ fi
 
 echo "Deploying Benchmark: $TEST_ID in namespace: $NAMESPACE"
 
-# Define default helm parameters
-REPLICAS=10
 HELM_RELEASE="fio-$TEST_ID"
-HELM_RELEASE=$(echo "$HELM_RELEASE" | tr '_' '-' | cut -c 1-53)
+HELM_RELEASE=$(echo "$HELM_RELEASE" | tr '_' '-' | cut -c 1-45)
 
-# Logic to handle specific test cases that require different replica counts or multiple phases
+# פונקציית חלוקה התומכת בניתוב לפי סוג הבדיקה (Throughput / IOPS) וביחס של 80/20
+deploy_split() {
+  local phase_suffix=$1
+  local job_file=$2
+  local total_pods=$3
+  local mode=${4:-both} # "both" או "100g_only"
+
+  local rep_100g=0
+  local rep_10g=0
+
+  if [ "$mode" == "100g_only" ]; then
+    rep_100g=$total_pods
+    rep_10g=0
+  else
+    # מצב both: חלוקה של 80% ל-100G ו-20% ל-10G
+    rep_100g=$(( total_pods * 8 / 10 ))
+    rep_10g=$(( total_pods - rep_100g ))
+    
+    # בבדיקות Max IOPS של פוד בודד, נרים פוד אחד בכל סביבה לצורך השוואה
+    if [ $total_pods -eq 1 ]; then
+      rep_100g=1
+      rep_10g=1
+    fi
+  fi
+
+  local rel_name="${HELM_RELEASE}${phase_suffix}"
+
+  if [ $rep_10g -gt 0 ]; then
+    echo "--> Deploying $rep_10g Pods to 10G Nodes..."
+    helm install "${rel_name}-10g" "$CHART_DIR" -n "$NAMESPACE" --create-namespace \
+      --set replicaCount=$rep_10g \
+      --set nodeSelector.netclass=slow10g \
+      --set pvc.storageClassName=csi-vast-sc-10 \
+      --set namePrefix="${rel_name}-10g" \
+      --set-file fioJob.content="$job_file"
+  fi
+
+  if [ $rep_100g -gt 0 ]; then
+    echo "--> Deploying $rep_100g Pods to 100G Nodes..."
+    helm install "${rel_name}-100g" "$CHART_DIR" -n "$NAMESPACE" --create-namespace \
+      --set replicaCount=$rep_100g \
+      --set nodeSelector.netclass=fast100g \
+      --set pvc.storageClassName=csi-vast-sc-100 \
+      --set namePrefix="${rel_name}-100g" \
+      --set-file fioJob.content="$job_file"
+  fi
+}
+
 case $TEST_ID in
-  *1pod*)
-    REPLICAS=1
-    helm install "$HELM_RELEASE" "$CHART_DIR" -n "$NAMESPACE" --create-namespace \
-      --set replicaCount=$REPLICAS \
-      --set namePrefix="fio-$TEST_ID" \
-      --set-file fioJob.content="$CHART_DIR/jobs/tests/$HELM_RELEASE.fio"
+  
+  # בדיקות פוד בודד (Max IOPS) - ירוץ על שתי הסביבות במקביל (פוד 1 לכל סוג רשת)
+  *1pod*) 
+    deploy_split "" "$CHART_DIR/jobs/tests/$TEST_ID.fio" 1 "both"
     ;;
   
+  # בדיקות 10 פודים מוכוונות Throughput (טסטים 5 ו-6)
+  *test5*|*test6*)
+    deploy_split "" "$CHART_DIR/jobs/tests/$TEST_ID.fio" 10 "100g_only"
+    ;;
+
+  # בדיקת Burst Write (מוכוונת Throughput 3GB -> 10GB)
   *test10_burst_write*)
-    echo "Deploying Phase 1 (5 Pods)..."
-    helm install "$HELM_RELEASE-p1" "$CHART_DIR" -n "$NAMESPACE" --create-namespace \
-      --set replicaCount=5 --set namePrefix="fio-t10-p1" \
-      --set-file fioJob.content="$CHART_DIR/jobs/tests/test10_burst_write_phase1.fio"
+    echo "Deploying Phase 1 (5 Pods on 100G)..."
+    deploy_split "-p1" "$CHART_DIR/jobs/tests/test10_burst_write_phase1.fio" 5 "100g_only"
     
-    echo "Waiting 5 minutes for Burst Phase 2..."
+    echo "Waiting 5 minutes..."
     sleep 300
     
-    echo "Deploying Phase 2 (+5 Pods)..."
-    helm install "$HELM_RELEASE-p2" "$CHART_DIR" -n "$NAMESPACE" --create-namespace \
-      --set replicaCount=5 --set namePrefix="fio-t10-p2" \
-      --set-file fioJob.content="$CHART_DIR/jobs/tests/test10_burst_write_phase2.fio"
+    echo "Deploying Phase 2 (+5 Pods on 100G)..."
+    deploy_split "-p2" "$CHART_DIR/jobs/tests/test10_burst_write_phase2.fio" 5 "100g_only"
     ;;
     
+  # בדיקת Burst Read (מוכוונת Throughput 5GB -> 10GB)
   *test11_burst_read*)
-    echo "Deploying Phase 1 (20 Pods)..."
-    helm install "$HELM_RELEASE-p1" "$CHART_DIR" -n "$NAMESPACE" --create-namespace \
-      --set replicaCount=20 --set namePrefix="fio-t11-p1" \
-      --set-file fioJob.content="$CHART_DIR/jobs/tests/test11_burst_read_phase1.fio"
+    echo "Deploying Phase 1 (20 Pods on 100G)..."
+    deploy_split "-p1" "$CHART_DIR/jobs/tests/test11_burst_read_phase1.fio" 20 "100g_only"
     
-    echo "Waiting 5 minutes for Burst Phase 2..."
+    echo "Waiting 5 minutes..."
     sleep 300
     
-    echo "Deploying Phase 2 (+5 Pods)..."
-    helm install "$HELM_RELEASE-p2" "$CHART_DIR" -n "$NAMESPACE" --create-namespace \
-      --set replicaCount=5 --set namePrefix="fio-t11-p2" \
-      --set-file fioJob.content="$CHART_DIR/jobs/tests/test11_burst_read_phase2.fio"
+    echo "Deploying Phase 2 (+5 Pods on 100G)..."
+    deploy_split "-p2" "$CHART_DIR/jobs/tests/test11_burst_read_phase2.fio" 5 "100g_only"
     ;;
 
-  *test_example*)
-    echo "Running Local Example: Phase 1 (10 Pods)..."
-    helm install "$HELM_RELEASE-p1" "$CHART_DIR" -n "$NAMESPACE" --create-namespace \
-      --set replicaCount=10 --set namePrefix="fio-example-p1" \
-      --set namespace="$NAMESPACE" \
-      --set pvc.size=2Gi \
-      --set resources.requests.cpu=100m \
-      --set resources.requests.memory=128Mi \
-      --set-file fioJob.content="$CHART_DIR/jobs/tests/test_example_phase1.fio"
-    
-    echo "Waiting 2 minutes for Phase 2..."
-    sleep 120
-    
-    echo "Running Local Example: Phase 2 (+1 Pod)..."
-    helm install "$HELM_RELEASE-p2" "$CHART_DIR" -n "$NAMESPACE" --create-namespace \
-      --set replicaCount=1 --set namePrefix="fio-example-p2" \
-      --set namespace="$NAMESPACE" \
-      --set pvc.size=2Gi \
-      --set resources.requests.cpu=100m \
-      --set resources.requests.memory=128Mi \
-      --set-file fioJob.content="$CHART_DIR/jobs/tests/test_example_phase2.fio"
-    ;;
-
+  # בדיקות גדילה הדרגתית (Gradual Scale)
   *gradual_scale*)
-    echo "Deploying initial 10 Pods..."
-    helm install "$HELM_RELEASE" "$CHART_DIR" -n "$NAMESPACE" --create-namespace \
-      --set replicaCount=10 --set namePrefix="fio-scale" \
-      --set-file fioJob.content="$CHART_DIR/jobs/tests/$TEST_ID.fio"
+    # אם שם הבדיקה מכיל בלוקים גדולים (1m או 512k), זו בדיקת Throughput שתרוץ רק על 100G
+    MODE="both"
+    if [[ "$TEST_ID" == *"1m"* || "$TEST_ID" == *"512k"* ]]; then
+        MODE="100g_only"
+    fi
     
-    # Scale up by 5 pods every minute for 30 minutes (up to 160 pods? 10 + 5*30 = 160)
+    echo "Deploying Initial Scale (10 Pods)..."
+    deploy_split "" "$CHART_DIR/jobs/tests/$TEST_ID.fio" 10 "$MODE"
+    
     for i in {1..30}; do
        sleep 60
-       NEW_REPLICAS=$((10 + i * 5))
-       echo "Scaling to $NEW_REPLICAS Pods..."
-       helm upgrade "$HELM_RELEASE" "$CHART_DIR" -n "$NAMESPACE" \
-         --set replicaCount=$NEW_REPLICAS --set namePrefix="fio-scale" \
-         --reuse-values
+       TOTAL_NOW=$(( 10 + i * 5 ))
+       
+       if [ "$MODE" == "100g_only" ]; then
+         REP_100G=$TOTAL_NOW
+         REP_10G=0
+         echo "Minute $i: Scaling to total $TOTAL_NOW Pods (All on 100G)..."
+       else
+         # יחס של 80/20 לטובת 100G
+         REP_100G=$(( TOTAL_NOW * 8 / 10 ))
+         REP_10G=$(( TOTAL_NOW - REP_100G ))
+         echo "Minute $i: Scaling to total $TOTAL_NOW Pods ($REP_10G on 10G, $REP_100G on 100G)..."
+       fi
+       
+       if [ $REP_10G -gt 0 ]; then
+         helm upgrade "${HELM_RELEASE}-10g" "$CHART_DIR" -n "$NAMESPACE" \
+           --set replicaCount=$REP_10G --set namePrefix="${HELM_RELEASE}-10g" --reuse-values || true
+       fi
+       if [ $REP_100G -gt 0 ]; then
+         helm upgrade "${HELM_RELEASE}-100g" "$CHART_DIR" -n "$NAMESPACE" \
+           --set replicaCount=$REP_100G --set namePrefix="${HELM_RELEASE}-100g" --reuse-values || true
+       fi
     done
     ;;
 
+  # בדיקת עומס מעורב - ממוקדת ב-IOPS (גדלים שונים)
   *test17_mixed_workload*)
-    echo "Deploying Mixed Workloads (40 Pods total across 4 releases)..."
-    helm install "$HELM_RELEASE-32k" "$CHART_DIR" -n "$NAMESPACE" --create-namespace --set replicaCount=10 --set namePrefix="fio-t17-32k" --set-file fioJob.content="$CHART_DIR/jobs/tests/test17_mixed_workload_32k.fio"
-    helm install "$HELM_RELEASE-64k" "$CHART_DIR" -n "$NAMESPACE" --create-namespace --set replicaCount=10 --set namePrefix="fio-t17-64k" --set-file fioJob.content="$CHART_DIR/jobs/tests/test17_mixed_workload_64k.fio"
-    helm install "$HELM_RELEASE-256k" "$CHART_DIR" -n "$NAMESPACE" --create-namespace --set replicaCount=10 --set namePrefix="fio-t17-256k" --set-file fioJob.content="$CHART_DIR/jobs/tests/test17_mixed_workload_256k.fio"
-    helm install "$HELM_RELEASE-512k" "$CHART_DIR" -n "$NAMESPACE" --create-namespace --set replicaCount=10 --set namePrefix="fio-t17-512k" --set-file fioJob.content="$CHART_DIR/jobs/tests/test17_mixed_workload_512k.fio"
+    echo "Deploying Mixed Workloads (10 Pods per block size, spread 80/20)..."
+    deploy_split "-32k" "$CHART_DIR/jobs/tests/test17_mixed_workload_32k.fio" 10 "both"
+    deploy_split "-64k" "$CHART_DIR/jobs/tests/test17_mixed_workload_64k.fio" 10 "both"
+    deploy_split "-256k" "$CHART_DIR/jobs/tests/test17_mixed_workload_256k.fio" 10 "both"
+    deploy_split "-512k" "$CHART_DIR/jobs/tests/test17_mixed_workload_512k.fio" 10 "both"
     ;;
 
+  # ברירת מחדל לטסטים 1-4 (בדיקות IOPS נקיות של 30k/50k)
   *)
-    # Default behavior (Test 1-6)
-    helm install "$HELM_RELEASE" "$CHART_DIR" -n "$NAMESPACE" --create-namespace \
-      --set replicaCount=$REPLICAS \
-      --set namePrefix="fio-$TEST_ID" \
-      --set-file fioJob.content="$CHART_DIR/jobs/tests/$TEST_ID.fio"
+    deploy_split "" "$CHART_DIR/jobs/tests/$TEST_ID.fio" 10 "both"
     ;;
 esac
 
