@@ -16,7 +16,7 @@ echo "Deploying Benchmark: $TEST_ID in namespace: $NAMESPACE"
 HELM_RELEASE="fio-$TEST_ID"
 HELM_RELEASE=$(echo "$HELM_RELEASE" | tr '_' '-' | cut -c 1-45)
 
-# פונקציית חלוקה התומכת בניתוב לפי סוג הבדיקה (Throughput / IOPS) וביחס של 80/20
+# פונקציית חלוקה התומכת בניתוב לפי סוג הבדיקה (Throughput / IOPS) וביחס של 65/35
 deploy_split() {
   local phase_suffix=$1
   local job_file=$2
@@ -30,8 +30,8 @@ deploy_split() {
     rep_100g=$total_pods
     rep_10g=0
   else
-    # מצב both: חלוקה של 80% ל-100G ו-20% ל-10G
-    rep_100g=$(( total_pods * 8 / 10 ))
+    # מצב both: חלוקה של 65% ל-100G ו-35% ל-10G
+    rep_100g=$(( total_pods * 65 / 100 ))
     rep_10g=$(( total_pods - rep_100g ))
     
     # בבדיקות Max IOPS של פוד בודד, נרים פוד אחד בכל סביבה לצורך השוואה
@@ -120,8 +120,8 @@ case $TEST_ID in
          REP_10G=0
          echo "Minute $i: Scaling to total $TOTAL_NOW Pods (All on 100G)..."
        else
-         # יחס של 80/20 לטובת 100G
-         REP_100G=$(( TOTAL_NOW * 8 / 10 ))
+         # יחס של 65/35 לטובת 100G
+         REP_100G=$(( TOTAL_NOW * 65 / 100 ))
          REP_10G=$(( TOTAL_NOW - REP_100G ))
          echo "Minute $i: Scaling to total $TOTAL_NOW Pods ($REP_10G on 10G, $REP_100G on 100G)..."
        fi
@@ -139,7 +139,7 @@ case $TEST_ID in
 
   # בדיקת עומס מעורב - ממוקדת ב-IOPS (גדלים שונים)
   *test17_mixed_workload*)
-    echo "Deploying Mixed Workloads (10 Pods per block size, spread 80/20)..."
+    echo "Deploying Mixed Workloads (10 Pods per block size, spread 65/35)..."
     deploy_split "-32k" "$CHART_DIR/jobs/tests/test17_mixed_workload_32k.fio" 10 "both"
     deploy_split "-64k" "$CHART_DIR/jobs/tests/test17_mixed_workload_64k.fio" 10 "both"
     deploy_split "-256k" "$CHART_DIR/jobs/tests/test17_mixed_workload_256k.fio" 10 "both"
