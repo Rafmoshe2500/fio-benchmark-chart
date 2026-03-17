@@ -9,7 +9,7 @@ time_based=1
 group_reporting=1
 directory=/mnt/fio-data
 numjobs=8
-iodepth=16
+iodepth=8
 
 refill_buffers=1
 scramble_buffers=1
@@ -21,4 +21,4 @@ rw=randrw
 rwmixread=50
 bs=4k
 # Target 5000 IOPS per pod. 5000 / 8 jobs = 625 IOPS per thread
-rate_iops=625
+rate_iops=6250

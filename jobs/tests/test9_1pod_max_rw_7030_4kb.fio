@@ -9,12 +9,18 @@ time_based=1
 group_reporting=1
 directory=/mnt/fio-data
 numjobs=8
-iodepth=16
+iodepth=64
 
 refill_buffers=1
 scramble_buffers=1
 randrepeat=0
 norandommap=1
+
+iodepth_batch_submit=16
+iodepth_batch_complete_min=1
+iodepth_batch_complete_max=16
+cpus_allowed_policy=split
+end_fsync=1
 
 [test9-1pod-max-rw-7030-4k]
 rw=randrw

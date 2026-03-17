@@ -1,0 +1,66 @@
+Starting FIO benchmark on pod 1...
+FIO Configuration:
+[global]
+ioengine=libaio
+direct=1
+fallocate=none
+#invalidate=1
+size=10G
+runtime=600
+ramp_time=120
+time_based=1
+group_reporting=1
+directory=/mnt/fio-data
+numjobs=8
+iodepth=16
+
+refill_buffers=1
+scramble_buffers=1
+randrepeat=0
+norandommap=1
+
+[simple]
+#rw=randrw
+rw=randread
+#rwmixread=70
+bs=4k
+---
+simple: (g=0): rw=randread, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=libaio, iodepth=16
+...
+fio-3.41
+Starting 8 processes
+simple: Laying out IO file (1 file / 10240MiB)
+simple: Laying out IO file (1 file / 10240MiB)
+simple: Laying out IO file (1 file / 10240MiB)
+simple: Laying out IO file (1 file / 10240MiB)
+simple: Laying out IO file (1 file / 10240MiB)
+simple: Laying out IO file (1 file / 10240MiB)
+simple: Laying out IO file (1 file / 10240MiB)
+simple: Laying out IO file (1 file / 10240MiB)
+
+simple: (groupid=0, jobs=8): err= 0: pid=76: Tue Mar 17 10:12:58 2026
+  read: IOPS=43.5k, BW=170MiB/s (178MB/s)(99.6GiB/600005msec)
+    slat (nsec): min=1330, max=320782, avg=11600.92, stdev=6301.64
+    clat (usec): min=347, max=85875, avg=2929.41, stdev=1508.81
+     lat (usec): min=362, max=85889, avg=2941.01, stdev=1509.21
+    clat percentiles (usec):
+     |  1.00th=[ 1037],  5.00th=[ 1418], 10.00th=[ 1663], 20.00th=[ 1975],
+     | 30.00th=[ 2180], 40.00th=[ 2376], 50.00th=[ 2573], 60.00th=[ 2802],
+     | 70.00th=[ 3097], 80.00th=[ 3490], 90.00th=[ 4359], 95.00th=[ 6194],
+     | 99.00th=[ 8979], 99.50th=[ 9896], 99.90th=[11863], 99.95th=[12780],
+     | 99.99th=[15664]
+   bw (  KiB/s): min=113947, max=323144, per=100.00%, avg=174036.36, stdev=3191.32, samples=9600
+   iops        : min=28486, max=80786, avg=43508.81, stdev=797.83, samples=9600
+  lat (usec)   : 500=0.01%, 750=0.17%, 1000=0.66%
+  lat (msec)   : 2=20.51%, 4=65.93%, 10=12.25%, 20=0.47%, 50=0.01%
+  lat (msec)   : 100=0.01%
+  cpu          : usr=2.44%, sys=9.55%, ctx=19514336, majf=0, minf=364
+  IO depths    : 1=0.0%, 2=0.0%, 4=0.0%, 8=0.0%, 16=100.0%, 32=0.0%, >=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.1%, 32=0.0%, 64=0.0%, >=64=0.0%
+     issued rwts: total=26099552,0,0,0 short=0,0,0,0 dropped=0,0,0,0
+     latency   : target=0, window=0, percentile=100.00%, depth=16
+
+Run status group 0 (all jobs):
+   READ: bw=170MiB/s (178MB/s), 170MiB/s-170MiB/s (178MB/s-178MB/s), io=99.6GiB (107GB), run=600005-600005msec
+FIO benchmark completed on pod 1

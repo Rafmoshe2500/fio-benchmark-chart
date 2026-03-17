@@ -3,7 +3,7 @@ ioengine=libaio
 direct=1
 fallocate=none
 size=10G
-runtime=900
+runtime=600
 ramp_time=60
 time_based=1
 group_reporting=1
@@ -18,7 +18,7 @@ norandommap=1
 
 [test10-burst-write-phase1]
 rw=randrw
-rwmixread=70
+rwmixread=80
 bs=256k
 # Strict Rate Limiter (Total 3GB/s = ~375m per thread, 70/30 split)
-rate=262m,113m
+rate=300m,75m

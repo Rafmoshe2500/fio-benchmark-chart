@@ -9,18 +9,20 @@ time_based=1
 group_reporting=1
 directory=/mnt/fio-data
 numjobs=8
-iodepth=16
+iodepth=8
 
 refill_buffers=1
 scramble_buffers=1
 randrepeat=0
 norandommap=1
 
+iodepth_batch_submit=16
+iodepth_batch_complete_min=1
+iodepth_batch_complete_max=16
+cpus_allowed_policy=split
+
 [test1-30k-5050-4k]
 rw=randrw
 rwmixread=50
 bs=4k
-# 10 pods * 3000 = 30K total IOPS. Since numjobs=8, rate_iops is per job or total for the block?
-# In group reporting with numjobs, rate_iops is per-job. We want 3000 total across 8 jobs.
-# 3000 / 8 = 375 IOPS per thread (approx)
-rate_iops=375
+rate_iops=3750

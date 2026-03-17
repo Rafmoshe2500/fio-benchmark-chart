@@ -20,7 +20,7 @@ namespace: default
 # Persistent Volume Claim configuration
 pvc:
   enabled: true
-  size: 10Gi
+  size: 500Gi
   storageClassName: ""  # Leave empty for default storage class
   accessMode: ReadWriteOnce
 
@@ -49,11 +49,11 @@ fioJob:
 # Resource limits and requests for FIO pods
 resources:
   requests:
-    memory: "512Mi"
-    cpu: "500m"
-  limits:
-    memory: "2Gi"
+    memory: "16Gi"
     cpu: "2000m"
+  limits:
+    memory: "32Gi"
+    cpu: "8000m"
 
 # Pod restart policy
 restartPolicy: Never

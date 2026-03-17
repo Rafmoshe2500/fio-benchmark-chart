@@ -1,0 +1,27 @@
+[global]
+ioengine=libaio          ; אין טעם לשנות — io_uring לא עובד על NFS kernel mount
+direct=1
+fallocate=none
+size=10G
+runtime=600
+ramp_time=60
+time_based=1
+group_reporting=1
+directory=/mnt/fio-data
+numjobs=8
+iodepth=64               ; העלה מ-16 — חשוב ב-NFS בגלל latency גבוה יותר
+
+refill_buffers=1
+scramble_buffers=1
+randrepeat=0
+norandommap=1
+
+iodepth_batch_submit=16
+iodepth_batch_complete_min=1
+iodepth_batch_complete_max=16
+cpus_allowed_policy=split
+end_fsync=1
+
+[simple]
+rw=read
+bs=4k

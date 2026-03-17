@@ -68,7 +68,12 @@ case $TEST_ID in
   
   # בדיקות פוד בודד (Max IOPS) - ירוץ על שתי הסביבות במקביל (פוד 1 לכל סוג רשת)
   *1pod*) 
-    deploy_split "" "$CHART_DIR/jobs/tests/$TEST_ID.fio" 1 "both"
+        helm install "${rel_name}-100g" "$CHART_DIR" -n "$NAMESPACE" --create-namespace \
+      --set replicaCount=1 \
+      --set nodeSelector.netclass=fast100g \
+      --set pvc.storageClassName=csi-vast-sc-100 \
+      --set namePrefix="${rel_name}-100g" \
+      --set-file fioJob.content="$job_file"
     ;;
   
   # בדיקות 10 פודים מוכוונות Throughput (טסטים 5 ו-6)
@@ -109,11 +114,11 @@ case $TEST_ID in
     fi
     
     echo "Deploying Initial Scale (10 Pods)..."
-    deploy_split "" "$CHART_DIR/jobs/tests/$TEST_ID.fio" 10 "$MODE"
+    deploy_split "" "$CHART_DIR/jobs/tests/$TEST_ID.fio" 20 "$MODE"
     
-    for i in {1..30}; do
-       sleep 60
-       TOTAL_NOW=$(( 10 + i * 5 ))
+    for i in {1..15}; do
+       sleep 120
+       TOTAL_NOW=$(( 10 + i * 10 ))
        
        if [ "$MODE" == "100g_only" ]; then
          REP_100G=$TOTAL_NOW

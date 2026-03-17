@@ -1,22 +1,27 @@
 [global]
 ioengine=libaio
 direct=1
-fallocate=none
-size=10G
+fallocate=none       ; חזור ל-none — בטוח על NFS
+size=10G             ; size per job — וודא שיש מקום ל-numjobs × size
 runtime=600
 ramp_time=60
-time_based=1
+time_based=1         ; חובה שיהיה כאן
 group_reporting=1
 directory=/mnt/fio-data
-numjobs=8
-iodepth=16
+numjobs=8            ; 8 × 10G = 80G — וודא שיש מקום
+iodepth=128
 
 refill_buffers=1
 scramble_buffers=1
 randrepeat=0
 norandommap=1
 
+iodepth_batch_submit=16
+iodepth_batch_complete_min=1
+iodepth_batch_complete_max=16
+cpus_allowed_policy=split
+
 [test7-1pod-max-write-4k]
 rw=randwrite
 bs=4k
-# No rate limit, we want to see the maximum possible
+
