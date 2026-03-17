@@ -19,6 +19,6 @@ norandommap=1
 
 [simple]
 #rw=randrw
-rw=randwrite
+rw=randread
 #rwmixread=70
-bs=256k
+bs=1m
