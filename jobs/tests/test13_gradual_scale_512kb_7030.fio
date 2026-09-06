@@ -12,6 +12,6 @@ iodepth=16
 [test13-scale-512k-7030]
 rw=randrw
 rwmixread=70
-bs=512k
+bs=128k
 # 2,500 IOPS per pod / 8 threads = ~312 IOPS per thread
-rate_iops=312
+rate_iops=70,30

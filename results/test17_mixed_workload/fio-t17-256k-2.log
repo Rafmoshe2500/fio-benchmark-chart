@@ -1,0 +1,72 @@
+Starting FIO benchmark on pod 2...
+FIO Configuration:
+[global]
+ioengine=libaio
+direct=1
+size=20G
+runtime=900
+time_based=1
+group_reporting=1
+directory=/mnt/fio-data
+numjobs=8
+iodepth=16
+
+[test17-mixed-256k]
+rw=randrw
+rwmixread=50
+bs=256k
+# 2,000 IOPS per pod / 8 threads = 250 IOPS per thread
+rate_iops=250
+---
+test17-mixed-256k: (g=0): rw=randrw, bs=(R) 256KiB-256KiB, (W) 256KiB-256KiB, (T) 256KiB-256KiB, ioengine=libaio, iodepth=16
+...
+fio-3.41
+Starting 8 processes
+test17-mixed-256k: Laying out IO file (1 file / 20480MiB)
+test17-mixed-256k: Laying out IO file (1 file / 20480MiB)
+test17-mixed-256k: Laying out IO file (1 file / 20480MiB)
+test17-mixed-256k: Laying out IO file (1 file / 20480MiB)
+test17-mixed-256k: Laying out IO file (1 file / 20480MiB)
+test17-mixed-256k: Laying out IO file (1 file / 20480MiB)
+test17-mixed-256k: Laying out IO file (1 file / 20480MiB)
+test17-mixed-256k: Laying out IO file (1 file / 20480MiB)
+
+test17-mixed-256k: (groupid=0, jobs=8): err= 0: pid=79: Thu Sep  3 17:56:10 2026
+  read: IOPS=1999, BW=500MiB/s (524MB/s)(439GiB/900004msec)
+    slat (usec): min=9, max=1066, avg=22.33, stdev=12.34
+    clat (usec): min=465, max=540700, avg=11302.73, stdev=10123.26
+     lat (usec): min=478, max=540725, avg=11325.06, stdev=10124.04
+    clat percentiles (usec):
+     |  1.00th=[  1303],  5.00th=[  1876], 10.00th=[  2278], 20.00th=[  3064],
+     | 30.00th=[  4359], 40.00th=[  7373], 50.00th=[  9765], 60.00th=[ 11863],
+     | 70.00th=[ 14222], 80.00th=[ 17433], 90.00th=[ 22414], 95.00th=[ 27657],
+     | 99.00th=[ 41681], 99.50th=[ 48497], 99.90th=[ 70779], 99.95th=[ 87557],
+     | 99.99th=[256902]
+   bw (  KiB/s): min=99328, max=869888, per=100.00%, avg=512068.77, stdev=5600.35, samples=14396
+   iops        : min=  388, max= 3398, avg=2000.04, stdev=21.88, samples=14396
+  write: IOPS=1999, BW=500MiB/s (524MB/s)(439GiB/900004msec); 0 zone resets
+    slat (usec): min=14, max=2564, avg=42.87, stdev=17.79
+    clat (usec): min=741, max=569961, avg=10385.85, stdev=10054.33
+     lat (usec): min=776, max=570000, avg=10428.71, stdev=10055.63
+    clat percentiles (usec):
+     |  1.00th=[  1045],  5.00th=[  1369], 10.00th=[  1647], 20.00th=[  2245],
+     | 30.00th=[  3359], 40.00th=[  6521], 50.00th=[  8979], 60.00th=[ 11076],
+     | 70.00th=[ 13304], 80.00th=[ 16319], 90.00th=[ 21365], 95.00th=[ 26346],
+     | 99.00th=[ 39584], 99.50th=[ 46400], 99.90th=[ 66847], 99.95th=[ 84411],
+     | 99.99th=[256902]
+   bw (  KiB/s): min=103936, max=876032, per=100.00%, avg=512068.79, stdev=5566.97, samples=14396
+   iops        : min=  406, max= 3422, avg=2000.04, stdev=21.75, samples=14396
+  lat (usec)   : 500=0.01%, 750=0.04%, 1000=0.46%
+  lat (msec)   : 2=10.82%, 4=19.19%, 10=22.61%, 20=33.86%, 50=12.63%
+  lat (msec)   : 100=0.35%, 250=0.03%, 500=0.01%, 750=0.01%
+  cpu          : usr=0.71%, sys=1.29%, ctx=4231943, majf=0, minf=4291
+  IO depths    : 1=18.9%, 2=27.4%, 4=22.3%, 8=17.3%, 16=14.1%, 32=0.0%, >=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     issued rwts: total=1800000,1800000,0,0 short=0,0,0,0 dropped=0,0,0,0
+     latency   : target=0, window=0, percentile=100.00%, depth=16
+
+Run status group 0 (all jobs):
+   READ: bw=500MiB/s (524MB/s), 500MiB/s-500MiB/s (524MB/s-524MB/s), io=439GiB (472GB), run=900004-900004msec
+  WRITE: bw=500MiB/s (524MB/s), 500MiB/s-500MiB/s (524MB/s-524MB/s), io=439GiB (472GB), run=900004-900004msec
+FIO benchmark completed on pod 2

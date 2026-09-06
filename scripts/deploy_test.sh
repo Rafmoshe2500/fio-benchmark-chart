@@ -84,7 +84,7 @@ case $TEST_ID in
   *gradual_scale*)
     echo "Deploying initial 10 Pods..."
     helm install "$HELM_RELEASE" "$CHART_DIR" -n "$NAMESPACE" --create-namespace \
-      --set replicaCount=10 --set namePrefix="fio-scale" \
+      --set replicaCount=10 --set namePrefix="fio-scale" --set pvc.storageClassName=sc-nas-nfs3 --set pvc.size=250Gi \
       --set-file fioJob.content="$CHART_DIR/jobs/tests/$TEST_ID.fio"
     
     # Scale up by 5 pods every minute for 30 minutes (up to 160 pods? 10 + 5*30 = 160)
@@ -100,10 +100,10 @@ case $TEST_ID in
 
   *test17_mixed_workload*)
     echo "Deploying Mixed Workloads (40 Pods total across 4 releases)..."
-    helm install "$HELM_RELEASE-32k" "$CHART_DIR" -n "$NAMESPACE" --create-namespace --set replicaCount=10 --set namePrefix="fio-t17-32k" --set-file fioJob.content="$CHART_DIR/jobs/tests/test17_mixed_workload_32k.fio"
-    helm install "$HELM_RELEASE-64k" "$CHART_DIR" -n "$NAMESPACE" --create-namespace --set replicaCount=10 --set namePrefix="fio-t17-64k" --set-file fioJob.content="$CHART_DIR/jobs/tests/test17_mixed_workload_64k.fio"
-    helm install "$HELM_RELEASE-256k" "$CHART_DIR" -n "$NAMESPACE" --create-namespace --set replicaCount=10 --set namePrefix="fio-t17-256k" --set-file fioJob.content="$CHART_DIR/jobs/tests/test17_mixed_workload_256k.fio"
-    helm install "$HELM_RELEASE-512k" "$CHART_DIR" -n "$NAMESPACE" --create-namespace --set replicaCount=10 --set namePrefix="fio-t17-512k" --set-file fioJob.content="$CHART_DIR/jobs/tests/test17_mixed_workload_512k.fio"
+    helm install "$HELM_RELEASE-32k" "$CHART_DIR" -n "$NAMESPACE" --create-namespace --set replicaCount=13 --set namePrefix="fio-t17-32k"  --set pvc.storageClassName=sc-nas-nfs3 --set pvc.size=250Gi --set-file fioJob.content="$CHART_DIR/jobs/tests/test17_mixed_workload_32k.fio"
+    helm install "$HELM_RELEASE-64k" "$CHART_DIR" -n "$NAMESPACE" --create-namespace --set replicaCount=17  --set pvc.storageClassName=sc-nas-nfs3 --set pvc.size=250Gi --set namePrefix="fio-t17-64k" --set-file fioJob.content="$CHART_DIR/jobs/tests/test17_mixed_workload_64k.fio"
+    helm install "$HELM_RELEASE-256k" "$CHART_DIR" -n "$NAMESPACE" --create-namespace --set replicaCount=7  --set pvc.storageClassName=sc-nas-nfs3 --set pvc.size=350Gi --set namePrefix="fio-t17-256k" --set-file fioJob.content="$CHART_DIR/jobs/tests/test17_mixed_workload_256k.fio"
+    helm install "$HELM_RELEASE-512k" "$CHART_DIR" -n "$NAMESPACE" --create-namespace --set replicaCount=3 --set pvc.storageClassName=sc-nas-nfs3 --set pvc.size=350Gi --set namePrefix="fio-t17-512k" --set-file fioJob.content="$CHART_DIR/jobs/tests/test17_mixed_workload_512k.fio"
     ;;
 
   *)

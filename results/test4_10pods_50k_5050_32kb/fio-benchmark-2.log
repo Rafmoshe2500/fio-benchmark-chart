@@ -1,0 +1,1233 @@
+Starting FIO benchmark on pod 2...
+FIO Configuration:
+[global]
+ioengine=libaio
+direct=1
+fallocate=none
+size=10G
+runtime=600
+ramp_time=60
+time_based=1
+group_reporting=1
+directory=/mnt/fio-data
+numjobs=8
+iodepth=64
+
+refill_buffers=1
+scramble_buffers=1
+randrepeat=0
+norandommap=1
+
+[test4-50k-32k-write-1]
+rw=randwrite
+bs=32k
+rate_iops=6250
+
+[test4-50k-32k-read-1]
+rw=randread
+bs=32k
+rate_iops=6250
+
+[test4-50k-32k-write-2]
+rw=randwrite
+bs=32k
+rate_iops=6250
+
+[test4-50k-32k-read-2]
+rw=randread
+bs=32k
+rate_iops=6250
+
+[test4-50k-32k-write-3]
+rw=randwrite
+bs=32k
+rate_iops=6250
+
+[test4-50k-32k-read-3]
+rw=randread
+bs=32k
+rate_iops=6250
+
+[test4-50k-32k-write-3]
+rw=randwrite
+bs=32k
+rate_iops=6250
+
+[test4-50k-32k-read-4]
+rw=randread
+bs=32k
+rate_iops=6250
+---
+test4-50k-32k-write-1: (g=0): rw=randwrite, bs=(R) 32.0KiB-32.0KiB, (W) 32.0KiB-32.0KiB, (T) 32.0KiB-32.0KiB, ioengine=libaio, iodepth=64
+...
+test4-50k-32k-read-1: (g=0): rw=randread, bs=(R) 32.0KiB-32.0KiB, (W) 32.0KiB-32.0KiB, (T) 32.0KiB-32.0KiB, ioengine=libaio, iodepth=64
+...
+test4-50k-32k-write-2: (g=0): rw=randwrite, bs=(R) 32.0KiB-32.0KiB, (W) 32.0KiB-32.0KiB, (T) 32.0KiB-32.0KiB, ioengine=libaio, iodepth=64
+...
+test4-50k-32k-read-2: (g=0): rw=randread, bs=(R) 32.0KiB-32.0KiB, (W) 32.0KiB-32.0KiB, (T) 32.0KiB-32.0KiB, ioengine=libaio, iodepth=64
+...
+test4-50k-32k-write-3: (g=0): rw=randwrite, bs=(R) 32.0KiB-32.0KiB, (W) 32.0KiB-32.0KiB, (T) 32.0KiB-32.0KiB, ioengine=libaio, iodepth=64
+...
+test4-50k-32k-read-3: (g=0): rw=randread, bs=(R) 32.0KiB-32.0KiB, (W) 32.0KiB-32.0KiB, (T) 32.0KiB-32.0KiB, ioengine=libaio, iodepth=64
+...
+test4-50k-32k-write-3: (g=0): rw=randwrite, bs=(R) 32.0KiB-32.0KiB, (W) 32.0KiB-32.0KiB, (T) 32.0KiB-32.0KiB, ioengine=libaio, iodepth=64
+...
+test4-50k-32k-read-4: (g=0): rw=randread, bs=(R) 32.0KiB-32.0KiB, (W) 32.0KiB-32.0KiB, (T) 32.0KiB-32.0KiB, ioengine=libaio, iodepth=64
+...
+fio-3.41
+Starting 64 processes
+test4-50k-32k-write-1: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-write-1: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-write-1: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-write-1: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-write-1: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-write-1: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-write-1: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-write-1: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-read-1: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-read-1: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-read-1: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-read-1: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-read-1: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-read-1: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-read-1: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-read-1: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-write-2: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-write-2: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-write-2: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-write-2: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-write-2: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-write-2: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-write-2: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-write-2: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-read-2: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-read-2: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-read-2: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-read-2: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-read-2: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-read-2: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-read-2: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-read-2: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-write-3: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-write-3: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-write-3: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-write-3: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-write-3: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-write-3: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-write-3: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-write-3: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-read-3: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-read-3: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-read-3: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-read-3: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-read-3: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-read-3: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-read-3: Laying out IO file (1 file / 10240MiB)
+test4-50k-32k-read-3: Laying out IO file (1 file / 10240MiB)
+fio: ENOSPC on laying out file, stopping
+fio: pid=0, err=28/file:filesetup.c:241, func=write, error=No space left on device
+test4-50k-32k-write-3: Laying out IO file (1 file / 10240MiB)
+fio: pid=0, err=28/file:filesetup.c:175, func=open, error=No space left on device
+test4-50k-32k-write-3: Laying out IO file (1 file / 10240MiB)
+fio: pid=0, err=28/file:filesetup.c:175, func=open, error=No space left on device
+test4-50k-32k-write-3: Laying out IO file (1 file / 10240MiB)
+fio: pid=0, err=28/file:filesetup.c:175, func=open, error=No space left on device
+test4-50k-32k-write-3: Laying out IO file (1 file / 10240MiB)
+fio: pid=0, err=28/file:filesetup.c:175, func=open, error=No space left on device
+test4-50k-32k-write-3: Laying out IO file (1 file / 10240MiB)
+fio: pid=0, err=28/file:filesetup.c:175, func=open, error=No space left on device
+test4-50k-32k-write-3: Laying out IO file (1 file / 10240MiB)
+fio: pid=0, err=28/file:filesetup.c:175, func=open, error=No space left on device
+test4-50k-32k-write-3: Laying out IO file (1 file / 10240MiB)
+fio: pid=0, err=28/file:filesetup.c:175, func=open, error=No space left on device
+test4-50k-32k-write-3: Laying out IO file (1 file / 10240MiB)
+fio: pid=0, err=28/file:filesetup.c:175, func=open, error=No space left on device
+test4-50k-32k-read-4: Laying out IO file (1 file / 10240MiB)
+fio: pid=0, err=28/file:filesetup.c:175, func=open, error=No space left on device
+test4-50k-32k-read-4: Laying out IO file (1 file / 10240MiB)
+fio: pid=0, err=28/file:filesetup.c:175, func=open, error=No space left on device
+test4-50k-32k-read-4: Laying out IO file (1 file / 10240MiB)
+fio: pid=0, err=28/file:filesetup.c:175, func=open, error=No space left on device
+test4-50k-32k-read-4: Laying out IO file (1 file / 10240MiB)
+fio: pid=0, err=28/file:filesetup.c:175, func=open, error=No space left on device
+test4-50k-32k-read-4: Laying out IO file (1 file / 10240MiB)
+fio: pid=0, err=28/file:filesetup.c:175, func=open, error=No space left on device
+test4-50k-32k-read-4: Laying out IO file (1 file / 10240MiB)
+fio: pid=0, err=28/file:filesetup.c:175, func=open, error=No space left on device
+test4-50k-32k-read-4: Laying out IO file (1 file / 10240MiB)
+fio: pid=0, err=28/file:filesetup.c:175, func=open, error=No space left on device
+test4-50k-32k-read-4: Laying out IO file (1 file / 10240MiB)
+fio: pid=0, err=28/file:filesetup.c:175, func=open, error=No space left on device
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=239763456, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=4679368704, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=4619829248, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=8174075904, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=192774144, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=6822526976, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=1329758208, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=5830803456, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=3709992960, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=7846428672, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=5354979328, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=7762870272, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=4470669312, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=1526530048, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=4138008576, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=251166720, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=4048683008, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=328728576, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=7728168960, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=9103867904, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=7861174272, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=929005568, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=8497758208, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=1999896576, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=7501938688, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=562954240, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=6699220992, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=2885713920, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=2519990272, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=418283520, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=5752881152, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=8551890944, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=6207635456, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=7450198016, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=7727644672, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=2933686272, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=4996464640, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=6891569152, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=3814326272, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=5430870016, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=7603912704, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=2510094336, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=4709646336, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=5071667200, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=6184140800, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=7613677568, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=144277504, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=9410805760, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=1583808512, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=2846720000, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=3478421504, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=7016677376, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=6116868096, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=4128014336, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=4150951936, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=5657067520, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=6716817408, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=7938506752, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=9818570752, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=9262694400, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=3614343168, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=4234248192, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=1534459904, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.6.0: No space left on device: write offset=9951150080, buflen=32768
+fio: pid=81, err=28/file:io_u.c:2008, func=io_u error, error=No space left on device
+fio: pid=115, err=28/file:filesetup.c:800, func=open(/mnt/fio-data/test4-50k-32k-write-3.4.0), error=No space left on device
+fio: pid=84, err=28/file:io_u.c:2008, func=io_u error, error=No space left on device
+fio: pid=102, err=28/file:io_u.c:2008, func=io_u error, error=No space left on device
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=9417424896, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=2794029056, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=8905523200, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=4348051456, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=2538864640, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=1290993664, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=612171776, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=172621824, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=10031759360, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=4915298304, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=9334456320, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=3896377344, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=1015644160, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=2700673024, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=8840773632, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=7493877760, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=3938418688, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=6137872384, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=2554855424, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=957513728, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=5057216512, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=6865944576, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=9196666880, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=1752530944, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=10384146432, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=3349282816, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=7832666112, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=1587740672, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=2871066624, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=1871872000, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=7856357376, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=3982819328, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=3104768000, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=6799228928, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=6772981760, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=16351232, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=8109064192, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=10216439808, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=7773650944, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=3028353024, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=3897556992, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=4368465920, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=2253783040, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=6100385792, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=8898347008, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=9310765056, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=3187015680, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=6770425856, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=10141564928, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=872710144, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=8316321792, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=6211272704, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=6192889856, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=10663657472, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=7900528640, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=1450573824, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=8187576320, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=4384686080, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=10595205120, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=7065174016, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=183566336, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=4532895744, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=2561736704, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=5965152256, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=7646904320, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=9115435008, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=9246998528, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=2148794368, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=9681141760, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=510394368, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=4675076096, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=1273692160, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=1937276928, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=6208552960, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=4319543296, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=5835259904, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=2870280192, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=2770829312, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=6782648320, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=6911492096, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=9432268800, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=1459650560, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=2637594624, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=1619165184, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=2752413696, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=5189664768, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=8946024448, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=1634566144, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=1655177216, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=2340552704, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=1302593536, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=8090812416, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=376602624, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=7414218752, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=9423323136, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=4056088576, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=7927988224, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=7094435840, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=5965414400, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=5856755712, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=1300791296, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=8342536192, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=1821212672, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=7912161280, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=6063882240, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=6804766720, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=32473088, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=3130458112, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=35127296, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.3.0: No space left on device: write offset=5524979712, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=6880362496, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=9964486656, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=3372220416, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=2861301760, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=9744941056, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=152240128, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=8901263360, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=3371597824, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=821952512, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=5466816512, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=3015507968, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=10631315456, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=9518219264, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=5486313472, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=5871435776, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=9007497216, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=6083936256, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.1.0: No space left on device: write offset=2796781568, buflen=32768
+fio: pid=113, err=28/file:filesetup.c:800, func=open(/mnt/fio-data/test4-50k-32k-write-3.6.0), error=No space left on device
+fio: pid=117, err=28/file:filesetup.c:800, func=open(/mnt/fio-data/test4-50k-32k-write-3.2.0), error=No space left on device
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=2664038400, buflen=32768
+fio: pid=111, err=28/file:filesetup.c:800, func=open(/mnt/fio-data/test4-50k-32k-write-3.0.0), error=No space left on device
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=2252636160, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=5840732160, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=1640824832, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=3543957504, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=4390944768, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=1038680064, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=3953917952, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=756744192, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=10587504640, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=4702371840, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=8281194496, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=7866679296, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=2690908160, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=7991689216, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=693207040, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=2434662400, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=4023320576, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=221216768, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=9422897152, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=6106972160, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=6513754112, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=10370252800, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=4719509504, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=8716746752, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=5343477760, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=8786378752, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=3861708800, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=6423150592, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=7669514240, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=6041010176, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=1823080448, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=900005888, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=6966018048, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=4749688832, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=3748659200, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=9079226368, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=1295450112, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=4693557248, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=8585543680, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=1406337024, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=1625751552, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=1202356224, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=3270279168, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=8385626112, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=3069837312, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=551583744, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=7496400896, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=8807710720, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=3485204480, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=10732503040, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=1078624256, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=6012534784, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=9244082176, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=6776389632, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=9417261056, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=8450670592, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=2641920000, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=7729414144, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=7050559488, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=7154204672, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=10624925696, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=6003949568, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=1020723200, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.4.0: No space left on device: write offset=8665235456, buflen=32768
+fio: pid=99, err=28/file:io_u.c:2008, func=io_u error, error=No space left on device
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=9646571520, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=31096832, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=1196392448, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=8881078272, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=1629618176, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=1282080768, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=422313984, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=6124371968, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=7316209664, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=1847328768, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=2998140928, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=3231645696, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=4471029760, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=7231995904, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=3202547712, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=10127867904, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=4487806976, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=5357764608, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=2497642496, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=5775884288, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=4988043264, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=1721794560, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=6056411136, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=10055057408, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=4194795520, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=9934110720, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=7559086080, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=9060941824, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=692879360, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=3811311616, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=8000962560, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=8470888448, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=2958458880, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=1191084032, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=5856854016, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=3261988864, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=5248548864, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=5995364352, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=1872166912, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=5900238848, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=3875700736, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=3567190016, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=3543859200, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=8237318144, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=3985014784, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=2006712320, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=6349029376, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=2095054848, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=3762257920, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=4877778944, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=9716432896, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=1360855040, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=716996608, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=5541363712, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=2727542784, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=2734227456, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=2760048640, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=7419789312, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=245235712, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=2523987968, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=10671390720, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=341737472, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.2.0: No space left on device: write offset=5156765696, buflen=32768
+fio: pid=101, err=28/file:io_u.c:2008, func=io_u error, error=No space left on device
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=4865949696, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=8115486720, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=3613097984, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=4520706048, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=9299230720, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=6974996480, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=440631296, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=256245760, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=10309763072, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=7450394624, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=9105375232, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=9118449664, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=5258608640, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=9558622208, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=2474082304, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=172064768, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=6523486208, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=583630848, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=9493118976, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=9525395456, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=1617494016, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=7691141120, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=9100656640, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=4622811136, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=5081825280, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=10535698432, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=4716822528, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=9489416192, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=721813504, buflen=32768
+fio: pid=86, err=28/file:io_u.c:2008, func=io_u error, error=No space left on device
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=6297452544, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=9754411008, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=8565620736, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=2415951872, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=4964974592, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=9369649152, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=7862419456, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=174784512, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=4879745024, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=5052596224, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=707854336, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=10530947072, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=6773243904, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=4869455872, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=3855450112, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=6507036672, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=1523974144, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=4575526912, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=8760754176, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=9417064448, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=4814372864, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=10274144256, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=3557654528, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=2840559616, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=10380804096, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=10263527424, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=767787008, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=8806006784, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=2197028864, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=7606337536, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=944046080, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=7226327040, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=6240075776, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=5490049024, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=8664580096, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.1.0: No space left on device: write offset=8709111808, buflen=32768
+fio: pid=114, err=28/file:filesetup.c:800, func=open(/mnt/fio-data/test4-50k-32k-write-3.5.0), error=No space left on device
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=7518158848, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=9771024384, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=5471240192, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=8984231936, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=2251980800, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=2822340608, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=10722508800, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=4040196096, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=3443392512, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=3031171072, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=9209643008, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=2158755840, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=4171202560, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=9886826496, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=7976681472, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=827326464, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=3976364032, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=4726325248, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=4066082816, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=4042817536, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=4964548608, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=4372889600, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=9386164224, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=4610228224, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=211156992, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=3312222208, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=7966588928, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=9801891840, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=5450039296, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=10134454272, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=3435888640, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=9903112192, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=169017344, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=7871070208, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=7177338880, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=3467116544, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=4519297024, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=3918692352, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=2634809344, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=2622783488, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=2656075776, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=8099659776, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=4908580864, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=8517353472, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=2620915712, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=3848798208, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=9921921024, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=6351224832, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=4045602816, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=73957376, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=8046280704, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=3229876224, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=10153164800, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=9537257472, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=3376021504, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=2405400576, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=7988871168, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=7988183040, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=1212809216, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=6257672192, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=5667323904, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=3907256320, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.6.0: No space left on device: write offset=8854601728, buflen=32768
+fio: pid=97, err=28/file:io_u.c:2008, func=io_u error, error=No space left on device
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=7666696192, buflen=32768
+fio: pid=116, err=28/file:filesetup.c:800, func=open(/mnt/fio-data/test4-50k-32k-write-3.3.0), error=No space left on device
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=4928700416, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=254083072, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=7381450752, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=1679785984, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=2819096576, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=4797562880, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=1892384768, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=3908370432, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=6464897024, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=4114120704, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=4323573760, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=882802688, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=9773514752, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=3245113344, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=2661384192, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=9685467136, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=4699389952, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=6473318400, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=1708785664, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=483917824, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=6536560640, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=2659123200, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=10010886144, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=1167327232, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=5819531264, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=878641152, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=2282291200, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=3497361408, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=10325852160, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=5138186240, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=8541110272, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=10108239872, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=3265036288, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=10064822272, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=7757627392, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=4737400832, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=6057525248, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=6196985856, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=10117480448, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=1584398336, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=3418095616, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=3385098240, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=7685734400, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=8871411712, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=1178763264, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=9726361600, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=10356293632, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=1026392064, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=3853713408, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=4264624128, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=1356824576, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=9046458368, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=7243956224, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=1182695424, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=3905126400, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=8643379200, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=10540417024, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=3762847744, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=7256735744, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=2828632064, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=712015872, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=6985056256, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=10573316096, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.5.0: No space left on device: write offset=378634240, buflen=32768
+fio: pid=98, err=28/file:io_u.c:2008, func=io_u error, error=No space left on device
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=9264136192, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=1921712128, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=4891344896, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=3871670272, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=8986001408, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=8111128576, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=2511765504, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=7285964800, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=6853525504, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=4326457344, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=10672406528, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=8747253760, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=4306731008, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=6308921344, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=10365927424, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=2716925952, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=1387823104, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=6409453568, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=9689268224, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=4884332544, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=1179844608, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=831946752, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=3740041216, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=9767124992, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=9486991360, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=3238559744, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=5934120960, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=3412951040, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=114688000, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=4680613888, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=8351350784, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=9988571136, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=9878667264, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=2041511936, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=3418357760, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=3348365312, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=9078931456, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=3947069440, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=5469405184, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=6678937600, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=10193960960, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=1153794048, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=3933306880, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=170557440, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=2445017088, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=10425434112, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=488538112, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=9194700800, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=3245768704, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=3665330176, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=5042405376, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=3591012352, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=817790976, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=6520504320, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=6906478592, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=8716484608, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=3553558528, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=8895332352, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=2251751424, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=8954740736, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=104693760, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=9140174848, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=1056309248, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.0.0: No space left on device: write offset=9333997568, buflen=32768
+fio: pid=79, err=28/file:io_u.c:2008, func=io_u error, error=No space left on device
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=1869807616, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=7714045952, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=7980253184, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=6355353600, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=3230597120, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=635207680, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=7611351040, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=1084129280, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=7262732288, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=4130471936, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=8056504320, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=2722103296, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=2443411456, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=1339817984, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=3740368896, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=3875110912, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=3156443136, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=2446753792, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=9560784896, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=4503961600, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=2669608960, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=8972861440, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=7312932864, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=7642120192, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=3177512960, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=500727808, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=6485344256, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=5430607872, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=4148854784, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=5473828864, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=1074397184, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=9620291584, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=3541532672, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=520814592, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=7979597824, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=2492268544, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=628916224, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=9832267776, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=697499648, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=3165519872, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=945487872, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=78872576, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=4762992640, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=5990711296, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=1660354560, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=9531424768, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=9234710528, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=5793054720, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=10430054400, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=8075313152, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=540377088, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=3715563520, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=5427494912, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=4285726720, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=6003228672, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=9453010944, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=8902377472, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=10659004416, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=5426839552, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=3029303296, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=4677861376, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=1321598976, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.7.0: No space left on device: write offset=9252175872, buflen=32768
+fio: pid=96, err=28/file:io_u.c:2008, func=io_u error, error=No space left on device
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=8470626304, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=4641521664, buflen=32768
+fio: pid=118, err=28/file:filesetup.c:800, func=open(/mnt/fio-data/test4-50k-32k-write-3.1.0), error=No space left on device
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=1381924864, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=5208211456, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=5404393472, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=3482288128, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=3074129920, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=4945444864, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=10356031488, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=2203680768, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=9577725952, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=6807748608, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=1982464000, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=381222912, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=3777560576, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=8658419712, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=2399207424, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=195493888, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=6595084288, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=5233246208, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=5062459392, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=6690537472, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=5293834240, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=509149184, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=3795025920, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=8118239232, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=8266514432, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=4400480256, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=5881724928, buflen=32768
+fio: pid=85, err=28/file:io_u.c:2008, func=io_u error, error=No space left on device
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=574685184, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=4606263296, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=491683840, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=3648258048, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=6019907584, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=9528606720, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=9960292352, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=4425678848, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=4623663104, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=10083663872, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=2652307456, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=4261838848, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=3880779776, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=9895673856, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=2337406976, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=6219661312, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=8122236928, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=8723333120, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=5161844736, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=3420192768, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=7728824320, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=575406080, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=550207488, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=8756035584, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=9678979072, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=5872779264, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=4838424576, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=6531776512, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=10451419136, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=10493493248, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=4142661632, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=4824694784, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=6094585856, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=8431173632, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=1819738112, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=2835087360, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.2.0: No space left on device: write offset=1712324608, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=1330544640, buflen=32768
+fio: pid=112, err=28/file:filesetup.c:800, func=open(/mnt/fio-data/test4-50k-32k-write-3.7.0), error=No space left on device
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=6616481792, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=1213136896, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=10339713024, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=4208885760, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=6960775168, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=1811120128, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=6588792832, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=1039433728, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=4157472768, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=592642048, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=4284645376, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=2563244032, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=9717514240, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=9016508416, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=2035482624, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=7792427008, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=3022061568, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=4499603456, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=924057600, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=1833861120, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=7555153920, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=4631920640, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=6226083840, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=3155034112, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=670662656, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=9332686848, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=7678984192, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=9559801856, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=2207121408, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=6066274304, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=5836898304, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=6367903744, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=8109588480, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=1242529792, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=7638450176, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=2445574144, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=10335551488, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=10371006464, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=3146481664, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=6137348096, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=6224379904, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=8990752768, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=8027963392, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=3661299712, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=9173467136, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=8240267264, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=8633516032, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=3352592384, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=8933965824, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=226066432, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=2627207168, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=1216577536, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=8349220864, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=2187722752, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=5480316928, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=6525255680, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=7601913856, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=10555424768, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=1508311040, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=3741712384, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=5154734080, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=1778876416, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.5.0: No space left on device: write offset=3194552320, buflen=32768
+fio: pid=82, err=28/file:io_u.c:2008, func=io_u error, error=No space left on device
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=352976896, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=8860303360, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=9337405440, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=8280604672, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=807763968, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=7778140160, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=10046472192, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=559972352, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=467861504, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=7416283136, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=2238087168, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=1721008128, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=7547977728, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=9198600192, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=9034137600, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=13467648, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=5463703552, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=304447488, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=684425216, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=5645762560, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=3846176768, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=10088808448, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=3419013120, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=10037166080, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=6184239104, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=9526476800, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=3599466496, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=5013504000, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=852557824, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=1028882432, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=6969163776, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=7559086080, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=1299316736, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=3889463296, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=7747633152, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=7350681600, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=5786566656, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=5422186496, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=5023268864, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=6409027584, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=253689856, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=9200992256, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=8253767680, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=2129494016, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=7410647040, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=9911894016, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=844464128, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=3832250368, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=7765262336, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=7324893184, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=424869888, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=1551859712, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=4411490304, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=9926574080, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=1839333376, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=2479980544, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=5796102144, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=5284069376, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=2511175680, buflen=32768
+fio: pid=83, err=28/file:io_u.c:2008, func=io_u error, error=No space left on device
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=9962225664, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=4274520064, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=5227675648, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.4.0: No space left on device: write offset=2643787776, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=3311894528, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=5863997440, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=9016410112, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=6991282176, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=5337841664, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=4326162432, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=9860841472, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=3321823232, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=2299854848, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=962134016, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=8156446720, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=3152216064, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=4562223104, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=5491392512, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=7283408896, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=6772391936, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=3967811584, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=1460961280, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=10481795072, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=2510061568, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=9341304832, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=125304832, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=9864052736, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=2462810112, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=5591760896, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=6953435136, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=415367168, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=7845642240, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=2019295232, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=3988160512, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=3803938816, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=5884149760, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=1032224768, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=1462960128, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=6892453888, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=670728192, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=4911923200, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=4905893888, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=7059374080, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=3321135104, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=4415160320, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=9594568704, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=7549321216, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=7122092032, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=1689583616, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=10656448512, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=6166904832, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=9487089664, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=1162051584, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=7558299648, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=9280258048, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=3610411008, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=9290711040, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=1419247616, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=7794851840, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=9449668608, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=2117337088, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=5234819072, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=6612942848, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=7821033472, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=8510832640, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=10066919424, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.3.0: No space left on device: write offset=1382383616, buflen=32768
+fio: pid=100, err=28/file:io_u.c:2008, func=io_u error, error=No space left on device
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=10010820608, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=5065244672, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=7340359680, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=8872787968, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=127565824, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=1285423104, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=10049880064, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=10475864064, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=10505355264, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=8167751680, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=5820186624, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=8089305088, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=1444610048, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=3311927296, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=1310883840, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=1050050560, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=512589824, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=6908608512, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=7486636032, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=10237411328, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=10560667648, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=5050236928, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=4226220032, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=1857880064, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=5973999616, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=4307550208, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=5895913472, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=7604862976, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=4584767488, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=5462556672, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=7554695168, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=9384656896, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=9983885312, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=8949497856, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=6510379008, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=3206545408, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=3002335232, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=723812352, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=4264525824, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=10506010624, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=4129619968, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=2177400832, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=1555005440, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=4717117440, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=1939046400, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=2331574272, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=913342464, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=1876951040, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=5304549376, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=9133817856, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=7036600320, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=2073559040, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=10557521920, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=3259793408, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=178749440, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=5092081664, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=3898834944, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=7896891392, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=5194842112, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=7428374528, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=6949175296, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=7584907264, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=9806053376, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-2.0.0: No space left on device: write offset=7532609536, buflen=32768
+fio: pid=95, err=28/file:io_u.c:2008, func=io_u error, error=No space left on device
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=3232235520, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=3482583040, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=2907930624, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=7235469312, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=311689216, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=183861248, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=10101293056, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=6917095424, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=4238245888, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=1537310720, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=618397696, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=4003659776, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=4640112640, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=7925301248, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=10105094144, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=9116286976, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=2462449664, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=63471616, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=6418432000, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=4439605248, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=1911881728, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=7099056128, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=5283184640, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=3404365824, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=1259044864, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=1380024320, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=10709598208, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=5098733568, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=946208768, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=626917376, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=9636675584, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=9338486784, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=8451162112, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=1207369728, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=4689592320, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=4704534528, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=5874974720, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=2979495936, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=5282791424, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=1710653440, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=7668367360, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=6044286976, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=4879908864, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=4251615232, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=1833467904, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=8903000064, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=2440364032, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=1272315904, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=2964652032, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=4886855680, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=10610704384, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=9668329472, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=3068428288, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=3557785600, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=1874853888, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=1037434880, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=5806653440, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=8842313728, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=5386764288, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=9052979200, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=8893661184, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=838565888, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=7249690624, buflen=32768
+fio: io_u error on file /mnt/fio-data/test4-50k-32k-write-1.7.0: No space left on device: write offset=4091805696, buflen=32768
+fio: pid=80, err=28/file:io_u.c:2008, func=io_u error, error=No space left on device
+
+test4-50k-32k-write-1: (groupid=0, jobs=64): err=28 (file:io_u.c:2008, func=io_u error, error=No space left on device): pid=79: Thu Sep  3 08:40:45 2026
+  read: IOPS=38.0k, BW=1187MiB/s (1244MB/s)(695GiB/600027msec)
+    slat (usec): min=3, max=2890, avg= 8.53, stdev= 7.50
+    clat (msec): min=3, max=103, avg=38.75, stdev= 6.26
+     lat (msec): min=3, max=103, avg=38.76, stdev= 6.26
+    clat percentiles (usec):
+     |  1.00th=[22676],  5.00th=[29230], 10.00th=[32375], 20.00th=[34866],
+     | 30.00th=[36439], 40.00th=[36963], 50.00th=[38011], 60.00th=[39060],
+     | 70.00th=[40633], 80.00th=[42730], 90.00th=[46400], 95.00th=[49021],
+     | 99.00th=[58459], 99.50th=[62653], 99.90th=[70779], 99.95th=[74974],
+     | 99.99th=[82314]
+   bw (  MiB/s): min= 1055, max= 1706, per=99.97%, avg=1186.28, stdev= 2.58, samples=27579
+   iops        : min=33784, max=54602, avg=37960.48, stdev=82.47, samples=27579
+  lat (msec)   : 4=0.01%, 10=0.02%, 20=0.49%, 50=95.59%, 100=3.90%
+  lat (msec)   : 250=0.01%
+  cpu          : usr=0.38%, sys=1.77%, ctx=22302045, majf=0, minf=2188
+  IO depths    : 1=0.1%, 2=0.1%, 4=0.1%, 8=0.1%, 16=0.1%, 32=0.1%, >=64=100.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.1%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.1%, >=64=0.0%
+     issued rwts: total=22783892,1024,0,0 short=0,0,0,0 dropped=0,0,0,0
+
+Run status group 0 (all jobs):
+   READ: bw=1187MiB/s (1244MB/s), 1187MiB/s-1187MiB/s (1244MB/s-1244MB/s), io=695GiB (747GB), run=600027-600027msec
+FIO benchmark completed on pod 2
