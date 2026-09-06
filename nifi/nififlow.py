@@ -15,6 +15,7 @@ import argparse
 import json
 import ssl
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -22,6 +23,19 @@ import urllib.request
 CTX = ssl.create_default_context()
 CTX.check_hostname = False
 CTX.verify_mode = ssl.CERT_NONE
+
+# We always talk to a local kubectl port-forward. An https_proxy / HTTPS_PROXY
+# in the environment would otherwise be used for 127.0.0.1 too, which fails
+# with an opaque URLError. An empty ProxyHandler disables proxy lookup for
+# this opener regardless of what is exported in the shell.
+OPENER = urllib.request.build_opener(
+    urllib.request.ProxyHandler({}),
+    urllib.request.HTTPSHandler(context=CTX),
+)
+
+
+class NifiError(Exception):
+    pass
 
 GEN = "org.apache.nifi.processors.standard.GenerateFlowFile"
 PUT = "org.apache.nifi.processors.standard.PutFile"
@@ -63,9 +77,31 @@ def _match(want, descriptors):
 
 
 class Nifi:
-    def __init__(self, base, user, password):
+    def __init__(self, base, user, password, wait=0):
         self.base = base.rstrip("/") + "/nifi-api"
-        self.token = self._token(user, password)
+        # NiFi opens its port well before the REST API is usable, and the
+        # startup probe is only a TCP check, so retry rather than fail on
+        # the first refusal.
+        deadline = time.time() + max(wait, 0)
+        attempt, last = 0, None
+        while True:
+            attempt += 1
+            try:
+                self.token = self._token(user, password)
+                if attempt > 1:
+                    print(f"  connected after {attempt} attempts", file=sys.stderr)
+                return
+            except NifiError as e:
+                last = e
+                if time.time() >= deadline:
+                    raise SystemExit(
+                        f"{e}\n"
+                        "  checked: is the port-forward alive, and has NiFi finished starting?\n"
+                        "    kubectl -n <ns> exec nifi-0 -c nifi -- "
+                        "tail -20 /opt/nifi/nifi-current/logs/nifi-app.log\n"
+                        "  proxy variables are already bypassed for this connection."
+                    )
+                time.sleep(5)
 
     def _raw(self, method, path, body=None, headers=None, raw_body=None):
         url = self.base + path
@@ -78,11 +114,15 @@ class Nifi:
             hdrs["Content-Type"] = "application/json"
         req = urllib.request.Request(url, data=data, method=method, headers=hdrs)
         try:
-            with urllib.request.urlopen(req, context=CTX, timeout=30) as r:
+            with OPENER.open(req, timeout=30) as r:
                 return r.read().decode()
         except urllib.error.HTTPError as e:
             detail = e.read().decode(errors="replace")[:500]
-            raise SystemExit(f"{method} {path} -> HTTP {e.code}: {detail}")
+            raise NifiError(f"{method} {path} -> HTTP {e.code}: {detail}")
+        except urllib.error.URLError as e:
+            raise NifiError(f"cannot reach {url}: {e.reason}")
+        except (ssl.SSLError, OSError) as e:
+            raise NifiError(f"cannot reach {url}: {e}")
 
     def _token(self, user, password):
         form = urllib.parse.urlencode({"username": user, "password": password})
@@ -274,11 +314,13 @@ def stats(n, label):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("action", choices=["build", "state", "stats", "clear"])
+    p.add_argument("action", choices=["build", "state", "stats", "clear", "ping"])
     p.add_argument("--url", required=True)
     p.add_argument("--user", default="admin")
     p.add_argument("--password", required=True)
     p.add_argument("--label", default="node")
+    p.add_argument("--wait", type=int, default=0,
+                   help="seconds to keep retrying the initial connection")
     p.add_argument("--file-size", default="4 KB")
     p.add_argument("--batch", type=int, default=200)
     p.add_argument("--threads", type=int, default=8)
@@ -290,7 +332,10 @@ def main():
     p.add_argument("--state", default="RUNNING", choices=["RUNNING", "STOPPED"])
     a = p.parse_args()
 
-    n = Nifi(a.url, a.user, a.password)
+    n = Nifi(a.url, a.user, a.password, wait=a.wait)
+    if a.action == "ping":
+        print(f"{a.label}: reachable, authenticated")
+        return
     if a.action == "build":
         sys.exit(build(n, a))
     elif a.action == "state":
@@ -302,4 +347,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except NifiError as e:
+        raise SystemExit(f"nifi api error: {e}")

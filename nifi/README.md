@@ -235,6 +235,18 @@ each cluster node has its own repositories either way. If you specifically need
 cluster semantics (load-balanced connections, a cluster coordinator), that's a
 different build.
 
+**Proxy environment variables.** `flow`, `stats` and the rest talk to a local
+`kubectl port-forward`. Python's `urllib` honours `https_proxy` / `HTTPS_PROXY`
+even for `127.0.0.1`, which produces an opaque `URLError` from `do_open`. Both
+the Python helper and the `curl` checks now bypass proxies explicitly, so an
+exported proxy in your shell is harmless. You do not need to unset anything.
+
+**Waiting for the REST API.** The startup probe is a TCP check, so a pod reports
+Ready as soon as something listens on 8443 — NiFi's API is usable somewhat
+later. `flow` pings each node and retries for `API_WAIT` seconds (default 420)
+before giving up. Raise it on slow storage:
+`API_WAIT=900 ./nifi-nfs-loadtest.sh flow`
+
 **Property names.** The flow builder no longer hardcodes them. It creates each
 processor bare, reads back the property descriptors that your NiFi build
 actually exposes, and matches the requested names against both the canonical

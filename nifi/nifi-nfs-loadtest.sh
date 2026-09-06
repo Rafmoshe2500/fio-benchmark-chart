@@ -78,6 +78,7 @@ NIFI_PASS="${NIFI_PASS:-loadtestAdminPass123}"    # >= 12 chars, required
 SENSITIVE_KEY="${SENSITIVE_KEY:-loadtestSensitivePropsKey123}"
 
 PORT_BASE="${PORT_BASE:-18443}"
+API_WAIT="${API_WAIT:-420}"   # seconds to wait for each node's REST API
 HELPER="${HELPER:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/nififlow.py}"
 
 # ======================================================================
@@ -300,12 +301,15 @@ forward_all() {
   for _ in $(seq 1 30); do
     sleep 2; ok=0
     for ((i=0; i<REPLICAS; i++)); do
-      if curl -sk --max-time 3 "https://127.0.0.1:$((PORT_BASE+i))/nifi-api/access" \
-           >/dev/null 2>&1; then ok=$((ok+1)); fi
+      if curl -sk --noproxy '*' --max-time 3 \
+           "https://127.0.0.1:$((PORT_BASE+i))/nifi-api/access" >/dev/null 2>&1; then
+        ok=$((ok+1))
+      fi
     done
     [[ $ok -eq $REPLICAS ]] && return 0
   done
-  warn "only ${ok}/${REPLICAS} nodes answering -- continuing anyway"
+  warn "only ${ok}/${REPLICAS} nodes answering over the port-forward"
+  warn "NiFi opens its port before the REST API is ready; the next step retries."
 }
 
 nfy() { # nfy <node-index> <action> [extra args...]
@@ -576,6 +580,8 @@ cmd_flow() {
   local i out_dir=""
   [[ "$WRITE_OUTPUT" == "true" ]] && out_dir='/data/out/${hostname()}'
   for ((i=0; i<REPLICAS; i++)); do
+    log "waiting for nifi-${i} REST API"
+    nfy "$i" ping --wait "${API_WAIT}" || die "nifi-${i} never became usable"
     log "building flow on nifi-${i}"
     nfy "$i" clear >/dev/null 2>&1 || true
     nfy "$i" build \
