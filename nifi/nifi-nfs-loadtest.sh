@@ -34,6 +34,11 @@ PLATFORM="${PLATFORM:-auto}"
 SA_NAME="${SA_NAME:-nifi-loadtest}"
 SCC="${SCC:-nonroot-v2}"
 
+# kubelet applies fsGroup with a recursive chown on the mounted volume. On an
+# NFS export with root_squash that chown fails and the pod never starts. Set
+# FSGROUP= (empty) to omit it and let the export's own permissions govern.
+FSGROUP="${FSGROUP-1000}"   # note: ${VAR-default}, so FSGROUP= is honoured
+
 CONF_SIZE="${CONF_SIZE:-1Gi}"
 FLOWFILE_REPO_SIZE="${FLOWFILE_REPO_SIZE:-10Gi}"
 CONTENT_REPO_SIZE="${CONTENT_REPO_SIZE:-50Gi}"
@@ -103,6 +108,11 @@ case "$PROFILE" in
   churn)     : "${FILE_SIZE:=512 KB}"; : "${BATCH_SIZE:=20}";  : "${CONCURRENT:=6}"; : "${REWRITES:=3}" ;;
   *) die "unknown PROFILE '$PROFILE' (smallfile|bigfile|churn)" ;;
 esac
+
+fsgroup_line() {
+  [[ -n "$FSGROUP" ]] && printf '        fsGroup: %s' "$FSGROUP"
+  return 0
+}
 
 proxy_hosts() {
   local out="" i
@@ -184,7 +194,7 @@ spec:
         runAsNonRoot: true
         runAsUser: 1000
         runAsGroup: 1000
-        fsGroup: 1000
+$(fsgroup_line)
         seccompProfile: { type: RuntimeDefault }
       terminationGracePeriodSeconds: 90
       initContainers:
@@ -381,27 +391,47 @@ $(kubectl get sc -o custom-columns=NAME:.metadata.name,PROV:.provisioner --no-he
   ensure_ns_sa
   bind_scc
 
-  local rwx_block="" rwx_mount="" rwx_test=""
-  if [[ "$WRITE_OUTPUT" == "true" ]]; then
-    rwx_block=$'\n---\napiVersion: v1\nkind: PersistentVolumeClaim\nmetadata: { name: smoke-rwx, namespace: '"${NS}"' }\nspec:\n  accessModes: ["ReadWriteMany"]\n  storageClassName: '"${STORAGE_CLASS}"'\n  resources: { requests: { storage: 1Gi } }'
-    rwx_mount='            - { name: rwx, mountPath: /rwx }'
-    rwx_test='echo rwx > /rwx/probe && cat /rwx/probe >/dev/null && echo "RWX  write OK" || { echo "RWX  write FAILED"; rc=1; }'
-  fi
-
-  cat <<YAML | kubectl apply -f - >/dev/null
+  # Each object gets its own heredoc. Do not try to splice YAML fragments
+  # together from shell strings; that is how newlines get eaten.
+  kubectl apply -f - >/dev/null <<YAML
 apiVersion: v1
 kind: PersistentVolumeClaim
-metadata: { name: smoke-rwo, namespace: ${NS} }
+metadata:
+  name: smoke-rwo
+  namespace: ${NS}
 spec:
   accessModes: ["ReadWriteOnce"]
   storageClassName: ${STORAGE_CLASS}
-  resources: { requests: { storage: 1Gi } }${rwx_block}
+  resources:
+    requests:
+      storage: 1Gi
 YAML
 
-  cat <<YAML | kubectl apply -f - >/dev/null
+  if [[ "$WRITE_OUTPUT" == "true" ]]; then
+    kubectl apply -f - >/dev/null <<YAML
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: smoke-rwx
+  namespace: ${NS}
+spec:
+  accessModes: ["ReadWriteMany"]
+  storageClassName: ${STORAGE_CLASS}
+  resources:
+    requests:
+      storage: 1Gi
+YAML
+  fi
+
+  # Build the probe pod in a temp file so the conditional RWX parts are
+  # appended as real lines rather than escaped strings.
+  local pod; pod="$(mktemp)"
+  cat > "$pod" <<YAML
 apiVersion: v1
 kind: Pod
-metadata: { name: nifi-smoke, namespace: ${NS} }
+metadata:
+  name: nifi-smoke
+  namespace: ${NS}
 spec:
   serviceAccountName: ${SA_NAME}
   restartPolicy: Never
@@ -409,47 +439,93 @@ spec:
     runAsNonRoot: true
     runAsUser: 1000
     runAsGroup: 1000
-    fsGroup: 1000
-    seccompProfile: { type: RuntimeDefault }
+$(fsgroup_line | sed 's/^    //')
+    seccompProfile:
+      type: RuntimeDefault
   containers:
     - name: probe
       image: ${NIFI_IMAGE}
       securityContext:
         allowPrivilegeEscalation: false
-        capabilities: { drop: ["ALL"] }
+        capabilities:
+          drop: ["ALL"]
       command: ["/bin/bash","-c"]
       args:
         - |
           rc=0
           echo "running as uid \$(id -u) gid \$(id -g)"
-          echo rwo > /rwo/probe && cat /rwo/probe >/dev/null && echo "RWO  write OK" || { echo "RWO  write FAILED"; rc=1; }
-          ${rwx_test}
-          # NiFi's flowfile repo relies on fsync; prove it works over this mount
-          dd if=/dev/zero of=/rwo/fsync.bin bs=1M count=16 oflag=dsync 2>&1 | tail -1
-          rm -f /rwo/probe /rwo/fsync.bin
-          exit \$rc
-      volumeMounts:
-        - { name: rwo, mountPath: /rwo }
-${rwx_mount}
-  volumes:
-    - name: rwo
-      persistentVolumeClaim: { claimName: smoke-rwo }
-$( [[ "$WRITE_OUTPUT" == "true" ]] && printf '    - name: rwx\n      persistentVolumeClaim: { claimName: smoke-rwx }' )
+          if echo rwo > /rwo/probe && [ "\$(cat /rwo/probe)" = rwo ]; then
+            echo "RWO  write OK"
+          else
+            echo "RWO  write FAILED"; rc=1
+          fi
 YAML
 
-  log "waiting for the probe pod..."
-  local phase="" i
-  for i in $(seq 1 60); do
+  if [[ "$WRITE_OUTPUT" == "true" ]]; then
+    cat >> "$pod" <<'YAML'
+          if echo rwx > /rwx/probe && [ "$(cat /rwx/probe)" = rwx ]; then
+            echo "RWX  write OK"
+          else
+            echo "RWX  write FAILED"; rc=1
+          fi
+YAML
+  fi
+
+  cat >> "$pod" <<'YAML'
+          # NiFi's flowfile repository depends on fsync. Prove it works
+          # on this mount and show what it costs.
+          dd if=/dev/zero of=/rwo/fsync.bin bs=1M count=16 oflag=dsync 2>&1 | tail -1
+          rm -f /rwo/probe /rwo/fsync.bin
+          exit $rc
+      volumeMounts:
+        - name: rwo
+          mountPath: /rwo
+YAML
+
+  if [[ "$WRITE_OUTPUT" == "true" ]]; then
+    cat >> "$pod" <<'YAML'
+        - name: rwx
+          mountPath: /rwx
+YAML
+  fi
+
+  cat >> "$pod" <<'YAML'
+  volumes:
+    - name: rwo
+      persistentVolumeClaim:
+        claimName: smoke-rwo
+YAML
+
+  if [[ "$WRITE_OUTPUT" == "true" ]]; then
+    cat >> "$pod" <<'YAML'
+    - name: rwx
+      persistentVolumeClaim:
+        claimName: smoke-rwx
+YAML
+  fi
+
+  if ! kubectl apply -f "$pod" >/dev/null; then
+    warn "probe pod rejected. Rendered manifest:"; cat "$pod" >&2; rm -f "$pod"
+    die "smoke test could not start"
+  fi
+  rm -f "$pod"
+
+  log "waiting for the probe pod (first run pulls the NiFi image, be patient)..."
+  local phase="" reason="" i last=""
+  for i in $(seq 1 100); do
     phase=$(kubectl -n "$NS" get pod nifi-smoke -o jsonpath='{.status.phase}' 2>/dev/null || echo "")
     [[ "$phase" == "Succeeded" || "$phase" == "Failed" ]] && break
+    reason=$(kubectl -n "$NS" get pod nifi-smoke \
+      -o jsonpath='{.status.containerStatuses[0].state.waiting.reason}' 2>/dev/null || echo "")
+    if [[ -n "$reason" && "$reason" != "$last" ]]; then log "  ${reason}"; last="$reason"; fi
     sleep 3
   done
 
   echo
   if [[ -z "$phase" || "$phase" == "Pending" ]]; then
-    warn "probe pod never started. Most likely SCC admission or PVC binding:"
+    warn "probe pod never ran. Events:"
     kubectl -n "$NS" describe pod nifi-smoke 2>/dev/null | sed -n '/Events:/,$p' | head -20
-    kubectl -n "$NS" get pvc 2>/dev/null
+    echo; kubectl -n "$NS" get pvc 2>/dev/null
   else
     kubectl -n "$NS" logs nifi-smoke 2>/dev/null | sed 's/^/    /'
   fi

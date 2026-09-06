@@ -80,6 +80,16 @@ lines from the pod `securityContext` in the script. Note that this only fixes
 the image's own directories — the NFS-backed PVCs still have to be writable by
 whatever uid OpenShift assigns, which usually means a permissive export.
 
+**`fsGroup` and root_squash.** kubelet applies `fsGroup` by recursively
+chowning the mounted volume. Against an NFS export with root_squash that chown
+fails and the pod never starts. If the smoke test shows the pod stuck in
+`Pending` or `CreateContainerError`, re-run with `FSGROUP=` (empty) to omit the
+field entirely and let the export's own permissions govern:
+
+```bash
+FSGROUP= STORAGE_CLASS=<your-sc> ./nifi-nfs-loadtest.sh smoke
+```
+
 **The NFS export must permit uid 1000.** The SCC governs what the cluster
 allows; the export governs what the array allows. Both have to agree. If the
 export root-squashes or restricts uid 1000, the pod passes admission and then
@@ -199,6 +209,18 @@ first and set `NIFI_IMAGE=` to the internal reference.
 **Password length.** NiFi 2.x refuses to start if the single-user password is
 under 12 characters. The default here is compliant; if you override `NIFI_PASS`,
 keep it long.
+
+**NFSv3 locking.** NFSv3 does locking out of band via NLM. The provenance
+repository is a Lucene index, and Lucene's file locking over NFSv3 is
+long-known to be unreliable. Lock errors in `nifi-app.log` against an NFSv3
+StorageClass are a finding about the protocol, not a bug in the setup. If your
+cluster also offers NFSv4.1, running the identical test against both and
+comparing is usually the most informative thing you can do:
+
+```bash
+NS=nifi-nfs3  STORAGE_CLASS=sc-nas-nfs3  ./nifi-nfs-loadtest.sh all
+NS=nifi-nfs41 STORAGE_CLASS=sc-nas-nfs41 ./nifi-nfs-loadtest.sh all
+```
 
 **NiFi does not officially support NFS for repositories.** File locking and
 fsync semantics over NFS are exactly why. That's fine — testing whether your
