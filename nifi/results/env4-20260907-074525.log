@@ -1,0 +1,42 @@
+[1;34m[07:45:27][0m recording 1800s every 10s -> ./results/env4-20260907-074525.csv
+[1;34m[07:45:27][0m ctrl-c stops recording early and still prints the summary
+  3 samples collected  6 samples collected  9 samples collected  12 samples collected  15 samples collected  18 samples collected  21 samples collected  24 samples collected  27 samples collected  30 samples collected  33 samples collected  36 samples collected  39 samples collected  42 samples collected  45 samples collected  48 samples collected  51 samples collected  54 samples collected  57 samples collected  60 samples collected  63 samples collected  66 samples collected  69 samples collected  72 samples collected  75 samples collected  78 samples collected  81 samples collected  84 samples collected  87 samples collected  90 samples collected  93 samples collected  96 samples collected  99 samples collected  102 samples collected  105 samples collected  108 samples collected  111 samples collected  114 samples collected  117 samples collected  120 samples collected  123 samples collected  126 samples collected  129 samples collected  132 samples collected  135 samples collected  138 samples collected  141 samples collected  144 samples collected  147 samples collected  150 samples collected  153 samples collected  156 samples collected  159 samples collected  162 samples collected  165 samples collected  168 samples collected  171 samples collected  174 samples collected  177 samples collected  180 samples collected  183 samples collected  186 samples collected  189 samples collected  192 samples collected  195 samples collected  198 samples collected  201 samples collected  204 samples collected  207 samples collected  210 samples collected  213 samples collected  216 samples collected  219 samples collected  222 samples collected  225 samples collected  228 samples collected  231 samples collected  234 samples collected  237 samples collected  240 samples collected  243 samples collected  246 samples collected  249 samples collected  252 samples collected  255 samples collected  258 samples collected  261 samples collected  264 samples collected  267 samples collected  270 samples collected  273 samples collected  276 samples collected  279 samples collected  282 samples collected  285 samples collected  288 samples collected  291 samples collected  294 samples collected  297 samples collected  300 samples collected  303 samples collected  306 samples collected  309 samples collected  312 samples collected  315 samples collected  318 samples collected  321 samples collected  324 samples collected  327 samples collected  330 samples collected  333 samples collected  336 samples collected  339 samples collected  342 samples collected  345 samples collected  348 samples collected  351 samples collected  354 samples collected
+==========================================================================
+NiFi storage load test summary   ./results/env4-20260907-074525.csv
+duration 29m 54s across 3 node(s), 354 samples
+==========================================================================
+
+nifi-0
+  content repo   +      7.5 GB   mean      4.3 MB/s
+  provenance     +    168.8 MB   mean     96.6 KB/s
+  flowfile repo  +      7.2 MB
+  write rate      median     39.9 MB/s   p95    450.9 MB/s   max    614.9 MB/s
+  queue depth     start   16,445   end   24,476   peak   24,764   trend +3.16/s
+  verdict         CLIMBING - storage did not keep up with the generator
+  GC time         2.2s over the run (0.1% of wall clock)
+
+nifi-1
+  content repo   +      4.9 GB   mean      2.8 MB/s
+  provenance     +    226.2 MB   mean    129.5 KB/s
+  flowfile repo  +       0.0 B
+  write rate      median      8.8 MB/s   p95    484.5 MB/s   max    634.8 MB/s
+  queue depth     start   23,017   end   16,346   peak   24,726   trend +1.12/s
+  verdict         STABLE - generator and storage in balance
+  GC time         2.1s over the run (0.1% of wall clock)
+
+nifi-2
+  content repo   +      1.4 GB   mean    805.1 KB/s
+  provenance     +     93.5 MB   mean     53.5 KB/s
+  flowfile repo  +      8.0 MB
+  write rate      median      3.3 MB/s   p95    409.5 MB/s   max    537.0 MB/s
+  queue depth     start   16,389   end   24,419   peak   24,719   trend +2.11/s
+  verdict         CLIMBING - storage did not keep up with the generator
+  GC time         2.0s over the run (0.1% of wall clock)
+
+--------------------------------------------------------------------------
+cluster total    content +13.8 GB   provenance +488.5 MB   flowfile +15.2 MB
+aggregate write rate to content repos: 7.9 MB/s
+--------------------------------------------------------------------------
+write rates above are derived from absolute repository growth, not from
+NiFi's rolling-window counters, so they can be compared directly with
+your array's own metrics. The raw CSV keeps both.
