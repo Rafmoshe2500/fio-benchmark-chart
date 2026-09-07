@@ -16,19 +16,30 @@
 #   ./nifi-multi.sh status            pods and PVCs per deployment
 #   ./nifi-multi.sh teardown          delete everything
 #
-# Configuration comes from a file (default ./deployments.conf), one deployment
-# per line, whitespace separated, '#' for comments:
+# Configuration is ./deployments.json (preferred) or ./deployments.conf.
+# JSON supports defaults plus per-deployment overrides of any driver variable:
 #
-#     # name    storageclass    replicas  profile
-#     nfs3      sc-nas-nfs3     3         smallfile
-#     nfs41     sc-nas-nfs41    3         smallfile
+#     {
+#       "defaults": { "storageClass": "sc-nas-nfs3", "replicas": 2 },
+#       "deployments": [
+#         { "name": "env1" },
+#         { "name": "env2", "profile": "bigfile",
+#           "env": { "CONTENT_REPO_SIZE": "100Gi" } }
+#       ]
+#     }
 #
 # Namespaces become nifi-<name>. Port ranges are assigned automatically, 100
 # apart, so the deployments never collide on port-forwards.
 #
 set -euo pipefail
 
-CONF="${CONF:-./deployments.conf}"
+# Prefer JSON when both are present; the whitespace format stays supported.
+if [[ -z "${CONF:-}" ]]; then
+  if   [[ -f ./deployments.json ]]; then CONF=./deployments.json
+  elif [[ -f ./deployments.conf ]]; then CONF=./deployments.conf
+  else CONF=./deployments.json
+  fi
+fi
 DRIVER="${DRIVER:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/nifi-nfs-loadtest.sh}"
 PORT_START="${PORT_START:-18443}"
 PORT_STRIDE="${PORT_STRIDE:-100}"
@@ -53,19 +64,98 @@ EOF
   exit 1
 fi
 
-# ---- parse config into parallel arrays ----
-NAMES=(); SCS=(); REPS=(); PROFS=(); PORTS=()
-idx=0
-while read -r name sc reps prof _rest; do
-  [[ -z "${name:-}" || "${name:0:1}" == "#" ]] && continue
-  [[ -n "${sc:-}" ]] || die "config line for '${name}' has no StorageClass"
-  NAMES+=("$name"); SCS+=("$sc")
-  REPS+=("${reps:-3}"); PROFS+=("${prof:-smallfile}")
-  PORTS+=($((PORT_START + idx * PORT_STRIDE)))
-  idx=$((idx + 1))
-done < "$CONF"
+# ---- parse config ----------------------------------------------------
+# Two formats are accepted. JSON (recommended) supports defaults plus
+# per-deployment overrides of any driver variable; the whitespace format is
+# kept so older configs keep working.
+NAMES=(); SCS=(); REPS=(); PROFS=(); PORTS=(); EXTRA=()
 
-[[ ${#NAMES[@]} -gt 0 ]] || die "no deployments defined in ${CONF}"
+parse_config() {
+  local first; first="$(grep -m1 -v '^\s*$' "$CONF" | head -c1 || true)"
+  if [[ "$CONF" == *.json || "$first" == "{" ]]; then
+    parse_json
+  else
+    parse_table
+  fi
+}
+
+parse_table() {
+  local idx=0 name sc reps prof _rest
+  while read -r name sc reps prof _rest; do
+    [[ -z "${name:-}" || "${name:0:1}" == "#" ]] && continue
+    [[ -n "${sc:-}" ]] || die "config line for '${name}' has no StorageClass"
+    NAMES+=("$name"); SCS+=("$sc")
+    REPS+=("${reps:-3}"); PROFS+=("${prof:-smallfile}")
+    PORTS+=($((PORT_START + idx * PORT_STRIDE))); EXTRA+=("")
+    idx=$((idx + 1))
+  done < "$CONF"
+}
+
+parse_json() {
+  local parsed
+  parsed="$(python3 - "$CONF" "$PORT_START" "$PORT_STRIDE" <<'PYEOF'
+import json, shlex, sys
+
+path, port_start, stride = sys.argv[1], int(sys.argv[2]), int(sys.argv[3])
+try:
+    doc = json.load(open(path))
+except json.JSONDecodeError as e:
+    sys.exit(f"invalid JSON in {path}: {e}")
+
+if not isinstance(doc, dict) or "deployments" not in doc:
+    sys.exit(f"{path}: expected an object with a 'deployments' array")
+
+defaults = doc.get("defaults") or {}
+deps = doc["deployments"]
+if not isinstance(deps, list) or not deps:
+    sys.exit(f"{path}: 'deployments' must be a non-empty array")
+
+seen = set()
+for i, d in enumerate(deps):
+    if not isinstance(d, dict):
+        sys.exit(f"{path}: deployment #{i+1} is not an object")
+    name = d.get("name")
+    if not name:
+        sys.exit(f"{path}: deployment #{i+1} has no 'name'")
+    if name in seen:
+        sys.exit(f"{path}: duplicate deployment name {name!r}")
+    seen.add(name)
+
+    sc = d.get("storageClass", defaults.get("storageClass"))
+    if not sc:
+        sys.exit(f"{path}: {name} has no storageClass and no default")
+    reps = d.get("replicas", defaults.get("replicas", 3))
+    prof = d.get("profile", defaults.get("profile", "smallfile"))
+    try:
+        reps = int(reps)
+        if reps < 1:
+            raise ValueError
+    except (TypeError, ValueError):
+        sys.exit(f"{path}: {name}: replicas must be a positive integer")
+    if prof not in ("smallfile", "bigfile", "churn"):
+        sys.exit(f"{path}: {name}: unknown profile {prof!r}")
+    if reps > stride:
+        sys.exit(f"{path}: {name}: replicas ({reps}) exceeds the port stride "
+                 f"({stride}); raise PORT_STRIDE or the port ranges will overlap")
+
+    # defaults.env merged first, then this deployment's env wins
+    env = dict(defaults.get("env") or {})
+    env.update(d.get("env") or {})
+    envstr = " ".join(f"{k}={shlex.quote(str(v))}" for k, v in env.items())
+
+    print("\t".join([name, sc, str(reps), prof,
+                     str(port_start + i * stride), envstr]))
+PYEOF
+  )" || die "config rejected (see the message above)"
+
+  while IFS=$'\t' read -r name sc reps prof port envstr; do
+    [[ -z "$name" ]] && continue
+    NAMES+=("$name"); SCS+=("$sc"); REPS+=("$reps")
+    PROFS+=("$prof"); PORTS+=("$port"); EXTRA+=("$envstr")
+  done <<< "$parsed"
+}
+
+parse_config
 
 # env for deployment i
 env_for() {
@@ -79,17 +169,23 @@ env_for() {
 
 run_for() { # run_for <index> <driver args...>
   local i="$1"; shift
-  env $(env_for "$i") "$DRIVER" "$@"
+  # EXTRA holds shell-quoted K=V pairs from the config; eval applies them
+  # after the positional settings so a per-deployment override wins.
+  # Word splitting on env_for is deliberate: it emits discrete K=V tokens.
+  # shellcheck disable=SC2046
+  eval env $(env_for "$i") ${EXTRA[$i]} '"$DRIVER"' '"$@"'
 }
 
 show_plan() {
-  printf '%-10s %-16s %-4s %-11s %-8s %s\n' NAME STORAGECLASS NODES PROFILE PORTS NAMESPACE
+  printf '%-10s %-16s %-5s %-10s %-13s %s\n' NAME STORAGECLASS NODES PROFILE PORTS NAMESPACE
   local i
   for i in "${!NAMES[@]}"; do
-    printf '%-10s %-16s %-4s %-11s %-8s %s\n' \
+    printf '%-10s %-16s %-5s %-10s %-13s %s\n' \
       "${NAMES[$i]}" "${SCS[$i]}" "${REPS[$i]}" "${PROFS[$i]}" \
       "${PORTS[$i]}-$((PORTS[$i] + REPS[$i] - 1))" "nifi-${NAMES[$i]}"
+    [[ -n "${EXTRA[$i]}" ]] && printf '%12s overrides: %s\n' "" "${EXTRA[$i]}"
   done
+  return 0
 }
 
 cmd_deploy() {
@@ -123,7 +219,8 @@ cmd_record() {
     local csv="${OUTDIR}/${NAMES[$i]}-${stamp}.csv"
     csvs+=("$csv")
     # Each child owns its own port range, so the port-forwards do not collide.
-    env $(env_for "$i") CSV="$csv" "$DRIVER" record "$duration" \
+    # shellcheck disable=SC2046
+    eval env $(env_for "$i") ${EXTRA[$i]} CSV='"$csv"' '"$DRIVER"' record "$duration" \
       > "${OUTDIR}/${NAMES[$i]}-${stamp}.log" 2>&1 &
     pids+=($!)
     log "  ${NAMES[$i]} -> ${csv}"

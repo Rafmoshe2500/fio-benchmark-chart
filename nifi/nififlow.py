@@ -13,6 +13,7 @@ NiFi node. Standard library only, no pip install needed.
 
 import argparse
 import json
+import os
 import ssl
 import sys
 import time
@@ -386,18 +387,9 @@ def _pct(vals, q):
 
 def summarize(path):
     """Turn a recorded CSV into something you can put in a report."""
-    import csv as _csv
-    from collections import defaultdict
-
     if not path:
         raise SystemExit("summarize needs --csv <file>")
-    rows = defaultdict(list)
-    with open(path) as fh:
-        for r in _csv.DictReader(fh):
-            try:
-                rows[r["node"]].append({k: int(v) for k, v in r.items() if k != "node"})
-            except (ValueError, TypeError):
-                continue
+    rows = _load_csv(path)
     if not rows:
         raise SystemExit(f"no usable samples in {path}")
 
@@ -476,6 +468,8 @@ def _load_csv(path):
     import csv as _csv
     from collections import defaultdict
     rows = defaultdict(list)
+    if not os.path.exists(path):
+        raise SystemExit(f"no such CSV: {path}")
     with open(path) as fh:
         for r in _csv.DictReader(fh):
             try:
@@ -525,7 +519,6 @@ def _deployment_stats(path):
 
 
 def compare(paths):
-    import os
     results = []
     for p_ in paths:
         st = _deployment_stats(p_)

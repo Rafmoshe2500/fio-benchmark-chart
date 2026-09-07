@@ -295,13 +295,46 @@ StorageClasses under identical load at the same moment, so array-side
 conditions are shared and the difference is the backend rather than the hour
 of the day.
 
-`deployments.conf`:
+Configuration is JSON (`deployments.json`), with defaults plus per-deployment
+overrides of any driver variable:
+
+```json
+{
+  "defaults": {
+    "storageClass": "sc-nas-nfs3",
+    "replicas": 2,
+    "profile": "smallfile",
+    "env": { "WRITE_OUTPUT": "false", "CONTENT_REPO_SIZE": "20Gi" }
+  },
+  "deployments": [
+    { "name": "env1" },
+    { "name": "env2" },
+    { "name": "env3", "profile": "bigfile",
+      "env": { "CONTENT_REPO_SIZE": "100Gi", "FILE_SIZE": "64 MB" } },
+    { "name": "env4", "profile": "churn", "replicas": 3 },
+    { "name": "nfs41", "storageClass": "sc-nas-nfs41",
+      "env": { "ALWAYS_SYNC": "true" } }
+  ]
+}
+```
+
+Anything in `env` is passed straight through to the driver, so every tunable
+in `nifi-nfs-loadtest.sh` can be set per deployment. `defaults.env` is merged
+first and the deployment's own `env` wins. The config is validated before
+anything is created: duplicate names, missing StorageClass, unknown profiles,
+bad replica counts and replica counts that would overlap the next port range
+are all rejected with a specific message.
+
+The older whitespace format still works if you already have one:
 
 ```
 # name    storageclass    replicas  profile
 nfs3      sc-nas-nfs3     3         smallfile
 nfs41     sc-nas-nfs41    3         smallfile
 ```
+
+It has no per-deployment overrides; variables you export before running the
+wrapper apply to every deployment instead.
 
 ```bash
 ./nifi-multi.sh plan          # show what would be created, ports included
@@ -313,8 +346,9 @@ nfs41     sc-nas-nfs41    3         smallfile
 ./nifi-multi.sh teardown
 ```
 
-Namespaces are `nifi-<name>`. Ports start at 18443 and step by 100 per
-deployment. CSVs and per-deployment logs land in `./results/`.
+Namespaces are `nifi-<name>`. Ports start at 18443 and step by `PORT_STRIDE`
+(100) per deployment; `plan` prints the assignment and any overrides in effect
+before anything is created. CSVs and per-deployment logs land in `./results/`.
 
 One caveat worth taking seriously: concurrent deployments share cluster CPU,
 memory and network. If a deployment looks slower, confirm it is array-bound

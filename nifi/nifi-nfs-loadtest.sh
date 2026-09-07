@@ -112,6 +112,36 @@ case "$PROFILE" in
   *) die "unknown PROFILE '$PROFILE' (smallfile|bigfile|churn)" ;;
 esac
 
+# The shared RWX target only exists when we actually write to it.
+data_pvc_doc() {
+  [[ "$WRITE_OUTPUT" != "true" ]] && return 0
+  cat <<EOF
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: { name: nifi-data, namespace: ${NS} }
+spec:
+  accessModes: ["ReadWriteMany"]
+  storageClassName: ${STORAGE_CLASS}
+  resources: { requests: { storage: ${DATA_SIZE} } }
+EOF
+  return 0
+}
+
+data_mount_line() {
+  [[ "$WRITE_OUTPUT" == "true" ]] && \
+    printf '            - { name: nifi-data,       mountPath: /data }'
+  return 0
+}
+
+data_volume_lines() {
+  [[ "$WRITE_OUTPUT" == "true" ]] && cat <<'EOF'
+        - name: nifi-data
+          persistentVolumeClaim: { claimName: nifi-data }
+EOF
+  return 0
+}
+
 fsgroup_line() {
   [[ -n "$FSGROUP" ]] && printf '        fsGroup: %s' "$FSGROUP"
   return 0
@@ -136,16 +166,7 @@ metadata: { name: ${NS} }
 apiVersion: v1
 kind: ServiceAccount
 metadata: { name: ${SA_NAME}, namespace: ${NS} }
----
-# Shared RWX target: all nodes write here at once. This is the
-# concurrent-writer test against a single NFS export.
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata: { name: nifi-data, namespace: ${NS} }
-spec:
-  accessModes: ["ReadWriteMany"]
-  storageClassName: ${STORAGE_CLASS}
-  resources: { requests: { storage: ${DATA_SIZE} } }
+$(data_pvc_doc)
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -250,7 +271,7 @@ $(fsgroup_line)
             - { name: flowfile-repo,   mountPath: /opt/nifi/nifi-current/flowfile_repository }
             - { name: content-repo,    mountPath: /opt/nifi/nifi-current/content_repository }
             - { name: provenance-repo, mountPath: /opt/nifi/nifi-current/provenance_repository }
-            - { name: nifi-data,       mountPath: /data }
+$(data_mount_line)
           startupProbe:
             tcpSocket: { port: 8443 }
             failureThreshold: 90
@@ -263,8 +284,7 @@ $(fsgroup_line)
       volumes:
         - name: tuning
           configMap: { name: nifi-tuning, defaultMode: 0755 }
-        - name: nifi-data
-          persistentVolumeClaim: { claimName: nifi-data }
+$(data_volume_lines)
   volumeClaimTemplates:
     - metadata: { name: conf }
       spec:
