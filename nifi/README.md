@@ -151,7 +151,38 @@ BP_OBJECTS=20000            # backpressure threshold; lower it to watch the
 administrator. Small claims turn a throughput test into a metadata test, and
 that is usually where an NFS array falls over first.
 
-## Reading the output
+## Running an actual measured test
+
+`stats` is a live view only — it reads the API and changes nothing, and Ctrl-C
+stops the polling, not the load. For anything you intend to analyse, use
+`record`, which samples every node to a CSV and prints a summary at the end:
+
+```bash
+./nifi-nfs-loadtest.sh record 1800        # 30 minutes
+./nifi-nfs-loadtest.sh summary            # re-print from the newest CSV
+./nifi-nfs-loadtest.sh summary run.csv    # or a specific one
+```
+
+Ctrl-C during `record` stops early and still prints the summary. `INTERVAL=5`
+changes the sample rate, `CSV=name.csv` the output file.
+
+The summary reports, per node: absolute repository growth, write rates derived
+from that growth (median / p95 / max), queue depth with a least-squares trend,
+and GC time as a share of wall clock. The verdict line is the headline —
+a queue trend above +0.5/s with real growth means storage did not keep up.
+
+Write rates come from repository growth rather than NiFi's rolling-window
+counters, so they are directly comparable to what your array reports. The CSV
+keeps both, plus heap and GC, if you want to do your own analysis.
+
+Stopping the load itself is separate:
+
+```bash
+./nifi-nfs-loadtest.sh stop     # processors stopped, pods and data intact
+./nifi-nfs-loadtest.sh start    # resume
+```
+
+## Reading the live view
 
 `stats` prints, per node, every 10 seconds:
 
@@ -254,6 +285,42 @@ name and the display name, ignoring case and punctuation. Values constrained to
 an allowable set are checked the same way. Anything it cannot resolve is printed
 as a warning naming the available properties, rather than silently producing an
 invalid processor.
+
+## Running several deployments at once
+
+`nifi-multi.sh` drives multiple independent deployments, each in its own
+namespace, on its own StorageClass, with its own port range so their
+port-forwards never collide. The usual reason to want this is comparing two
+StorageClasses under identical load at the same moment, so array-side
+conditions are shared and the difference is the backend rather than the hour
+of the day.
+
+`deployments.conf`:
+
+```
+# name    storageclass    replicas  profile
+nfs3      sc-nas-nfs3     3         smallfile
+nfs41     sc-nas-nfs41    3         smallfile
+```
+
+```bash
+./nifi-multi.sh plan          # show what would be created, ports included
+./nifi-multi.sh deploy        # sequential, so PVC provisioning doesn't thrash
+./nifi-multi.sh flow
+./nifi-multi.sh record 1800   # all deployments recorded in parallel
+./nifi-multi.sh compare       # side-by-side table
+./nifi-multi.sh status
+./nifi-multi.sh teardown
+```
+
+Namespaces are `nifi-<name>`. Ports start at 18443 and step by 100 per
+deployment. CSVs and per-deployment logs land in `./results/`.
+
+One caveat worth taking seriously: concurrent deployments share cluster CPU,
+memory and network. If a deployment looks slower, confirm it is array-bound
+and not client-bound before drawing a conclusion — check per-node CPU and the
+GC share in the summary. Running the deployments sequentially instead removes
+that ambiguity at the cost of no longer sharing array conditions.
 
 ## Teardown
 

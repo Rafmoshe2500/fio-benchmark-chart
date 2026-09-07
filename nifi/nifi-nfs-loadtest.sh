@@ -9,7 +9,9 @@
 #   ./nifi-nfs-loadtest.sh smoke      prove uid 1000 can write, before deploying
 #   ./nifi-nfs-loadtest.sh deploy     create ns, SA, PVCs, StatefulSet
 #   ./nifi-nfs-loadtest.sh flow       build + start the load flow on all nodes
-#   ./nifi-nfs-loadtest.sh stats      live throughput + repo utilisation
+#   ./nifi-nfs-loadtest.sh stats      live throughput + repo utilisation (read only)
+#   ./nifi-nfs-loadtest.sh record [s] record a timed run to CSV, then summarise
+#   ./nifi-nfs-loadtest.sh summary [f] re-print the summary for a CSV
 #   ./nifi-nfs-loadtest.sh stop|start pause / resume the load
 #   ./nifi-nfs-loadtest.sh clear      wipe the flow (keeps pods + data)
 #   ./nifi-nfs-loadtest.sh ui [n]     port-forward node n's UI
@@ -621,6 +623,39 @@ cmd_stats() {
   done
 }
 
+# Record a timed run to CSV, then summarise it. This is the one to use for
+# anything you intend to analyse or report; 'stats' is just a live view.
+cmd_record() {
+  local duration="${1:-900}" interval="${INTERVAL:-10}"
+  local csv="${CSV:-nifi-loadtest-$(date +%Y%m%d-%H%M%S).csv}"
+  RECORD_CSV="$csv"
+  trap 'echo; cleanup; [[ -s "$RECORD_CSV" ]] && cmd_summary "$RECORD_CSV"; exit 0' INT
+  forward_all
+  python3 "$HELPER" header > "$csv"
+  log "recording ${duration}s every ${interval}s -> ${csv}"
+  log "ctrl-c stops recording early and still prints the summary"
+
+  local endtime=$(( $(date +%s) + duration )) i
+  while [[ $(date +%s) -lt $endtime ]]; do
+    for ((i=0; i<REPLICAS; i++)); do
+      nfy "$i" sample >> "$csv" 2>/dev/null || warn "nifi-${i}: sample failed"
+    done
+    printf '\r  %s samples collected' "$(( $(wc -l < "$csv") - 1 ))"
+    sleep "$interval"
+  done
+  echo
+  cmd_summary "$csv"
+}
+
+cmd_summary() {
+  local csv="${1:-}"
+  if [[ -z "$csv" ]]; then
+    csv=$(ls -t nifi-loadtest-*.csv 2>/dev/null | head -1)
+    [[ -n "$csv" ]] || die "no CSV given and none found in this directory"
+  fi
+  python3 "$HELPER" summarize --csv "$csv"
+}
+
 cmd_ui() {
   local idx="${1:-0}" port=$((PORT_BASE + ${1:-0}))
   log "UI: https://127.0.0.1:${port}/nifi   user=${NIFI_USER}  pass=${NIFI_PASS}"
@@ -652,6 +687,8 @@ case "${1:-}" in
   stop)     cmd_state STOPPED ;;
   clear)    cmd_clear ;;
   stats)    cmd_stats ;;
+  record)   cmd_record "${2:-900}" ;;
+  summary)  cmd_summary "${2:-}" ;;
   ui)       cmd_ui "${2:-0}" ;;
   logs)     cmd_logs "${2:-0}" ;;
   teardown) cmd_teardown ;;
