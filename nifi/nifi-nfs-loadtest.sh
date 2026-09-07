@@ -229,6 +229,10 @@ $(fsgroup_line)
           ports: [{ containerPort: 8443, name: https }]
           env:
             - { name: NIFI_WEB_HTTPS_PORT, value: "8443" }
+            # Without this the image binds nifi.web.https.host to $HOSTNAME,
+            # i.e. the pod IP only. kubectl port-forward targets 127.0.0.1
+            # inside the pod's netns, so it would get connection refused.
+            - { name: NIFI_WEB_HTTPS_HOST, value: "0.0.0.0" }
             - { name: NIFI_WEB_PROXY_HOST, value: "$(proxy_hosts)" }
             - { name: SINGLE_USER_CREDENTIALS_USERNAME, value: "${NIFI_USER}" }
             - { name: SINGLE_USER_CREDENTIALS_PASSWORD, value: "${NIFI_PASS}" }
