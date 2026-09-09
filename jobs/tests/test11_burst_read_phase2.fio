@@ -9,6 +9,27 @@ directory=/mnt/fio-data
 numjobs=8
 iodepth=16
 
+# --- standardised policy: identical across every test so the results are
+# --- comparable to each other. See docs/superpowers/plans/ Task 4.
+ramp_time=60
+randrepeat=0
+norandommap=1
+refill_buffers=1
+scramble_buffers=1
+randseed=20260909
+
+# Time series. Without these there is no distinguishing a steady 10K IOPS
+# from 20K for five minutes and zero for five more.
+write_iops_log=/tmp/fiolog/fio
+write_bw_log=/tmp/fiolog/fio
+write_lat_log=/tmp/fiolog/fio
+log_avg_msec=1000
+per_job_logs=1
+
+# Read test: the dataset is laid out by the prepare initContainer.
+# Refuse to silently create a sparse file if that did not happen.
+allow_file_create=0
+
 [test11-burst-read-phase2]
 rw=read
 bs=512k

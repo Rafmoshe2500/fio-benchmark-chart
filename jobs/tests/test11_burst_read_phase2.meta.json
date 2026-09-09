@@ -1,0 +1,23 @@
+{
+  "test_id": "test11_burst_read_phase2",
+  "replicas": 5,
+  "numjobs": 8,
+  "sections": [
+    "test11-burst-read-phase2"
+  ],
+  "block_size": "512k",
+  "pattern": "read",
+  "rw_mix_read": 1.0,
+  "aggregate_scope": "per_pod",
+  "expected_directions": [
+    "read"
+  ],
+  "runtime_s": 600,
+  "ramp_s": 60,
+  "rate_limited": true,
+  "target_iops_per_pod": null,
+  "target_iops_total": null,
+  "target_bw_mibps_per_pod": 10000,
+  "target_bw_mibps_total": 50000,
+  "dataset_gib_per_pod": 320
+}

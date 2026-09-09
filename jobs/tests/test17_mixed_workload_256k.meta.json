@@ -1,0 +1,24 @@
+{
+  "test_id": "test17_mixed_workload_256k",
+  "replicas": 7,
+  "numjobs": 8,
+  "sections": [
+    "test17-mixed-256k"
+  ],
+  "block_size": "256k",
+  "pattern": "randrw",
+  "rw_mix_read": 0.5,
+  "aggregate_scope": "per_pod",
+  "expected_directions": [
+    "read",
+    "write"
+  ],
+  "runtime_s": 900,
+  "ramp_s": 60,
+  "rate_limited": true,
+  "target_iops_per_pod": 2000,
+  "target_iops_total": 14000,
+  "target_bw_mibps_per_pod": null,
+  "target_bw_mibps_total": null,
+  "dataset_gib_per_pod": 160
+}

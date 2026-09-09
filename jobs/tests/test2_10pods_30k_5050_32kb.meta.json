@@ -1,0 +1,31 @@
+{
+  "test_id": "test2_10pods_30k_5050_32kb",
+  "replicas": 10,
+  "numjobs": 8,
+  "sections": [
+    "test2-30k-32k-write-1",
+    "test2-30k-32k-read-1",
+    "test2-30k-32k-write-2",
+    "test2-30k-32k-read-2",
+    "test2-30k-32k-write-3",
+    "test2-30k-32k-read-3",
+    "test2-30k-32k-write-4",
+    "test2-30k-32k-read-4"
+  ],
+  "block_size": "32k",
+  "pattern": "multi-section",
+  "rw_mix_read": 0.5,
+  "aggregate_scope": "per_pod",
+  "expected_directions": [
+    "read",
+    "write"
+  ],
+  "runtime_s": 600,
+  "ramp_s": 60,
+  "rate_limited": true,
+  "target_iops_per_pod": 30000,
+  "target_iops_total": 300000,
+  "target_bw_mibps_per_pod": null,
+  "target_bw_mibps_total": null,
+  "dataset_gib_per_pod": 80
+}

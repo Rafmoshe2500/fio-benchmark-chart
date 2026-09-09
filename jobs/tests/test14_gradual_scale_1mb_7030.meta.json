@@ -1,0 +1,25 @@
+{
+  "test_id": "test14_gradual_scale_1mb_7030",
+  "replicas": 10,
+  "numjobs": 8,
+  "sections": [
+    "test14-scale-1m-7030"
+  ],
+  "block_size": "1m",
+  "pattern": "randrw",
+  "rw_mix_read": 0.7,
+  "aggregate_scope": "per_pod",
+  "expected_directions": [
+    "read",
+    "write"
+  ],
+  "runtime_s": 1800,
+  "ramp_s": 60,
+  "rate_limited": true,
+  "target_iops_per_pod": 2500,
+  "target_iops_total": 25000,
+  "target_bw_mibps_per_pod": null,
+  "target_bw_mibps_total": null,
+  "dataset_gib_per_pod": 200,
+  "note": "Stepped scaling test: replicas is the first step. See results/<run_id>/steps.json for the actual replica count of each measurement window."
+}

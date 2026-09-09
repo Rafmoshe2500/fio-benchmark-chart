@@ -47,6 +47,22 @@ class ParseJobFileTest(unittest.TestCase):
         )
         self.assertEqual(spec.directions, {"write"})
 
+    def test_option_falls_back_from_global_to_section(self):
+        """bs and rw live in the job section in most of these files, not in
+        [global]. Metadata generation must not report them as absent."""
+        spec = parse_job_file(self._write(
+            "[global]\nsize=10G\nnumjobs=8\niodepth=32\n\n"
+            "[job1]\nrw=randwrite\nbs=32k\n"))
+        self.assertEqual(spec.option("bs"), "32k")
+        self.assertEqual(spec.option("rw"), "randwrite")
+        self.assertEqual(spec.option("iodepth"), "32")
+        self.assertIsNone(spec.option("nonesuch"))
+
+    def test_global_wins_over_section_for_the_same_option(self):
+        spec = parse_job_file(self._write(
+            "[global]\nsize=1G\nbs=4k\n\n[j]\nrw=read\nbs=64k\n"))
+        self.assertEqual(spec.option("bs"), "4k")
+
     def test_inline_comment_is_stripped(self):
         spec = parse_job_file(
             self._write("[global]\nsize=10G   ; per job\nnumjobs=8\n\n[j]\nrw=read\n")

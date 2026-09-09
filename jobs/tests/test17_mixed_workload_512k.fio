@@ -9,9 +9,27 @@ directory=/mnt/fio-data
 numjobs=8
 iodepth=16
 
+# --- standardised policy: identical across every test so the results are
+# --- comparable to each other. See docs/superpowers/plans/ Task 4.
+ramp_time=60
+randrepeat=0
+norandommap=1
+refill_buffers=1
+scramble_buffers=1
+randseed=20260909
+
+# Time series. Without these there is no distinguishing a steady 10K IOPS
+# from 20K for five minutes and zero for five more.
+write_iops_log=/tmp/fiolog/fio
+write_bw_log=/tmp/fiolog/fio
+write_lat_log=/tmp/fiolog/fio
+log_avg_msec=1000
+per_job_logs=1
+
 [test17-mixed-512k]
 rw=randrw
 rwmixread=50
 bs=512k
-# 2,000 IOPS per pod / 8 threads = 250 IOPS per thread
-rate_iops=250
+# 2,000 IOPS per pod / 8 clones = 250 per clone, split 50/50.
+# A scalar caps EACH direction, so rate_iops=250 gave 500/clone = 4K/pod.
+rate_iops=125,125

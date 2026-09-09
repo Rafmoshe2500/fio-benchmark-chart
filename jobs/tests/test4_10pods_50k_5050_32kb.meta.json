@@ -1,0 +1,24 @@
+{
+  "test_id": "test4_10pods_50k_5050_32kb",
+  "replicas": 10,
+  "numjobs": 8,
+  "sections": [
+    "test4_50k_5050"
+  ],
+  "block_size": "32k",
+  "pattern": "randrw",
+  "rw_mix_read": 0.5,
+  "aggregate_scope": "per_pod",
+  "expected_directions": [
+    "read",
+    "write"
+  ],
+  "runtime_s": 600,
+  "ramp_s": 60,
+  "rate_limited": true,
+  "target_iops_per_pod": 50000,
+  "target_iops_total": 500000,
+  "target_bw_mibps_per_pod": null,
+  "target_bw_mibps_total": null,
+  "dataset_gib_per_pod": 80
+}

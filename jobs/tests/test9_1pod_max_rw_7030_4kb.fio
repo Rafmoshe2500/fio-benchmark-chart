@@ -4,23 +4,34 @@ direct=1
 fallocate=none
 size=10G
 runtime=600
-ramp_time=60
 time_based=1
 group_reporting=1
 directory=/mnt/fio-data
 numjobs=8
 iodepth=64
 
-refill_buffers=1
-scramble_buffers=1
-randrepeat=0
-norandommap=1
 
 iodepth_batch_submit=16
 iodepth_batch_complete_min=1
 iodepth_batch_complete_max=16
-cpus_allowed_policy=split
 end_fsync=1
+
+# --- standardised policy: identical across every test so the results are
+# --- comparable to each other. See docs/superpowers/plans/ Task 4.
+ramp_time=60
+randrepeat=0
+norandommap=1
+refill_buffers=1
+scramble_buffers=1
+randseed=20260909
+
+# Time series. Without these there is no distinguishing a steady 10K IOPS
+# from 20K for five minutes and zero for five more.
+write_iops_log=/tmp/fiolog/fio
+write_bw_log=/tmp/fiolog/fio
+write_lat_log=/tmp/fiolog/fio
+log_avg_msec=1000
+per_job_logs=1
 
 [test9-1pod-max-rw-7030-4k]
 rw=randrw

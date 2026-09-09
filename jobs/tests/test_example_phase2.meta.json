@@ -1,0 +1,24 @@
+{
+  "test_id": "test_example_phase2",
+  "replicas": 1,
+  "numjobs": 2,
+  "sections": [
+    "test-example-phase2"
+  ],
+  "block_size": "8k",
+  "pattern": "randrw",
+  "rw_mix_read": 0.7,
+  "aggregate_scope": "per_pod",
+  "expected_directions": [
+    "read",
+    "write"
+  ],
+  "runtime_s": 180,
+  "ramp_s": 60,
+  "rate_limited": true,
+  "target_iops_per_pod": 500,
+  "target_iops_total": 500,
+  "target_bw_mibps_per_pod": null,
+  "target_bw_mibps_total": null,
+  "dataset_gib_per_pod": 2
+}

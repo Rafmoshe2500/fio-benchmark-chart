@@ -1,7 +1,7 @@
 [global]
 ioengine=libaio
 direct=1
-size=40G
+size=25G
 runtime=1800
 time_based=1
 group_reporting=1
@@ -9,9 +9,27 @@ directory=/mnt/fio-data
 numjobs=8
 iodepth=8
 
+# --- standardised policy: identical across every test so the results are
+# --- comparable to each other. See docs/superpowers/plans/ Task 4.
+ramp_time=60
+randrepeat=0
+norandommap=1
+refill_buffers=1
+scramble_buffers=1
+randseed=20260909
+
+# Time series. Without these there is no distinguishing a steady 10K IOPS
+# from 20K for five minutes and zero for five more.
+write_iops_log=/tmp/fiolog/fio
+write_bw_log=/tmp/fiolog/fio
+write_lat_log=/tmp/fiolog/fio
+log_avg_msec=1000
+per_job_logs=1
+
 [test16-scale-1m-5050]
 rw=randrw
 rwmixread=50
 bs=1m
-# 2,500 IOPS per pod / 8 threads = ~312 IOPS per thread
-rate_iops=312
+# 2,500 IOPS per pod / 8 clones = 312 per clone, split 50/50.
+# A scalar caps EACH direction, so rate_iops=312 gave 624/clone = ~5K/pod.
+rate_iops=156,156

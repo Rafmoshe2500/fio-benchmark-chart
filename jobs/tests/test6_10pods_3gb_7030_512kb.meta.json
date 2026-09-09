@@ -1,0 +1,24 @@
+{
+  "test_id": "test6_10pods_3gb_7030_512kb",
+  "replicas": 10,
+  "numjobs": 8,
+  "sections": [
+    "test6-3gb-7030-512k"
+  ],
+  "block_size": "512k",
+  "pattern": "randrw",
+  "rw_mix_read": 0.7,
+  "aggregate_scope": "per_pod",
+  "expected_directions": [
+    "read",
+    "write"
+  ],
+  "runtime_s": 600,
+  "ramp_s": 60,
+  "rate_limited": true,
+  "target_iops_per_pod": null,
+  "target_iops_total": null,
+  "target_bw_mibps_per_pod": 3000,
+  "target_bw_mibps_total": 30000,
+  "dataset_gib_per_pod": 320
+}

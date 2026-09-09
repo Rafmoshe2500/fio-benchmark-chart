@@ -1,0 +1,25 @@
+{
+  "test_id": "test8_1pod_max_read_4kb",
+  "replicas": 1,
+  "numjobs": 8,
+  "sections": [
+    "test8-1pod-max-read-4k"
+  ],
+  "block_size": "4k",
+  "pattern": "randread",
+  "rw_mix_read": 1.0,
+  "aggregate_scope": "per_pod",
+  "expected_directions": [
+    "read"
+  ],
+  "runtime_s": 600,
+  "ramp_s": 60,
+  "rate_limited": false,
+  "target_iops_per_pod": null,
+  "target_iops_total": null,
+  "target_bw_mibps_per_pod": null,
+  "target_bw_mibps_total": null,
+  "dataset_gib_per_pod": 80,
+  "total_queue_depth": 256,
+  "note": "Ceiling test: iodepth=32 x 8 clones = 256 outstanding IOs. Latency from this run describes a saturated queue and must not be compared with the rate-limited tests."
+}

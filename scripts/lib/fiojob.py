@@ -34,6 +34,7 @@ class JobSpec:
     size_bytes: int = 0
     directions: set = field(default_factory=set)
     sections: list = field(default_factory=list)
+    job_options: list = field(default_factory=list)
     globals: dict = field(default_factory=dict)
 
     @property
@@ -42,6 +43,16 @@ class JobSpec:
 
     def required_gib(self, headroom=1.2):
         return self.required_bytes * headroom / 1024 ** 3
+
+    def option(self, key, default=None):
+        """Resolve an option from [global], falling back to the first job
+        section. bs and rw live in the section in most of these files."""
+        if key in self.globals:
+            return self.globals[key]
+        for opts in self.job_options:
+            if key in opts:
+                return opts[key]
+        return default
 
 
 def _directions_for(rw):
@@ -81,6 +92,7 @@ def parse_job_file(path):
 
     spec.globals = {k: v for k, v in glb.items() if k != "name"}
     spec.sections = [s["name"] for s in jobs]
+    spec.job_options = [{k: v for k, v in s.items() if k != "name"} for s in jobs]
     spec.size_bytes = parse_size(glb.get("size", "0"))
 
     # numjobs from [global] applies to every section. Without it each section

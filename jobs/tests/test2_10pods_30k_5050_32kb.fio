@@ -4,7 +4,6 @@ direct=1
 fallocate=none
 size=10G
 runtime=600
-ramp_time=60
 time_based=1
 group_reporting=1
 directory=/mnt/fio-data
@@ -14,11 +13,22 @@ iodepth_batch_submit=32
 iodepth_batch_complete_min=1
 iodepth_batch_complete_max=32
 
-refill_buffers=0
-scramble_buffers=0
+# --- standardised policy: identical across every test so the results are
+# --- comparable to each other. See docs/superpowers/plans/ Task 4.
+ramp_time=60
 randrepeat=0
 norandommap=1
-cpus_allowed_policy=split
+refill_buffers=1
+scramble_buffers=1
+randseed=20260909
+
+# Time series. Without these there is no distinguishing a steady 10K IOPS
+# from 20K for five minutes and zero for five more.
+write_iops_log=/tmp/fiolog/fio
+write_bw_log=/tmp/fiolog/fio
+write_lat_log=/tmp/fiolog/fio
+log_avg_msec=1000
+per_job_logs=1
 
 [test2-30k-32k-write-1]
 rw=randwrite
