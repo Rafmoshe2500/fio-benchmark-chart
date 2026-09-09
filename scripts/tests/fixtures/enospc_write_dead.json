@@ -1,0 +1,42 @@
+{
+  "fio version": "fio-3.41",
+  "jobs": [
+    {
+      "jobname": "test4_50k_5050",
+      "error": 28,
+      "elapsed": 601,
+      "read": {
+        "io_bytes": 999639984000,
+        "bw_bytes": 1666000000,
+        "iops": 50840.0,
+        "runtime": 600024,
+        "iops_stddev": 152.52,
+        "clat_ns": {
+          "mean": 620000,
+          "stddev": 248000.0,
+          "percentile": {
+            "50.000000": 600000,
+            "95.000000": 900000,
+            "99.000000": 1100000,
+            "99.900000": 2000000
+          }
+        }
+      },
+      "write": {
+        "io_bytes": 0,
+        "bw_bytes": 0,
+        "iops": 0.0,
+        "runtime": 0,
+        "iops_stddev": 0.0,
+        "clat_ns": {
+          "mean": 0,
+          "stddev": 0,
+          "percentile": {}
+        }
+      },
+      "usr_cpu": 1.33,
+      "sys_cpu": 6.89,
+      "ctx": 32065615
+    }
+  ]
+}
