@@ -1,21 +1,35 @@
 {
+  "_comment": [
+    "A comparison set must vary exactly ONE parameter. Here that is storageClass.",
+    "The previous version of this file varied profile, replicas, file size AND",
+    "ALWAYS_SYNC between deployments -- in particular it enabled sync only on",
+    "nfs41 -- so any difference it reported could not be attributed to the NFS",
+    "version. nifi-multi.sh writes a config_hash next to each CSV and",
+    "nififlow.py compare refuses to rank runs whose hashes differ.",
+    "",
+    "For sweeping profiles or sync settings, use deployments-profiles.json:",
+    "  CONF=./deployments-profiles.json ./nifi-multi.sh run 1800",
+    "That is a survey, not a comparison, and must not be quoted as one."
+  ],
   "defaults": {
-    "storageClass": "sc-nas-nfs3",
-    "replicas": 2,
+    "replicas": 3,
     "profile": "smallfile",
     "env": {
-      "WRITE_OUTPUT": "false",
-      "CONTENT_REPO_SIZE": "20Gi",
-      "PROVENANCE_REPO_SIZE": "10Gi"
+      "WRITE_OUTPUT": "true",
+      "CONTENT_REPO_SIZE": "50Gi",
+      "PROVENANCE_REPO_SIZE": "20Gi",
+      "FLOWFILE_REPO_SIZE": "10Gi",
+      "ALWAYS_SYNC": "false",
+      "ARCHIVE_ENABLED": "false",
+      "CHECKPOINT_INTERVAL": "20 secs",
+      "MAX_APPENDABLE_SIZE": "1 MB",
+      "FILE_SIZE": "4 KB",
+      "BATCH_SIZE": "200",
+      "CONCURRENT": "8"
     }
   },
   "deployments": [
-    { "name": "env1" },
-    { "name": "env2" },
-    { "name": "env3", "profile": "bigfile",
-      "env": { "CONTENT_REPO_SIZE": "100Gi", "FILE_SIZE": "64 MB" } },
-    { "name": "env4", "profile": "churn", "replicas": 3 },
-    { "name": "nfs41", "storageClass": "sc-nas-nfs41",
-      "env": { "ALWAYS_SYNC": "true" } }
+    { "name": "nfs3",  "storageClass": "sc-nas-nfs3" },
+    { "name": "nfs41", "storageClass": "sc-nas-nfs41" }
   ]
 }

@@ -1,0 +1,40 @@
+{
+  "_comment": [
+    "A SURVEY, not a comparison. Every deployment here differs in more than",
+    "one way, so the results describe what each profile does to the array --",
+    "they do not rank the deployments against each other.",
+    "",
+    "nififlow.py compare will print a NOT COMPARABLE banner for this set.",
+    "That is correct and expected. Use deployments.json when you need to",
+    "attribute a difference to one variable.",
+    "",
+    "  CONF=./deployments-profiles.json ./nifi-multi.sh run 1800"
+  ],
+  "defaults": {
+    "storageClass": "sc-nas-nfs3",
+    "replicas": 2,
+    "profile": "smallfile",
+    "env": {
+      "WRITE_OUTPUT": "true",
+      "CONTENT_REPO_SIZE": "50Gi",
+      "PROVENANCE_REPO_SIZE": "20Gi",
+      "ALWAYS_SYNC": "false"
+    }
+  },
+  "deployments": [
+    { "name": "smallfile",
+      "profile": "smallfile" },
+
+    { "name": "bigfile",
+      "profile": "bigfile",
+      "env": { "CONTENT_REPO_SIZE": "100Gi", "FILE_SIZE": "64 MB" } },
+
+    { "name": "churn",
+      "profile": "churn",
+      "replicas": 3 },
+
+    { "name": "syncheavy",
+      "profile": "smallfile",
+      "env": { "ALWAYS_SYNC": "true" } }
+  ]
+}

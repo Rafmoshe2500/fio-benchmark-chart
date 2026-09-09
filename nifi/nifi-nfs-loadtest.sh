@@ -10,7 +10,10 @@
 #   ./nifi-nfs-loadtest.sh deploy     create ns, SA, PVCs, StatefulSet
 #   ./nifi-nfs-loadtest.sh flow       build + start the load flow on all nodes
 #   ./nifi-nfs-loadtest.sh stats      live throughput + repo utilisation (read only)
+#   ./nifi-nfs-loadtest.sh run [s]    FULL lifecycle: deploy, flow, warm-up,
+#                                     reset counters, record, drain, verify
 #   ./nifi-nfs-loadtest.sh record [s] record a timed run to CSV, then summarise
+#   ./nifi-nfs-loadtest.sh verify     compare output files against the counters
 #   ./nifi-nfs-loadtest.sh summary [f] re-print the summary for a CSV
 #   ./nifi-nfs-loadtest.sh stop|start pause / resume the load
 #   ./nifi-nfs-loadtest.sh clear      wipe the flow (keeps pods + data)
@@ -210,6 +213,23 @@ spec:
       labels: { app: nifi-loadtest }
     spec:
       serviceAccountName: ${SA_NAME}
+      # Two NiFi nodes on one worker share its CPU, memory and NIC, and that
+      # contention shows up as storage latency that is not storage latency.
+      # required, not preferred: a comparison in which two nodes shared a
+      # worker is not a comparison. If the cluster is too small the pods stay
+      # Pending, which is the correct signal.
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchLabels: { app: nifi-loadtest }
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: DoNotSchedule
+        labelSelector:
+          matchLabels: { app: nifi-loadtest }
       # uid 1000 is what the apache/nifi image is built around: /opt/nifi is
       # owned by nifi:nifi (1000:1000). OpenShift's default restricted-v2 SCC
       # forces a random uid from the namespace range instead, which the image
@@ -605,21 +625,96 @@ cmd_flow() {
   forward_all
   local i out_dir=""
   [[ "$WRITE_OUTPUT" == "true" ]] && out_dir='/data/out/${hostname()}'
+
+  # Build every node first and leave them all STOPPED. Starting node 0 while
+  # node 2 is still being built gives node 0 a head start on the array, which
+  # is exactly the skew a comparison must not contain.
   for ((i=0; i<REPLICAS; i++)); do
     log "waiting for nifi-${i} REST API"
     nfy "$i" ping --wait "${API_WAIT}" || die "nifi-${i} never became usable"
-    log "building flow on nifi-${i}"
-    nfy "$i" clear >/dev/null 2>&1 || true
-    nfy "$i" build \
-      --file-size "$FILE_SIZE" --batch "$BATCH_SIZE" --threads "$CONCURRENT" \
-      --rewrites "$REWRITES" --schedule "$SCHEDULE" \
-      --bp-objects "$BP_OBJECTS" --bp-size "$BP_SIZE" \
-      --output-dir "$out_dir" \
-      || die "flow build failed on nifi-${i}"
-    nfy "$i" state --state RUNNING
-    log "nifi-${i}: RUNNING"
+    log "building flow on nifi-${i} (left stopped)"
+    # Not swallowed: a stale flow left from a previous run would silently
+    # double the load and invalidate everything measured here.
+    nfy "$i" clear || die "nifi-${i}: clear failed; refusing to build on top of a stale flow"
+    nfy "$i" build       --file-size "$FILE_SIZE" --batch "$BATCH_SIZE" --threads "$CONCURRENT"       --rewrites "$REWRITES" --schedule "$SCHEDULE"       --bp-objects "$BP_OBJECTS" --bp-size "$BP_SIZE"       --output-dir "$out_dir"       || die "flow build failed on nifi-${i}"
   done
-  log "load is live. watch it with: $0 stats"
+
+  # Absolute-time barrier, the same mechanism the fio pods use.
+  local start_at="${START_EPOCH:-$(( $(date +%s) + 30 ))}"
+  local now; now=$(date +%s)
+  if [[ $now -lt $start_at ]]; then
+    log "holding until $(date -d "@$start_at" 2>/dev/null || date -r "$start_at") ($((start_at - now))s)"
+    while [[ "$(date +%s)" -lt "$start_at" ]]; do sleep 0.2; done
+  else
+    warn "barrier instant already passed by $((now - start_at))s; nodes may be skewed"
+  fi
+  for ((i=0; i<REPLICAS; i++)); do nfy "$i" state --state RUNNING & done
+  wait
+  log "load is live on all ${REPLICAS} nodes"
+}
+
+# Everything that changes the workload. Two runs whose hashes differ are not
+# comparable, however similar the graphs look.
+config_hash() {
+  printf '%s
+' "$PROFILE" "$FILE_SIZE" "$BATCH_SIZE" "$CONCURRENT"     "$REWRITES" "$SCHEDULE" "$ALWAYS_SYNC" "$ARCHIVE_ENABLED"     "$CHECKPOINT_INTERVAL" "$MAX_APPENDABLE_SIZE" "$REPLICAS"     "$BP_OBJECTS" "$BP_SIZE" "$WRITE_OUTPUT" "$HEAP" "$CPU_LIM" "$MEM_LIM"     | sha256sum | cut -c1-16
+}
+
+# Snapshot NFS RPC counters from inside each node. /proc/self/mountstats is
+# cumulative per mount, so a pair of these brackets the measurement window.
+nfsstat_snapshot() {
+  local out="$1" i
+  : > "$out"
+  for ((i=0; i<REPLICAS; i++)); do
+    kubectl -n "$NS" exec "nifi-${i}" -c nifi -- cat /proc/self/mountstats       > "${out}.node${i}" 2>/dev/null || warn "nifi-${i}: no mountstats"
+  done
+  return 0
+}
+
+# The full measured lifecycle. `record` on its own samples whatever state the
+# flow happens to be in; this makes the phases explicit and repeatable.
+cmd_run() {
+  local duration="${1:-900}" warmup="${WARMUP:-120}" drain="${DRAIN:-180}"
+  cmd_deploy
+  echo
+  cmd_flow
+  echo
+  log "warm-up ${warmup}s (not measured)"
+  sleep "$warmup"
+  log "resetting counters -- measurement starts from zero"
+  local i
+  for ((i=0; i<REPLICAS; i++)); do nfy "$i" reset-counters || warn "nifi-${i}: counter reset failed"; done
+  echo
+  cmd_record "$duration"
+  echo
+  log "stopping generators, draining queues for up to ${drain}s"
+  cmd_state STOPPED
+  local deadline=$(( $(date +%s) + drain )) q
+  while [[ "$(date +%s)" -lt "$deadline" ]]; do
+    q=$(nfy 0 sample 2>/dev/null | cut -d, -f9)
+    [[ "${q:-1}" == "0" ]] && { log "queues drained"; break; }
+    sleep 10
+  done
+  echo
+  cmd_verify
+}
+
+# Prove the output matches what the flow claims it produced. A gap between
+# the counter and the export means FlowFiles were dropped, or the counters
+# are counting something other than delivered work.
+cmd_verify() {
+  if [[ "$WRITE_OUTPUT" != "true" ]]; then
+    warn "WRITE_OUTPUT=false; there is no output directory to verify against"
+    return 0
+  fi
+  local i files bytes
+  for ((i=0; i<REPLICAS; i++)); do
+    files=$(kubectl -n "$NS" exec "nifi-${i}" -c nifi --       bash -c 'find /data/out -type f 2>/dev/null | wc -l' 2>/dev/null || echo 0)
+    bytes=$(kubectl -n "$NS" exec "nifi-${i}" -c nifi --       bash -c 'du -sb /data/out 2>/dev/null | cut -f1' 2>/dev/null || echo 0)
+    log "nifi-${i}: ${files} output files, ${bytes} bytes on the export"
+  done
+  log "compare these with counter_files / counter_bytes in the CSV;"
+  log "a gap means work was dropped or the counters are miscounting"
 }
 
 cmd_state() {
@@ -652,18 +747,77 @@ cmd_record() {
   trap 'echo; cleanup; [[ -s "$RECORD_CSV" ]] && cmd_summary "$RECORD_CSV"; exit 0' INT
   forward_all
   python3 "$HELPER" header > "$csv"
+
+  # The manifest is what makes a comparison legitimate. compare() refuses to
+  # rank deployments whose config_hash differs.
+  cat > "${csv%.csv}-manifest.json" <<JSON
+{
+  "config_hash": "$(config_hash)",
+  "storage_class": "$STORAGE_CLASS",
+  "namespace": "$NS",
+  "replicas": $REPLICAS,
+  "profile": "$PROFILE",
+  "file_size": "$FILE_SIZE",
+  "batch_size": $BATCH_SIZE,
+  "concurrent": $CONCURRENT,
+  "rewrites": $REWRITES,
+  "schedule": "$SCHEDULE",
+  "always_sync": "$ALWAYS_SYNC",
+  "archive_enabled": "$ARCHIVE_ENABLED",
+  "checkpoint_interval": "$CHECKPOINT_INTERVAL",
+  "max_appendable_size": "$MAX_APPENDABLE_SIZE",
+  "write_output": "$WRITE_OUTPUT",
+  "heap": "$HEAP",
+  "cpu_limit": "$CPU_LIM",
+  "mem_limit": "$MEM_LIM",
+  "nifi_image": "$NIFI_IMAGE",
+  "duration_s": $duration,
+  "interval_s": $interval,
+  "started_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "nodes": [$(kubectl -n "$NS" get pods -l app=nifi-loadtest       -o jsonpath='{range .items[*]}"{.spec.nodeName}",{end}' 2>/dev/null | sed 's/,$//')]
+}
+JSON
+
   log "recording ${duration}s every ${interval}s -> ${csv}"
+  log "config ${csv%.csv}-manifest.json hash $(config_hash)"
   log "ctrl-c stops recording early and still prints the summary"
+
+  nfsstat_snapshot "${csv%.csv}-nfs-before"
 
   local endtime=$(( $(date +%s) + duration )) i
   while [[ $(date +%s) -lt $endtime ]]; do
     for ((i=0; i<REPLICAS; i++)); do
       nfy "$i" sample >> "$csv" 2>/dev/null || warn "nifi-${i}: sample failed"
     done
-    printf '\r  %s samples collected' "$(( $(wc -l < "$csv") - 1 ))"
+    printf '  %s samples collected' "$(( $(wc -l < "$csv") - 1 ))"
     sleep "$interval"
   done
   echo
+
+  nfsstat_snapshot "${csv%.csv}-nfs-after"
+
+  # NFS RPC latency for the window. This is the storage-side number; the
+  # NiFi-side one is task duration in the summary.
+  local before after
+  for ((i=0; i<REPLICAS; i++)); do
+    before="${csv%.csv}-nfs-before.node${i}"
+    after="${csv%.csv}-nfs-after.node${i}"
+    if [[ -s "$before" && -s "$after" ]]; then
+      echo "--- nifi-${i} NFS RPC latency ---"
+      python3 "$(dirname "$HELPER")/nfsstat.py" --file "$after"         --before <(python3 "$(dirname "$HELPER")/nfsstat.py" --file "$before")         2>/dev/null || warn "nifi-${i}: could not diff mountstats"
+    fi
+  done
+
+  log "collecting bulletins"
+  : > "${csv%.csv}-bulletins.tsv"
+  for ((i=0; i<REPLICAS; i++)); do
+    nfy "$i" bulletins >> "${csv%.csv}-bulletins.tsv" 2>/dev/null || true
+  done
+  if [[ -s "${csv%.csv}-bulletins.tsv" ]]; then
+    warn "$(wc -l < "${csv%.csv}-bulletins.tsv") bulletins recorded in ${csv%.csv}-bulletins.tsv"
+    warn "a run with ERROR bulletins is not a valid measurement"
+  fi
+
   cmd_summary "$csv"
 }
 
@@ -707,7 +861,9 @@ case "${1:-}" in
   stop)     cmd_state STOPPED ;;
   clear)    cmd_clear ;;
   stats)    cmd_stats ;;
+  run)      cmd_run "${2:-900}" ;;
   record)   cmd_record "${2:-900}" ;;
+  verify)   cmd_verify ;;
   summary)  cmd_summary "${2:-}" ;;
   ui)       cmd_ui "${2:-0}" ;;
   logs)     cmd_logs "${2:-0}" ;;

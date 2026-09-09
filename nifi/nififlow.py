@@ -486,8 +486,14 @@ def stats(n, label):
 
 
 def _fmt(b):
-    for u in ("B", "KB", "MB", "GB", "TB"):
-        if abs(b) < 1024 or u == "TB":
+    """Binary units, labelled as binary units.
+
+    This divided by 1024 while printing "MB"/"GB", so every figure was
+    understated by 4.9% at MB and 7.4% at GB against its own label, and could
+    not be lined up with an array that reports decimal units.
+    """
+    for u in ("B", "KiB", "MiB", "GiB", "TiB"):
+        if abs(b) < 1024 or u == "TiB":
             return f"{b:,.1f} {u}"
         b /= 1024
 

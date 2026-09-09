@@ -10,6 +10,7 @@
 #
 #   ./nifi-multi.sh deploy            bring every deployment up
 #   ./nifi-multi.sh flow              build and start the load on all of them
+#   ./nifi-multi.sh run 1800          FULL lifecycle on all, shared start
 #   ./nifi-multi.sh record 1800       record all in parallel, then compare
 #   ./nifi-multi.sh compare           re-print the comparison
 #   ./nifi-multi.sh stop | start      pause / resume all
@@ -35,9 +36,10 @@ set -euo pipefail
 
 # Prefer JSON when both are present; the whitespace format stays supported.
 if [[ -z "${CONF:-}" ]]; then
-  if   [[ -f ./deployments.json ]]; then CONF=./deployments.json
-  elif [[ -f ./deployments.conf ]]; then CONF=./deployments.conf
-  else CONF=./deployments.json
+  _here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  if   [[ -f "$_here/deployments.json" ]]; then CONF="$_here/deployments.json"
+  elif [[ -f "$_here/deployments.conf" ]]; then CONF="$_here/deployments.conf"
+  else CONF="$_here/deployments.json"
   fi
 fi
 DRIVER="${DRIVER:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/nifi-nfs-loadtest.sh}"
@@ -214,13 +216,19 @@ cmd_record() {
   local stamp; stamp="$(date +%Y%m%d-%H%M%S)"
   local pids=() csvs=() i
 
+  # One absolute instant shared by every child, so the deployments are under
+  # load simultaneously rather than staggered by their own setup time. The
+  # whole point of running them together is that array-side conditions are
+  # shared; a skewed start throws that away.
+  local start_epoch=$(( $(date +%s) + ${BARRIER_LEAD:-120} ))
   log "recording ${duration}s across ${#NAMES[@]} deployments in parallel"
+  log "synchronised start at $(date -d "@$start_epoch" 2>/dev/null || date -r "$start_epoch")"
   for i in "${!NAMES[@]}"; do
     local csv="${OUTDIR}/${NAMES[$i]}-${stamp}.csv"
     csvs+=("$csv")
     # Each child owns its own port range, so the port-forwards do not collide.
     # shellcheck disable=SC2046
-    eval env $(env_for "$i") ${EXTRA[$i]} CSV='"$csv"' '"$DRIVER"' record "$duration" \
+    eval env $(env_for "$i") ${EXTRA[$i]} CSV='"$csv"' START_EPOCH='"$start_epoch"' '"$DRIVER"' record "$duration" \
       > "${OUTDIR}/${NAMES[$i]}-${stamp}.log" 2>&1 &
     pids+=($!)
     log "  ${NAMES[$i]} -> ${csv}"
@@ -249,6 +257,32 @@ cmd_compare() {
   local args=()
   for f in "${files[@]}"; do args+=(--csv "$f"); done
   python3 "$(dirname "$DRIVER")/nififlow.py" compare "${args[@]}"
+}
+
+# Full lifecycle across every deployment, sharing one start instant.
+cmd_run() {
+  local duration="${1:-1800}"
+  local start_epoch=$(( $(date +%s) + ${BARRIER_LEAD:-300} ))
+  mkdir -p "$OUTDIR"
+  local stamp; stamp="$(date +%Y%m%d-%H%M%S)"
+  local pids=() csvs=() i
+  log "full lifecycle across ${#NAMES[@]} deployments"
+  log "load starts at $(date -d "@$start_epoch" 2>/dev/null || date -r "$start_epoch")"
+  for i in "${!NAMES[@]}"; do
+    local csv="${OUTDIR}/${NAMES[$i]}-${stamp}.csv"
+    csvs+=("$csv")
+    # shellcheck disable=SC2046
+    eval env $(env_for "$i") ${EXTRA[$i]} CSV='"$csv"' START_EPOCH='"$start_epoch"' '"$DRIVER"' run "$duration" > "${OUTDIR}/${NAMES[$i]}-${stamp}.log" 2>&1 &
+    pids+=($!)
+    log "  ${NAMES[$i]} -> ${csv}"
+  done
+  local rc=0
+  for i in "${!pids[@]}"; do
+    wait "${pids[$i]}" || { warn "${NAMES[$i]} exited non-zero"; rc=1; }
+  done
+  echo
+  cmd_compare "${csvs[@]}"
+  return $rc
 }
 
 cmd_status() {
@@ -281,6 +315,7 @@ case "${1:-}" in
   start)    cmd_simple start ;;
   stop)     cmd_simple stop ;;
   clear)    cmd_simple clear ;;
+  run)      cmd_run "${2:-1800}" ;;
   record)   cmd_record "${2:-1800}" ;;
   compare)  shift; cmd_compare "$@" ;;
   status)   cmd_status ;;
