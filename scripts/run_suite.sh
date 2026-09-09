@@ -144,5 +144,8 @@ log "suite complete: ${#PASSED[@]} valid run(s), ${#REJECTED[@]} rejected"
 [ ${#REJECTED[@]} -gt 0 ] && warn "rejected: ${REJECTED[*]}"
 log "results: results/suites/$SUITE_ID"
 echo
-log "compare against another environment with:"
-log "  python3 scripts/compare_envs.py results/suites/$SUITE_ID results/suites/<other>"
+log "see what this environment did:"
+log "  python3 scripts/suite_report.py results/suites/$SUITE_ID"
+echo
+log "compare against another environment:"
+log "  python3 scripts/compare_envs.py results/suites/<baseline> results/suites/$SUITE_ID"
