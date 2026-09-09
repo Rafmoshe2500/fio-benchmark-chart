@@ -13,7 +13,7 @@
     "read",
     "write"
   ],
-  "runtime_s": 1800,
+  "runtime_s": 420,
   "ramp_s": 60,
   "rate_limited": true,
   "target_iops_per_pod": 2500,
