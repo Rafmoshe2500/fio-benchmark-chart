@@ -1,0 +1,11 @@
+# The pod command in templates/pods.yaml is rendered verbatim into a Linux
+# container's bash args. A CRLF checkout on Windows turns every line into
+# `...\r`, which bash reports as "command not found" for the first line and
+# silently mangles the rest. Force LF for everything that ends up executed.
+*.sh    text eol=lf
+*.yaml  text eol=lf
+*.yml   text eol=lf
+*.tpl   text eol=lf
+*.py    text eol=lf
+*.fio   text eol=lf
+*.json  text eol=lf
