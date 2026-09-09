@@ -1,64 +1,32 @@
 # NiFi on Kubernetes as an NFS storage load generator
 
-> ## ⚠️ Known limitations — read before quoting any number from this
+> ## מה הכלי הזה כן ולא עושה
 >
-> This tooling is a useful **exploratory NFS stress harness** and a sound
-> operational check that NiFi runs on a given StorageClass. It is **not yet
-> reliable for quantitative throughput, for comparing NFSv3 against NFSv4.1,
-> or for claiming the storage meets NiFi's production load.**
+> **כן:** מייצר עומס NFS ריאליסטי, מודד עבודה מצטברת, latency של NFS RPC,
+> וכשלים — ומסרב להשוות ריצות שאינן ברות־השוואה.
 >
-> The fio side of this repository has been through remediation
-> ([docs/superpowers/plans/](../docs/superpowers/plans/)); the NiFi side has
-> not. These are the open issues, in the order they matter:
+> **עדיין לא:** אלה מופעי NiFi **עצמאיים, לא cluster**. הם לא בודקים cluster
+> coordinator, load-balanced connections, primary-node processors או failover.
+> אין גם injection של תקלות ואין אימות recovery. עד שיהיו — אל תטען שהמערך
+> "עומד בעומס production של NiFi"; טען שהוא עומד בעומס ה־repository של
+> מופע NiFi בודד, וזה מה שנמדד.
 >
-> 1. **Throughput is measured as net repository growth, not work done.**
->    `nififlow.py` derives its rate from the delta in
->    `contentRepositoryStorageUsage.usedSpaceBytes`. That is *occupancy*.
->    When content claims are reclaimed or archived, a run can move terabytes
->    and report a growth near zero — or negative. `mean rate` in the summary
->    is therefore not a write throughput, and the median/p95 of occupancy
->    changes are not percentiles of a write rate.
+> **מה תוקן לאחרונה** (ראה [docs/superpowers/plans/](../docs/superpowers/plans/)):
 >
-> 2. **Processor failures are silently discarded.** `PutFile` and
->    `ReplaceText` auto-terminate their `failure` relationship and nothing
->    counts it. A NiFi that cannot write a single byte looks *stable*,
->    because the queue is not growing — the FlowFiles are being dropped, not
->    delivered.
+> | היה | עכשיו |
+> |---|---|
+> | throughput מגידול נטו ב־repository | מונים מצטברים (`UpdateCounter`) |
+> | כשלי processor נבלעו ב־auto-terminate | נספרים; ריצה עם כשלים נפסלת (exit 2) |
+> | אין latency | task duration + NFS RPC RTT/queue/retransmits |
+> | `p95 = per-node p95 × node count` | percentile של סדרה קלאסטרית מיושרת |
+> | nodes מתחילים אחד־אחד | barrier על שעון מוחלט |
+> | `clear` כושל נבלע | עוצר את הריצה |
+> | `deployments.json` שינה 4 משתנים בבת אחת | משתנה אחד; sweep עבר לקובץ נפרד |
+> | `_fmt` חילק ב־1024 והדפיס "MB" | KiB/MiB/GiB |
 >
-> 3. **No latency of any kind is recorded.** Repository volumes, queue depth,
->    heap and GC are sampled; processor task duration, end-to-end latency and
->    NFS RPC latency are not.
->
-> 4. **`compare` can report a difference that is not one.** `p95_rate` is the
->    per-node p95 multiplied by the node count, which assumes every node peaks
->    in the same second. Worse, `deployments.json` used to vary profile,
->    replicas, file size *and* `ALWAYS_SYNC` between deployments, so a
->    protocol comparison was never one variable.
->
-> 5. **Nodes start one at a time.** `cmd_flow` builds and starts each node in
->    a loop, so node 0 is already generating load while node 2 is still being
->    built. There is no warm-up, no barrier and no counter reset.
->
-> 6. **State survives between runs.** The namespace and PVCs are fixed, and a
->    failed `clear` is swallowed before `build`.
->
-> 7. **These are standalone NiFi instances, not a cluster.** Fine for
->    per-node repository load; it does not exercise the cluster coordinator,
->    load-balanced connections, primary-node processors or failover.
->
-> **What it is safe to use today:** generating realistic NFS load, the
-> smallfile/bigfile/churn profiles, the RWO/RWX/`dsync` smoke test, separate
-> PVCs per repository, and confirming NiFi starts and runs against a
-> StorageClass at all.
-
-
-Two files, no Helm, no subscription. Apache NiFi is Apache 2.0 licensed and the
-`apache/nifi` image is free.
-
-- `nifi-nfs-loadtest.sh` — deploys the nodes, drives the test
-- `nififlow.py` — talks to the NiFi REST API (stdlib only, no pip install)
-
-Keep them in the same directory.
+> **הכלל שנשאר:** `content_used` הוא **retention, לא throughput**. ריצה
+> שכותבת 2 TB ומשחררת 2 TB תראה גידול אפס. המספר לציטוט הוא
+> `counter_bytes`, ורצוי לאמת אותו מול `./nifi-nfs-loadtest.sh verify`.
 
 ## Quick start
 
