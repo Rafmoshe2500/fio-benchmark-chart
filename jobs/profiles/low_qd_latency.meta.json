@@ -1,0 +1,27 @@
+{
+  "test_id": "low_qd_latency",
+  "replicas": 1,
+  "numjobs": 1,
+  "sections": [
+    "low-qd-latency"
+  ],
+  "block_size": "4k",
+  "pattern": "randrw",
+  "rw_mix_read": 0.7,
+  "aggregate_scope": "per_pod",
+  "expected_directions": [
+    "read",
+    "write"
+  ],
+  "runtime_s": 300,
+  "ramp_s": 30,
+  "rate_limited": false,
+  "target_iops_per_pod": null,
+  "target_iops_total": null,
+  "target_bw_mibps_per_pod": null,
+  "target_bw_mibps_total": null,
+  "dataset_gib_per_pod": 8,
+  "requires_prepare": false,
+  "buffered_io": false,
+  "note": "Unloaded baseline. Every other latency number should be read against this one."
+}

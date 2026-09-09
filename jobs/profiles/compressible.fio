@@ -1,0 +1,37 @@
+# Reducible data, so the array's dedup and compression can do their work.
+#
+# Run this alongside incompressible.fio on the SAME StorageClass. The gap
+# between the two is the array's data-reduction benefit, and it must be
+# stated explicitly: quoting one number without saying which side of this
+# pair it came from is quoting an undeclared assumption about the data.
+#
+# 50% compressible in 4k chunks, 25% of blocks duplicated -- pick values
+# that match the real payload once it has been characterised.
+[global]
+ioengine=libaio
+direct=1
+size=10G
+runtime=600
+ramp_time=60
+time_based=1
+group_reporting=1
+directory=/mnt/fio-data
+numjobs=8
+iodepth=32
+refill_buffers=0
+scramble_buffers=1
+buffer_compress_percentage=50
+buffer_compress_chunk=4096
+dedupe_percentage=25
+randrepeat=0
+norandommap=1
+randseed=20260909
+write_iops_log=/tmp/fiolog/fio
+write_bw_log=/tmp/fiolog/fio
+write_lat_log=/tmp/fiolog/fio
+log_avg_msec=1000
+per_job_logs=1
+
+[compressible]
+rw=randwrite
+bs=64k

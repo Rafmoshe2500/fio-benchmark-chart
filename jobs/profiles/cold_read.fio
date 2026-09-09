@@ -1,0 +1,36 @@
+# Read from a dataset this pod has not touched in this run.
+#
+# allow_file_create=0: the dataset is laid out by the prepare initContainer.
+# Without it fio silently creates sparse files and measures nothing.
+#
+# HONEST LIMITATION: this controls the CLIENT cache only. direct=1 bypasses
+# the client page cache, but the NFS SERVER's cache is not under our control
+# and may well still hold the data. "Cold" here means cold to the client.
+# For a genuinely cold read the array's cache has to be dropped or the
+# dataset made larger than it, and that must be recorded in the run notes.
+[global]
+ioengine=libaio
+direct=1
+size=20G
+runtime=600
+ramp_time=60
+time_based=1
+group_reporting=1
+directory=/mnt/fio-data
+numjobs=8
+iodepth=32
+allow_file_create=0
+# --- standardised policy: identical across every profile so they are
+# --- comparable to each other. See jobs/profiles/README.md.
+randrepeat=0
+norandommap=1
+randseed=20260909
+write_iops_log=/tmp/fiolog/fio
+write_bw_log=/tmp/fiolog/fio
+write_lat_log=/tmp/fiolog/fio
+log_avg_msec=1000
+per_job_logs=1
+
+[cold-read]
+rw=randread
+bs=64k

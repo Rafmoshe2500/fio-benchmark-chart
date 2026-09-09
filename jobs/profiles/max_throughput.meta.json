@@ -1,0 +1,27 @@
+{
+  "test_id": "max_throughput",
+  "replicas": 4,
+  "numjobs": 8,
+  "sections": [
+    "max-throughput"
+  ],
+  "block_size": "1m",
+  "pattern": "randrw",
+  "rw_mix_read": 0.7,
+  "aggregate_scope": "per_pod",
+  "expected_directions": [
+    "read",
+    "write"
+  ],
+  "runtime_s": 600,
+  "ramp_s": 60,
+  "rate_limited": false,
+  "target_iops_per_pod": null,
+  "target_iops_total": null,
+  "target_bw_mibps_per_pod": null,
+  "target_bw_mibps_total": null,
+  "dataset_gib_per_pod": 160,
+  "requires_prepare": false,
+  "buffered_io": false,
+  "note": "Ceiling. Total queue depth 512; its latency describes a saturated queue and must not be compared with rate-limited profiles."
+}

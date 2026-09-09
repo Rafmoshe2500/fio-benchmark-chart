@@ -1,0 +1,41 @@
+# Can the array hold a declared rate for the whole window?
+#
+# rate_iops sets the offered load; rate_iops_min makes fio ITSELF fail when
+# the rate is not sustained, so a miss is an error rather than a number that
+# has to be noticed in a report. That is the difference between a benchmark
+# and a measurement.
+#
+# CALIBRATION REQUIRED: the values below are placeholders. Set them from the
+# rate the target NiFi environment actually sustains. See README.md.
+[global]
+ioengine=libaio
+direct=1
+size=10G
+runtime=900
+ramp_time=60
+time_based=1
+group_reporting=1
+directory=/mnt/fio-data
+numjobs=8
+iodepth=16
+refill_buffers=1
+scramble_buffers=1
+# --- standardised policy: identical across every profile so they are
+# --- comparable to each other. See jobs/profiles/README.md.
+randrepeat=0
+norandommap=1
+randseed=20260909
+write_iops_log=/tmp/fiolog/fio
+write_bw_log=/tmp/fiolog/fio
+write_lat_log=/tmp/fiolog/fio
+log_avg_msec=1000
+per_job_logs=1
+
+[target-rate-steady]
+rw=randrw
+rwmixread=70
+bs=32k
+# 5,000 IOPS per pod / 8 clones = 625 per clone, split 70/30
+rate_iops=438,187
+# Fail the run if the offered rate cannot be sustained. 90% of target.
+rate_iops_min=394,168

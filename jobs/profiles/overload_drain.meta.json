@@ -1,0 +1,26 @@
+{
+  "test_id": "overload_drain",
+  "replicas": 8,
+  "numjobs": 8,
+  "sections": [
+    "overload-drain"
+  ],
+  "block_size": "64k",
+  "pattern": "randwrite",
+  "rw_mix_read": 0.0,
+  "aggregate_scope": "per_pod",
+  "expected_directions": [
+    "write"
+  ],
+  "runtime_s": 600,
+  "ramp_s": 0,
+  "rate_limited": false,
+  "target_iops_per_pod": null,
+  "target_iops_total": null,
+  "target_bw_mibps_per_pod": null,
+  "target_bw_mibps_total": null,
+  "dataset_gib_per_pod": 160,
+  "requires_prepare": false,
+  "buffered_io": false,
+  "note": "Past saturation on purpose. The metric is latency shape and drain time, not throughput."
+}

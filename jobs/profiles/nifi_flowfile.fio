@@ -1,0 +1,36 @@
+# NiFi flowfile repository: a write-ahead log.
+#
+# Small sequential appends with a periodic checkpoint. NiFi's default
+# nifi.flowfile.repository.checkpoint.interval is 20 secs, and the WAL is
+# fsynced on checkpoint (or on every write when always.sync=true).
+#
+# fsync=64 approximates a periodic checkpoint rather than a per-write flush:
+# it is the middle case between sync_write (every write) and no sync at all.
+# For the always.sync=true case, run sync_write instead.
+#
+# No direct=1: see nifi_content.
+[global]
+ioengine=sync
+size=4G
+runtime=900
+ramp_time=60
+time_based=1
+group_reporting=1
+directory=/mnt/fio-data
+numjobs=4
+iodepth=1
+fsync=64
+refill_buffers=1
+scramble_buffers=1
+randrepeat=0
+norandommap=1
+randseed=20260909
+write_iops_log=/tmp/fiolog/fio
+write_bw_log=/tmp/fiolog/fio
+write_lat_log=/tmp/fiolog/fio
+log_avg_msec=1000
+per_job_logs=1
+
+[nifi-flowfile]
+rw=write
+bs=8k

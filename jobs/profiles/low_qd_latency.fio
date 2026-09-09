@@ -1,0 +1,34 @@
+# Unloaded latency. Every other latency figure in the suite should be read
+# against this one: it is what the array does when nothing is queued.
+#
+# iodepth=1, numjobs=1 on purpose. A single outstanding IO means the measured
+# time is service time, not service time plus queueing. Comparing a saturated
+# test's P99 against anything is meaningless without this baseline.
+[global]
+ioengine=libaio
+direct=1
+size=8G
+runtime=300
+ramp_time=30
+time_based=1
+group_reporting=1
+directory=/mnt/fio-data
+numjobs=1
+iodepth=1
+refill_buffers=1
+scramble_buffers=1
+# --- standardised policy: identical across every profile so they are
+# --- comparable to each other. See jobs/profiles/README.md.
+randrepeat=0
+norandommap=1
+randseed=20260909
+write_iops_log=/tmp/fiolog/fio
+write_bw_log=/tmp/fiolog/fio
+write_lat_log=/tmp/fiolog/fio
+log_avg_msec=1000
+per_job_logs=1
+
+[low-qd-latency]
+rw=randrw
+rwmixread=70
+bs=4k

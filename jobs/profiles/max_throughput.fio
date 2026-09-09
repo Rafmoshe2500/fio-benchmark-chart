@@ -1,0 +1,33 @@
+# Ceiling. No rate cap, deep queue.
+#
+# The latency this reports describes a saturated queue and must NOT be
+# compared with the rate-limited profiles. Total outstanding IO is
+# iodepth x numjobs = 512.
+[global]
+ioengine=libaio
+direct=1
+size=20G
+runtime=600
+ramp_time=60
+time_based=1
+group_reporting=1
+directory=/mnt/fio-data
+numjobs=8
+iodepth=64
+refill_buffers=1
+scramble_buffers=1
+# --- standardised policy: identical across every profile so they are
+# --- comparable to each other. See jobs/profiles/README.md.
+randrepeat=0
+norandommap=1
+randseed=20260909
+write_iops_log=/tmp/fiolog/fio
+write_bw_log=/tmp/fiolog/fio
+write_lat_log=/tmp/fiolog/fio
+log_avg_msec=1000
+per_job_logs=1
+
+[max-throughput]
+rw=randrw
+rwmixread=70
+bs=1m

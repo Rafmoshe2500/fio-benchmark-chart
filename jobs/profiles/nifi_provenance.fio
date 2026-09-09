@@ -1,0 +1,36 @@
+# NiFi provenance repository: journal, then index, then merge.
+#
+# Provenance is the most write-amplifying of the three repositories: every
+# FlowFile event is journalled, the journals are periodically merged into
+# larger files, and a Lucene index is maintained alongside. That merge is a
+# read-then-write pass over data just written, which is why this profile is
+# mixed rather than write-only despite provenance being an append-only log
+# from the flow's point of view.
+#
+# No direct=1: see nifi_content.
+[global]
+ioengine=libaio
+size=10G
+runtime=900
+ramp_time=60
+time_based=1
+group_reporting=1
+directory=/mnt/fio-data
+numjobs=4
+iodepth=8
+nrfiles=32
+refill_buffers=1
+scramble_buffers=1
+randrepeat=0
+norandommap=1
+randseed=20260909
+write_iops_log=/tmp/fiolog/fio
+write_bw_log=/tmp/fiolog/fio
+write_lat_log=/tmp/fiolog/fio
+log_avg_msec=1000
+per_job_logs=1
+
+[nifi-provenance]
+rw=rw
+rwmixread=25
+bs=32k

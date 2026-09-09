@@ -1,0 +1,31 @@
+# Read a working set small enough to sit in cache, repeatedly.
+#
+# The pair (cold_read, warm_read) brackets the array: cold is what a cache
+# miss costs, warm is what a hit costs. A single "read latency" number
+# without saying which one it is, is not usable.
+[global]
+ioengine=libaio
+direct=1
+size=2G
+runtime=600
+ramp_time=120
+time_based=1
+group_reporting=1
+directory=/mnt/fio-data
+numjobs=8
+iodepth=32
+allow_file_create=0
+# --- standardised policy: identical across every profile so they are
+# --- comparable to each other. See jobs/profiles/README.md.
+randrepeat=0
+norandommap=1
+randseed=20260909
+write_iops_log=/tmp/fiolog/fio
+write_bw_log=/tmp/fiolog/fio
+write_lat_log=/tmp/fiolog/fio
+log_avg_msec=1000
+per_job_logs=1
+
+[warm-read]
+rw=randread
+bs=64k

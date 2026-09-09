@@ -1,0 +1,41 @@
+# NiFi content repository.
+#
+# direct=1 is DELIBERATELY ABSENT from all three nifi_* profiles. NiFi writes
+# its repositories through the normal page cache; it does not open with
+# O_DIRECT. A profile that uses O_DIRECT measures a different I/O path than
+# the one NiFi will actually take, and its numbers cannot be transferred.
+# This is the single most important difference between these profiles and
+# the storage-ceiling ones.
+#
+# Content claims are appended to until they reach
+# nifi.content.claim.max.appendable.size (1 MB by default), then a new claim
+# file is started. So the pattern is many sequential ~1 MB files rather than
+# random IO, with the reads coming from downstream processors re-reading
+# claims that are still warm.
+[global]
+ioengine=libaio
+size=20G
+runtime=900
+ramp_time=60
+time_based=1
+group_reporting=1
+directory=/mnt/fio-data
+numjobs=6
+iodepth=16
+nrfiles=64
+filesize=1m
+refill_buffers=1
+scramble_buffers=1
+randrepeat=0
+norandommap=1
+randseed=20260909
+write_iops_log=/tmp/fiolog/fio
+write_bw_log=/tmp/fiolog/fio
+write_lat_log=/tmp/fiolog/fio
+log_avg_msec=1000
+per_job_logs=1
+
+[nifi-content]
+rw=rw
+rwmixread=30
+bs=64k

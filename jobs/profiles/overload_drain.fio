@@ -1,0 +1,35 @@
+# Offer more than the array can take, then stop and watch it recover.
+#
+# The number that matters here is not throughput -- it is how the latency
+# distribution behaves past saturation, and how long the queue takes to
+# drain once the offered load stops. An array that degrades gracefully and
+# one that collapses can post the same peak throughput.
+#
+# Deliberately uncapped with a deep queue. Pair the result with the queue
+# depth trend from the NiFi side and with nfsstat.py timeouts: RPC timeouts
+# appearing here and not in max_throughput is the signal to look for.
+[global]
+ioengine=libaio
+direct=1
+size=20G
+runtime=600
+ramp_time=0
+time_based=1
+group_reporting=1
+directory=/mnt/fio-data
+numjobs=8
+iodepth=128
+refill_buffers=1
+scramble_buffers=1
+randrepeat=0
+norandommap=1
+randseed=20260909
+write_iops_log=/tmp/fiolog/fio
+write_bw_log=/tmp/fiolog/fio
+write_lat_log=/tmp/fiolog/fio
+log_avg_msec=1000
+per_job_logs=1
+
+[overload-drain]
+rw=randwrite
+bs=64k

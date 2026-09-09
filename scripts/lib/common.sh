@@ -57,10 +57,25 @@ pvc_size_for() {
 }
 
 # job_file_for <test_id> -> absolute path, dies if missing
+#
+# jobs/tests holds the scenario suite; jobs/profiles holds the workload
+# matrix (one I/O characteristic each). Both are deployable the same way.
 job_file_for() {
-  local f="$CHART_DIR/jobs/tests/$1.fio"
-  [[ -f "$f" ]] || die "no such fio job file: $f"
-  printf '%s' "$f"
+  local d f
+  for d in tests profiles; do
+    f="$CHART_DIR/jobs/$d/$1.fio"
+    [[ -f "$f" ]] && { printf '%s' "$f"; return 0; }
+  done
+  die "no such fio job file: $1.fio (looked in jobs/tests and jobs/profiles)"
+}
+
+# meta_dir_for <test_id> -> directory holding its .meta.json
+meta_dir_for() {
+  local d
+  for d in tests profiles; do
+    [[ -f "$CHART_DIR/jobs/$d/$1.meta.json" ]] && { printf '%s' "$CHART_DIR/jobs/$d"; return 0; }
+  done
+  die "no metadata for $1 in jobs/tests or jobs/profiles"
 }
 
 # resource_class_for <test_id> -> "<cpu> <memory>"

@@ -10,7 +10,7 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
   echo "# preflight refuses to deploy when they disagree."
   echo "#"
   printf "# %-38s %s\n" "test_id" "pvc_size"
-  for f in ../jobs/tests/*.fio; do
+  for f in ../jobs/tests/*.fio ../jobs/profiles/*.fio; do
     id=$(basename "$f" .fio)
     need=$(python3 fio_capacity.py "$f")
     [ "$need" -lt 8 ] && need=$((need + 1))

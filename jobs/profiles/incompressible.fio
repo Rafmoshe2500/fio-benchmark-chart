@@ -1,0 +1,36 @@
+# Worst case for an array that deduplicates or compresses.
+#
+# refill_buffers regenerates the buffer for every IO and scramble_buffers
+# perturbs it, so nothing the array sees is reducible. This is the
+# conservative number: it is what the storage does when its space-saving
+# features cannot help.
+#
+# It is also expensive on the CLIENT -- generating incompressible data at
+# multiple GiB/s is real CPU work, which is why the heavy resource class
+# exists. If cgroup throttling appears, the parser rejects the run.
+[global]
+ioengine=libaio
+direct=1
+size=10G
+runtime=600
+ramp_time=60
+time_based=1
+group_reporting=1
+directory=/mnt/fio-data
+numjobs=8
+iodepth=32
+refill_buffers=1
+scramble_buffers=1
+dedupe_percentage=0
+randrepeat=0
+norandommap=1
+randseed=20260909
+write_iops_log=/tmp/fiolog/fio
+write_bw_log=/tmp/fiolog/fio
+write_lat_log=/tmp/fiolog/fio
+log_avg_msec=1000
+per_job_logs=1
+
+[incompressible]
+rw=randwrite
+bs=64k

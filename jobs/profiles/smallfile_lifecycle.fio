@@ -1,0 +1,35 @@
+# Metadata, not data. create, write, stat, delete, over and over.
+#
+# NFS metadata operations are round-trip bound in a way bulk IO is not, and
+# they are what a NiFi flowfile repository and a small-file flow actually
+# generate. Bandwidth is not the metric here; LOOKUP/CREATE/REMOVE RTT from
+# nfsstat.py is.
+[global]
+ioengine=sync
+direct=0
+size=4G
+runtime=600
+ramp_time=60
+time_based=1
+group_reporting=1
+directory=/mnt/fio-data
+numjobs=8
+nrfiles=2048
+filesize=16k
+file_service_type=random
+create_on_open=1
+unlink=1
+# --- standardised policy: identical across every profile so they are
+# --- comparable to each other. See jobs/profiles/README.md.
+randrepeat=0
+norandommap=1
+randseed=20260909
+write_iops_log=/tmp/fiolog/fio
+write_bw_log=/tmp/fiolog/fio
+write_lat_log=/tmp/fiolog/fio
+log_avg_msec=1000
+per_job_logs=1
+
+[smallfile-lifecycle]
+rw=write
+bs=16k

@@ -51,14 +51,14 @@ def main():
     a = ap.parse_args()
 
     repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    meta_dir = a.meta_dir or os.path.join(repo, "jobs", "tests")
 
     # A run is only reportable when we know what was deployed. Without the
     # manifest a directory of logs has no declared intent to check against.
+    # Step subdirectories inherit their parent's manifest.
     manifest_path = os.path.join(a.results_dir, "manifest.json")
     if not os.path.exists(manifest_path):
-        parent = os.path.join(os.path.dirname(a.results_dir), "manifest.json")
-        manifest_path = parent if os.path.exists(parent) else manifest_path
+        manifest_path = os.path.join(
+            os.path.dirname(os.path.normpath(a.results_dir)), "manifest.json")
     if not os.path.exists(manifest_path):
         sys.stderr.write(
             "%s: no manifest.json.\n"
@@ -68,6 +68,17 @@ def main():
         return 3
     with open(manifest_path) as fh:
         manifest = json.load(fh)
+
+    # jobs/tests is the scenario suite, jobs/profiles the workload matrix.
+    meta_dir = a.meta_dir
+    if not meta_dir:
+        for d in ("tests", "profiles"):
+            cand = os.path.join(repo, "jobs", d)
+            if os.path.exists(os.path.join(
+                    cand, "%s.meta.json" % manifest["test_id"])):
+                meta_dir = cand
+                break
+        meta_dir = meta_dir or os.path.join(repo, "jobs", "tests")
 
     try:
         meta = load_meta(manifest["test_id"], meta_dir)

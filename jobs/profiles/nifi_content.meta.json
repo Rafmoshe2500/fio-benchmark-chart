@@ -1,0 +1,27 @@
+{
+  "test_id": "nifi_content",
+  "replicas": 4,
+  "numjobs": 6,
+  "sections": [
+    "nifi-content"
+  ],
+  "block_size": "64k",
+  "pattern": "rw",
+  "rw_mix_read": 0.3,
+  "aggregate_scope": "per_pod",
+  "expected_directions": [
+    "read",
+    "write"
+  ],
+  "runtime_s": 900,
+  "ramp_s": 60,
+  "rate_limited": false,
+  "target_iops_per_pod": null,
+  "target_iops_total": null,
+  "target_bw_mibps_per_pod": null,
+  "target_bw_mibps_total": null,
+  "dataset_gib_per_pod": 120,
+  "requires_prepare": false,
+  "buffered_io": true,
+  "note": "NiFi-representative: direct=1 is deliberately absent because NiFi writes its repositories through the page cache. A profile using O_DIRECT measures a different I/O path and its numbers do not transfer."
+}

@@ -1,0 +1,26 @@
+{
+  "test_id": "compressible",
+  "replicas": 4,
+  "numjobs": 8,
+  "sections": [
+    "compressible"
+  ],
+  "block_size": "64k",
+  "pattern": "randwrite",
+  "rw_mix_read": 0.0,
+  "aggregate_scope": "per_pod",
+  "expected_directions": [
+    "write"
+  ],
+  "runtime_s": 600,
+  "ramp_s": 60,
+  "rate_limited": false,
+  "target_iops_per_pod": null,
+  "target_iops_total": null,
+  "target_bw_mibps_per_pod": null,
+  "target_bw_mibps_total": null,
+  "dataset_gib_per_pod": 80,
+  "requires_prepare": false,
+  "buffered_io": false,
+  "note": "Verified 1.98x gzip. Run against incompressible on the same StorageClass; the gap is the data-reduction benefit."
+}

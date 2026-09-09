@@ -1,0 +1,37 @@
+# What durability costs.
+#
+# fsync=1 forces a flush after EVERY write, which is the expensive case and
+# the one NiFi hits when nifi.*.repository.always.sync=true.
+#
+# Deliberately NOT end_fsync=1. end_fsync flushes once at the end of the run,
+# so it measures a single sync amortised over the whole workload and tells
+# you nothing about per-operation durability cost. The old test9 used it and
+# was described as a durability test; it was not.
+[global]
+ioengine=libaio
+direct=1
+size=8G
+runtime=600
+ramp_time=60
+time_based=1
+group_reporting=1
+directory=/mnt/fio-data
+numjobs=4
+iodepth=1
+fsync=1
+refill_buffers=1
+scramble_buffers=1
+# --- standardised policy: identical across every profile so they are
+# --- comparable to each other. See jobs/profiles/README.md.
+randrepeat=0
+norandommap=1
+randseed=20260909
+write_iops_log=/tmp/fiolog/fio
+write_bw_log=/tmp/fiolog/fio
+write_lat_log=/tmp/fiolog/fio
+log_avg_msec=1000
+per_job_logs=1
+
+[sync-write]
+rw=randwrite
+bs=4k
