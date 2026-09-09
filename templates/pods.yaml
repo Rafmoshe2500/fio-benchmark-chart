@@ -24,21 +24,162 @@ spec:
   securityContext:
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  containers:
-  - name: fio
+  {{- if $.Values.podAntiAffinity.enabled }}
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          topologyKey: kubernetes.io/hostname
+          labelSelector:
+            matchLabels:
+              fio.benchmark/run-id: {{ $.Values.runId | quote }}
+  {{- else }}
+  {{- with $.Values.affinity }}
+  affinity:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- end }}
+  {{- if $.Values.prepare.enabled }}
+  initContainers:
+  - name: fio-prepare
     image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
     imagePullPolicy: {{ $.Values.image.pullPolicy }}
     command: ["/bin/bash", "-c"]
     args:
       - |
-        echo "Starting FIO benchmark on pod {{ $i }}..."
+        set -e
+        cp /fio-config/fio.job /tmp/prep.job
+        sed -i 's|directory=.*|directory={{ $.Values.mountPath }}|g' /tmp/prep.job
+        # create_only lays the files out at full size without measuring, so
+        # the measured run reads a real dataset instead of sparse holes.
+        echo "laying out dataset (not measured)"
+        fio /tmp/prep.job --create_only=1 --allow_file_create=1
+        echo "dataset ready:"
+        du -sh {{ $.Values.mountPath }}
+    volumeMounts:
+    {{- if $.Values.pvc.enabled }}
+    - name: fio-data
+      mountPath: {{ $.Values.mountPath }}
+    {{- end }}
+    - name: fio-config
+      mountPath: /fio-config
+    resources:
+      {{- toYaml $.Values.resources | nindent 6 }}
+  {{- end }}
+  containers:
+  - name: fio
+    image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
+    imagePullPolicy: {{ $.Values.image.pullPolicy }}
+    env:
+    - name: NODE_NAME
+      valueFrom: { fieldRef: { fieldPath: spec.nodeName } }
+    - name: POD_NAME
+      valueFrom: { fieldRef: { fieldPath: metadata.name } }
+    command: ["/bin/bash", "-c"]
+    args:
+      - |
+        set -o pipefail
+        echo "pod {{ $i }} of {{ $.Values.replicaCount }}, run {{ $.Values.runId }}"
         cp /fio-config/fio.job /tmp/fio.job
         sed -i 's|directory=.*|directory={{ $.Values.mountPath }}|g' /tmp/fio.job
-        echo "FIO Configuration:"
+        mkdir -p /tmp/fiolog
+
+        echo "=== environment ==="
+        echo "node=${NODE_NAME} pod=${POD_NAME}"
+        fio --version
+        df -h {{ $.Values.mountPath }}
+        grep "{{ $.Values.mountPath }}" /proc/mounts || true
+
+        echo "=== fio job ==="
         cat /tmp/fio.job
-        echo "---"
+
+        # Capacity gate. size is per clone, so the dataset is size x clones.
+        # This runs inside the pod on purpose: scripts/deploy_test.sh checks
+        # the same thing beforehand, but a bare `helm install` bypasses it,
+        # and this is the failure that killed results/test4_*.
+        NUMJOBS=$(sed -n 's/^[[:space:]]*numjobs[[:space:]]*=[[:space:]]*\([0-9]\+\).*/\1/p' /tmp/fio.job | head -1)
+        SECTIONS=$(grep -c '^\[' /tmp/fio.job)
+        SECTIONS=$((SECTIONS > 1 ? SECTIONS - 1 : 1))
+        if [ -n "$NUMJOBS" ]; then CLONES=$((NUMJOBS * SECTIONS)); else CLONES=$SECTIONS; fi
+        SIZE_RAW=$(sed -n 's/^[[:space:]]*size[[:space:]]*=[[:space:]]*\([0-9]\+[KMGTkmgt]\?\).*/\1/p' /tmp/fio.job | head -1)
+        SIZE_NUM=$(echo "$SIZE_RAW" | tr -cd '0-9')
+        case "$(echo "$SIZE_RAW" | tr -cd 'KMGTkmgt' | tr '[:lower:]' '[:upper:]')" in
+          K) MULT=1 ;; M) MULT=1024 ;; G) MULT=$((1024*1024)) ;;
+          T) MULT=$((1024*1024*1024)) ;; *) MULT=1 ;;
+        esac
+        NEED_KB=$((SIZE_NUM * MULT * CLONES))
+        AVAIL_KB=$(df -Pk {{ $.Values.mountPath }} | awk 'NR==2 {print $4}')
+        echo "=== capacity ==="
+        echo "dataset: size=${SIZE_RAW} x ${CLONES} clones = $((NEED_KB/1024/1024)) GiB"
+        echo "mount:   $((AVAIL_KB/1024/1024)) GiB free"
+        if [ "$NEED_KB" -gt "$AVAIL_KB" ]; then
+          echo "FATAL: PVC is too small for this job."
+          echo "  fio would lay out files until ENOSPC, kill part of the workload,"
+          echo "  and still exit having produced a plausible-looking log."
+          echo "  Set pvc.size to at least $(( (NEED_KB * 12 / 10) / 1024 / 1024 ))Gi and re-run."
+          exit 28
+        fi
+
+        # cgroup CPU pressure, before. If the client is throttled during the
+        # run then its tail latency describes the CFS scheduler, not NFS.
+        CG=""
+        if [ -r /sys/fs/cgroup/cpu.stat ]; then CG=/sys/fs/cgroup/cpu.stat
+        elif [ -r /sys/fs/cgroup/cpu/cpu.stat ]; then CG=/sys/fs/cgroup/cpu/cpu.stat
+        fi
+        CG_BEFORE=$([ -n "$CG" ] && tr '\n' ' ' < "$CG" || echo "")
+
+        {{- if $.Values.startEpoch }}
+        # Absolute-time barrier. Every pod in every release of this run waits
+        # for the same instant, so a burst phase actually overlaps the phase
+        # it is meant to burst against, rather than starting whenever helm
+        # happened to return.
+        TARGET={{ $.Values.startEpoch }}
+        NOW=$(date +%s)
+        if [ "$NOW" -lt "$TARGET" ]; then
+          echo "barrier: waiting $((TARGET - NOW))s until $(date -d @$TARGET)"
+          while [ "$(date +%s)" -lt "$TARGET" ]; do sleep 0.2; done
+        else
+          echo "barrier: WARNING started $((NOW - TARGET))s late; overlap is not guaranteed"
+        fi
+        {{- end }}
+
+        echo "=== fio start $(date -u +%Y-%m-%dT%H:%M:%SZ) epoch=$(date +%s) ==="
+        {{- if $.Values.fioOutput.json }}
+        fio /tmp/fio.job --output-format=json+ --output=/tmp/fio.json
+        FIO_RC=$?
+        {{- else }}
         fio /tmp/fio.job
-        echo "FIO benchmark completed on pod {{ $i }}"
+        FIO_RC=$?
+        {{- end }}
+        echo "=== fio end $(date -u +%Y-%m-%dT%H:%M:%SZ) epoch=$(date +%s) rc=$FIO_RC ==="
+
+        echo "===FIO_CGROUP_BEGIN==="
+        echo "before: ${CG_BEFORE}"
+        echo "after: $([ -n "$CG" ] && tr '\n' ' ' < "$CG" || echo "")"
+        echo "===FIO_CGROUP_END==="
+
+        {{- if $.Values.fioOutput.json }}
+        # Markers let collect_results.sh extract the JSON from kubectl logs
+        # without needing a shared volume or a sidecar.
+        echo "===FIO_JSON_BEGIN==="
+        cat /tmp/fio.json
+        echo "===FIO_JSON_END==="
+        {{- end }}
+
+        {{- if $.Values.fioOutput.timeSeries }}
+        echo "===FIO_TSLOG_BEGIN==="
+        for l in /tmp/fiolog/*.log; do
+          [ -f "$l" ] || continue
+          echo "--- $(basename "$l") ---"
+          cat "$l"
+        done
+        echo "===FIO_TSLOG_END==="
+        {{- end }}
+
+        # Propagate the real result. Without this the container exits 0 on a
+        # failed fio and kubectl reports Completed for a run that died.
+        exit $FIO_RC
     volumeMounts:
     {{- if $.Values.pvc.enabled }}
     - name: fio-data
@@ -59,10 +200,6 @@ spec:
       name: {{ include "fio-benchmark.fullname" $ }}-config
   {{- with $.Values.nodeSelector }}
   nodeSelector:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
-  {{- with $.Values.affinity }}
-  affinity:
     {{- toYaml . | nindent 4 }}
   {{- end }}
   {{- with $.Values.tolerations }}

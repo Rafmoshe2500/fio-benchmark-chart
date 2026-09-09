@@ -43,14 +43,24 @@ fioJob:
     iodepth=32
     numjobs=4
 
-# Resource limits and requests for FIO pods
+# Resource limits and requests for FIO pods.
+#
+# requests == limits on purpose: that is Guaranteed QoS, the only class the
+# kubelet will not throttle first under node pressure. A throttled fio client
+# reports CFS stalls as storage latency, and nothing downstream can separate
+# the two afterwards.
+#
+# scripts/deploy_test.sh overrides these per test via resource_class_for():
+#   light   1 cpu / 1Gi   test_example
+#   normal  4 cpu / 4Gi   rate-limited tests
+#   heavy   8 cpu / 8Gi   ceiling tests and the burst phases
 resources:
   requests:
-    memory: "512Mi"
-    cpu: "500m"
+    memory: "4Gi"
+    cpu: "4"
   limits:
-    memory: "2Gi"
-    cpu: "2000m"
+    memory: "4Gi"
+    cpu: "4"
 
 # Pod restart policy
 restartPolicy: Never
@@ -93,3 +103,20 @@ runId: ""
 # releases begin at the same instant regardless of when helm returned.
 # Empty means "start immediately".
 startEpoch: ""
+
+# Lay the dataset out before the measured run starts. Required for read
+# tests: without it fio reads sparse or absent files and measures nothing.
+prepare:
+  enabled: false
+
+# Emit machine-readable results alongside the human-readable output. The
+# parser consumes the JSON; the text is for eyeballing a single pod.
+fioOutput:
+  json: true
+  timeSeries: true
+
+# Two benchmark pods on one worker share its NIC and page cache, which shows
+# up as array latency that is not array latency. Preferred, not required, so
+# a 40-pod test can still schedule on a smaller cluster.
+podAntiAffinity:
+  enabled: true
