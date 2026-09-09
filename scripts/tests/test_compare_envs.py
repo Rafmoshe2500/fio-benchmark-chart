@@ -65,6 +65,18 @@ class CompareSuitesTest(unittest.TestCase):
             compare_suites([load_suite(a), load_suite(b)])
         self.assertIn("different suites", str(cm.exception))
 
+    def test_refuses_same_name_with_different_test_lists(self):
+        """'manual' edited between runs: the name matches but the measurement
+        is not the same one."""
+        a = _suite(self.root, "a", "nfs3", ["t1", "t2"],
+                   {"t1": [100.0, 101.0, 99.0], "t2": [50.0, 51.0, 49.0]},
+                   suite="manual")
+        b = _suite(self.root, "b", "nfs41", ["t1"],
+                   {"t1": [100.0, 101.0, 99.0]}, suite="manual")
+        with self.assertRaises(CompareError) as cm:
+            compare_suites([load_suite(a), load_suite(b)])
+        self.assertIn("different test lists", str(cm.exception))
+
     def test_warns_on_different_commits(self):
         a = _suite(self.root, "a", "nfs3", ["t1"], {"t1": [100.0, 101.0, 99.0]}, commit="aaa")
         b = _suite(self.root, "b", "nfs41", ["t1"], {"t1": [100.0, 101.0, 99.0]}, commit="bbb")

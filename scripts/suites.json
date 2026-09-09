@@ -4,19 +4,31 @@
     "  ./scripts/run_suite.sh <suite> <environment> [namespace]",
     "",
     "Keep a suite identical across the environments you intend to compare;",
-    "compare_envs.py refuses to compare runs of different suites."
+    "compare_envs.py refuses to compare runs of different suites.",
+    "",
+    "'manual' is yours to edit freely. Because its contents change, the exact",
+    "list is recorded in each run's suite.json and compare_envs.py checks the",
+    "recorded lists -- not just the suite name -- so two 'manual' runs with",
+    "different tests are refused rather than silently half-compared.",
+    "",
+    "For a one-off you do not want to edit a file for, pass the selection",
+    "directly instead:",
+    "  ./scripts/run_suite.sh 1-4,7-9,12,17 nfs3",
+    "  ./scripts/run_suite.sh 5-8 nfs3"
   ],
   "suites": {
+    "manual": [
+      "test1_10pods_30k_5050_4kb",
+      "test4_10pods_50k_5050_32kb"
+    ],
     "smoke": [
       "test_example_phase1"
     ],
-
     "quick": [
       "low_qd_latency",
       "test1_10pods_30k_5050_4kb",
       "test4_10pods_50k_5050_32kb"
     ],
-
     "characterise": [
       "low_qd_latency",
       "max_throughput",
@@ -27,14 +39,12 @@
       "incompressible",
       "compressible"
     ],
-
     "nifi": [
       "nifi_content",
       "nifi_flowfile",
       "nifi_provenance",
       "smallfile_lifecycle"
     ],
-
     "scenarios": [
       "test1_10pods_30k_5050_4kb",
       "test2_10pods_30k_5050_32kb",
@@ -43,7 +53,6 @@
       "test5_10pods_3gb_7030_256kb",
       "test6_10pods_3gb_7030_512kb"
     ],
-
     "ceiling": [
       "test7_1pod_max_write_4kb",
       "test8_1pod_max_read_4kb",

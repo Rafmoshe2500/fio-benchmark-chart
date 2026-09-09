@@ -56,6 +56,7 @@ REPEATS=3 ./scripts/run_suite.sh characterise nfs3
 
 | suite | בדיקות | למה |
 |---|---|---|
+| `manual` | שלך | **ערוך אותו ב־`scripts/suites.json` כרצונך** |
 | `smoke` | 1 | לאמת שהצינור עובד |
 | `quick` | 3 | סבב מהיר |
 | `characterise` | 8 | **אפיון מלא של מערך** — הכי שימושי להשוואה |
@@ -64,6 +65,36 @@ REPEATS=3 ./scripts/run_suite.sh characterise nfs3
 | `ceiling` | 3 | תקרות |
 
 לראות מה יש: `./scripts/run_suite.sh` בלי ארגומנטים.
+
+### בחירה חופשית — בלי לערוך קובץ
+
+במקום שם suite אפשר להעביר **מספרי בדיקות**:
+
+```bash
+./scripts/run_suite.sh 1-4,7-9,12,17 nfs3      # טווחים ובודדים
+./scripts/run_suite.sh 5-8 nfs3
+./scripts/run_suite.sh low_qd_latency,sync_write nfs3   # גם שמות מלאים
+```
+
+טווחים, מספרים בודדים, שמות מלאים, וכל שילוב. הסדר לפי מספר (2 לפני 10, לא לפי מיון טקסט).
+
+**שתי בדיקות מתקבצות אוטומטית:** `10` ו־`11` פורסות את שני השלבים מ־`phase1`, ו־`17` פורסת את כל ארבעת גדלי הבלוק — לכן הן מופיעות פעם אחת ברשימה. אל תוסיף `phase2` ידנית, זה יפרוס את הזוג פעמיים.
+
+### `manual` — ה־suite שלך לעריכה
+
+ב־[scripts/suites.json](scripts/suites.json) יש `manual` שאתה עורך מתי שתרצה.
+
+> **חשוב:** מכיוון ש־`manual` משתנה, **השם שלו אינו הזהות שלו**. רשימת הבדיקות המדויקת נשמרת ב־`suite.json` של כל ריצה, ו־`compare_envs.py` בודק את **הרשימות** ולא רק את השם:
+>
+> ```
+> refusing to compare runs of 'manual' with different test lists.
+>   The suite was edited between these runs, so they are not the
+>   same measurement:
+>     nfs3         test1_..., test4_...
+>     nfs41        test5_...
+> ```
+>
+> כך שאם ערכת את `manual` בין שתי הסביבות — תקבל סירוב, לא השוואה חלקית בשקט.
 
 | משתנה | ברירת מחדל | |
 |---|---|---|

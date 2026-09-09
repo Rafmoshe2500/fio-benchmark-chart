@@ -1,9 +1,12 @@
 #!/bin/bash
 # Run a named suite of tests against one named environment.
 #
-#   ./scripts/run_suite.sh <suite> <environment> [namespace]
-#   ./scripts/run_suite.sh characterise nfs3
-#   REPEATS=3 ./scripts/run_suite.sh quick nfs41
+#   ./scripts/run_suite.sh <suite|selection> <environment> [namespace]
+#
+#   ./scripts/run_suite.sh characterise nfs3        a named suite
+#   ./scripts/run_suite.sh manual nfs3              the suite you edit
+#   ./scripts/run_suite.sh 1-4,7-9,12,17 nfs3       an ad-hoc selection
+#   REPEATS=3 ./scripts/run_suite.sh 5-8 nfs41
 #
 # This is the thing to use when the goal is "the same tests on a different
 # array". It pins everything except the storage: the same suite, the same
@@ -23,7 +26,12 @@ REPEATS="${REPEATS:-1}"
 SETTLE="${SETTLE:-60}"
 
 usage() {
-  echo "Usage: ./run_suite.sh <suite> <environment> [namespace]"
+  echo "Usage: ./run_suite.sh <suite|selection> <environment> [namespace]"
+  echo
+  echo "A selection is test numbers, ranges, or ids -- no config file needed:"
+  echo "  ./run_suite.sh 1-4,7-9,12,17 nfs3"
+  echo "  ./run_suite.sh 5-8 nfs3"
+  echo "  ./run_suite.sh low_qd_latency,sync_write nfs3"
   echo
   echo "Suites:"
   python3 -c "
@@ -58,23 +66,44 @@ PY
 ) || die "could not resolve environment '$ENVNAME'"
 [ "$ENV_EXTRA" = "-" ] && ENV_EXTRA=""
 
+# A named suite from suites.json, or an ad-hoc selection like "1-4,7-9".
 mapfile -t TESTS < <(python3 - "$(native_path "$CHART_DIR")" "$SUITE" <<'PY'
-import json, sys
+import glob, json, os, sys
+sys.path.insert(0, os.path.join(sys.argv[1], "scripts"))
+from lib.testselect import SelectionError, resolve_selection
+
 repo, name = sys.argv[1], sys.argv[2]
 suites = json.load(open(repo + "/scripts/suites.json"))["suites"]
-if name not in suites:
-    sys.exit("unknown suite %r; known: %s" % (name, ", ".join(sorted(suites))))
-for t in suites[name]:
-    print(t)
+if name in suites:
+    for t in suites[name]:
+        print(t)
+    sys.exit(0)
+
+available = sorted(
+    os.path.basename(f)[:-4]
+    for d in ("tests", "profiles")
+    for f in glob.glob(os.path.join(repo, "jobs", d, "*.fio")))
+try:
+    for t in resolve_selection(name, available):
+        print(t)
+except SelectionError as e:
+    sys.exit("%s
+  Named suites: %s" % (e, ", ".join(sorted(suites))))
 PY
-) || die "could not resolve suite '$SUITE'"
+) || die "could not resolve '$SUITE'"
+
+# A named suite keeps its name; an ad-hoc selection is recorded as "manual",
+# and its identity is the recorded test list rather than the label.
+SUITE_LABEL="$SUITE"
+case "$SUITE" in *[,-]*|[0-9]*) SUITE_LABEL="manual" ;; esac
+[ -n "${SUITES_JSON_NAME:-}" ] && SUITE_LABEL="$SUITES_JSON_NAME"
 
 STAMP="$(date +%Y%m%d-%H%M%S)"
-SUITE_ID="${SUITE}-${ENVNAME}-${STAMP}"
+SUITE_ID="${SUITE_LABEL}-${ENVNAME}-${STAMP}"
 SUITE_DIR="$CHART_DIR/results/suites/$SUITE_ID"
 mkdir -p "$SUITE_DIR"
 
-log "suite=$SUITE environment=$ENVNAME sc=$SC"
+log "suite=$SUITE_LABEL (from '$SUITE') environment=$ENVNAME sc=$SC"
 log "tests: ${TESTS[*]}"
 log "repeats=$REPEATS namespace=$NAMESPACE"
 log "results -> results/suites/$SUITE_ID"
@@ -124,7 +153,8 @@ tests_json=$(printf '"%s",' "${TESTS[@]}")
 cat > "$SUITE_DIR/suite.json" <<JSON
 {
   "suite_id": "$SUITE_ID",
-  "suite": "$SUITE",
+  "suite": "$SUITE_LABEL",
+  "selection": "$SUITE",
   "environment": "$ENVNAME",
   "storage_class": "$SC",
   "namespace": "$NAMESPACE",

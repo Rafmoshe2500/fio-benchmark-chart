@@ -78,6 +78,22 @@ def compare_suites(suites):
             "  The tests are not the same question. Re-run the same suite\n"
             "  against each environment." % ", ".join(sorted(names)))
 
+    # The suite NAME is not its identity when the suite is editable. Two
+    # 'manual' runs whose contents were changed between them would pass the
+    # name check and then be half-compared over whatever happened to overlap.
+    # Compare the recorded test lists instead.
+    lists = {tuple(sorted(s.get("tests") or [])) for s in suites}
+    if len(lists) > 1:
+        detail = "\n".join(
+            "    %-12s %s" % (s["environment"], ", ".join(sorted(s.get("tests") or [])))
+            for s in suites)
+        raise CompareError(
+            "refusing to compare runs of '%s' with different test lists.\n"
+            "  The suite was edited between these runs, so they are not the\n"
+            "  same measurement:\n%s\n"
+            "  Re-run the same list against both environments."
+            % (sorted(names)[0], detail))
+
     warnings = []
 
     commits = {s.get("git_commit", "?") for s in suites}
