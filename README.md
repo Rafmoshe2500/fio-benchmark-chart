@@ -19,6 +19,19 @@
 
 ## התחלה מהירה
 
+**המטרה הנפוצה — אותן בדיקות על סביבות שונות:**
+
+```bash
+REPEATS=3 ./scripts/run_suite.sh characterise nfs3
+REPEATS=3 ./scripts/run_suite.sh characterise nfs41
+python3 scripts/compare_envs.py results/suites/characterise-nfs3-* results/suites/characterise-nfs41-*
+```
+
+הסביבות מוגדרות פעם אחת ב־[scripts/environments.json](scripts/environments.json).
+המדריך התפעולי המלא: **[RUNBOOK.md](RUNBOOK.md)**
+
+**בדיקה בודדת:**
+
 ```bash
 # 1. פריסה. מדפיס RUN_ID.
 ./scripts/deploy_test.sh test_example_phase1 fio-tests
@@ -37,6 +50,7 @@ python3 scripts/parse_results.py results/<RUN_ID>
 
 **דרישות מוקדמות:** Helm 3, `kubectl`/`oc` מחובר, Python 3.9+, ו־image עם fio 3.41.
 
+איך מריצים כל דבר: **[RUNBOOK.md](RUNBOOK.md)**
 לרשימת הבדיקות ומה כל אחת בודקת: **[jobs/tests/README.md](jobs/tests/README.md)**
 למטריצת העומסים (פרופילים מבודדים): **[jobs/profiles/README.md](jobs/profiles/README.md)**
 לפרטי הסקריפטים ומשתני הסביבה: **[scripts/README.md](scripts/README.md)**
