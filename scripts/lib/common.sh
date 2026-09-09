@@ -10,6 +10,13 @@ CHART_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." >/dev/null 2>&1 && pwd)"
 RUN_LABEL_KEY="fio.benchmark/run-id"
 TEST_LABEL_KEY="fio.benchmark/test-id"
 
+# Paths handed to python3 must be in the platform's native form. On Linux
+# that is a no-op; under Git Bash on Windows a /c/... path is meaningless to
+# a native Python and has to be converted.
+native_path() {
+  if command -v cygpath >/dev/null 2>&1; then cygpath -w "$1"; else printf '%s' "$1"; fi
+}
+
 log()  { printf '\033[1;34m[%s]\033[0m %s\n' "$(date +%H:%M:%S)" "$*"; }
 warn() { printf '\033[1;33m[warn]\033[0m %s\n' "$*" >&2; }
 die()  { printf '\033[1;31m[fail]\033[0m %s\n' "$*" >&2; exit 1; }

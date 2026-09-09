@@ -1,0 +1,21 @@
+{
+  "_comment": [
+    "The environments you compare. Add one entry per StorageClass or array.",
+    "",
+    "Everything except storage_class is optional. Anything you put in 'env'",
+    "is exported before the run, so any variable deploy_test.sh honours can",
+    "be overridden per environment -- but be careful: a comparison in which",
+    "two environments differ by more than the storage is not a comparison.",
+    "compare_envs.py checks this and refuses."
+  ],
+  "environments": {
+    "nfs3": {
+      "storage_class": "sc-nas-nfs3",
+      "description": "NFSv3 export"
+    },
+    "nfs41": {
+      "storage_class": "sc-nas-nfs41",
+      "description": "NFSv4.1 export"
+    }
+  }
+}
