@@ -1,55 +1,53 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-TEST_ID=$1
-NAMESPACE=${2:-default}
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/common.sh"
 
-if [ -z "$TEST_ID" ]; then
-  echo "Usage: ./cleanup_test.sh <test_id> [namespace]"
-  echo "Example: ./cleanup_test.sh test1_10pods_30k_5050_4kb fio-tests"
+RUN_ID="${1:-}"
+NAMESPACE="${2:-fio-tests}"
+FORCE="${FORCE:-false}"
+
+if [ -z "$RUN_ID" ]; then
+  echo "Usage: ./cleanup_test.sh <run_id> [namespace]"
+  echo "Run IDs are printed by deploy_test.sh and stored in results/<run_id>/manifest.json"
+  echo
+  echo "Runs currently present in $NAMESPACE:"
+  kubectl get pods -n "$NAMESPACE" \
+    -o jsonpath="{range .items[*]}{.metadata.labels['fio\.benchmark/run-id']}{'\n'}{end}" \
+    2>/dev/null | sort -u | grep -v '^$' | sed 's/^/  /' || echo "  (none)"
   exit 1
 fi
 
-echo "Cleaning up resources for Test: $TEST_ID in namespace: $NAMESPACE..."
+SEL="$(run_selector "$RUN_ID")"
 
-# We need to find all helm releases associated with this test.
-# During deploy, we named releases based on the test ID (e.g. fio-test10-p1, fio-scale, etc)
-# To be safe, we will just delete everything that matches the prefix.
+# Show what will go before anything goes. The old script deleted every PVC
+# matching app.kubernetes.io/name=fio-benchmark across the namespace, which
+# took out concurrent runs and prepared read datasets with them.
+echo "Resources matching ${SEL} in ${NAMESPACE}:"
+kubectl get pods,pvc,configmap -n "$NAMESPACE" -l "$SEL" 2>/dev/null || true
+echo
 
-HELM_RELEASE="fio-$TEST_ID"
-HELM_RELEASE=$(echo "$HELM_RELEASE" | tr '_' '-' | cut -c 1-53)
+if [ "$FORCE" != "true" ]; then
+  read -rp "Delete all of the above? [y/N] " a
+  [[ "$a" == "y" ]] || { log "aborted"; exit 0; }
+fi
 
-case $TEST_ID in
-  *test10_burst_write*)
-    helm uninstall "$HELM_RELEASE-p1" -n "$NAMESPACE" || true
-    helm uninstall "$HELM_RELEASE-p2" -n "$NAMESPACE" || true
-    ;;
-  *test11_burst_read*)
-    helm uninstall "$HELM_RELEASE-p1" -n "$NAMESPACE" || true
-    helm uninstall "$HELM_RELEASE-p2" -n "$NAMESPACE" || true
-    ;;
-  *test_example*)
-    helm uninstall "$HELM_RELEASE-p1" -n "$NAMESPACE" || true
-    helm uninstall "$HELM_RELEASE-p2" -n "$NAMESPACE" || true
-    ;;
-  *gradual_scale*)
-    helm uninstall "fio-scale" -n "$NAMESPACE" || true
-    ;;
-  *test17_mixed_workload*)
-    helm uninstall "$HELM_RELEASE-32k" -n "$NAMESPACE" || true
-    helm uninstall "$HELM_RELEASE-64k" -n "$NAMESPACE" || true
-    helm uninstall "$HELM_RELEASE-256k" -n "$NAMESPACE" || true
-    helm uninstall "$HELM_RELEASE-512k" -n "$NAMESPACE" || true
-    ;;
-  *)
-    helm uninstall "$HELM_RELEASE" -n "$NAMESPACE" || true
-    ;;
-esac
+# Uninstall by release name recorded at deploy time, not guessed. The old
+# gradual-scale branch uninstalled a hardcoded "fio-scale" while deploy had
+# installed a release named after the test, so the release survived cleanup.
+MANIFEST="$CHART_DIR/results/$RUN_ID/manifest.json"
+if [ -f "$MANIFEST" ]; then
+  while read -r release; do
+    [ -z "$release" ] && continue
+    log "uninstalling $release"
+    helm uninstall "$release" -n "$NAMESPACE" 2>/dev/null || warn "$release already gone"
+  done < <(python3 -c 'import json,sys
+for r in json.load(open(sys.argv[1])).get("releases", []): print(r)' "$MANIFEST")
+else
+  warn "no manifest for $RUN_ID; falling back to label-scoped deletion only"
+fi
 
-echo "Helm releases deleted."
+# Scoped to this run and nothing else.
+kubectl delete pvc -n "$NAMESPACE" -l "$SEL" --wait=false 2>/dev/null || true
 
-# Helm does not always delete the PVCs, so we should clean them up as well if they belong to this prefix
-echo "Cleaning up dangling PVCs matching fio-..."
-kubectl delete pvc -l "app.kubernetes.io/name=fio-benchmark" -n "$NAMESPACE" || true
-
-echo "Cleanup completed."
+log "cleanup completed for $RUN_ID"

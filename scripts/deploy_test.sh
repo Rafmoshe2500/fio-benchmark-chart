@@ -1,120 +1,149 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-CHART_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." >/dev/null 2>&1 && pwd)"
-TEST_ID=$1
-NAMESPACE=${2:-default}
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/common.sh"
+
+TEST_ID="${1:-}"
+NAMESPACE="${2:-fio-tests}"
 
 if [ -z "$TEST_ID" ]; then
   echo "Usage: ./deploy_test.sh <test_id> [namespace]"
   echo "Example: ./deploy_test.sh test1_10pods_30k_5050_4kb fio-tests"
+  echo
+  echo "Environment:"
+  echo "  STORAGE_CLASS   storage class to test        (default sc-nas-nfs3)"
+  echo "  BARRIER_LEAD    seconds before synchronised start (default 180)"
+  echo
+  echo "Available tests:"
+  for f in "$CHART_DIR"/jobs/tests/*.fio; do echo "  $(basename "$f" .fio)"; done
   exit 1
 fi
 
-echo "Deploying Benchmark: $TEST_ID in namespace: $NAMESPACE"
+SAFE_TEST_ID="$(safe_id "$TEST_ID")"
+RUN_ID="$(new_run_id "$SAFE_TEST_ID")"
+STORAGE_CLASS="${STORAGE_CLASS:-sc-nas-nfs3}"
 
-# Define default helm parameters
-REPLICAS=10
-HELM_RELEASE="fio-$TEST_ID"
-HELM_RELEASE=$(echo "$HELM_RELEASE" | tr '_' '-' | cut -c 1-53)
+# Every pod waits for this absolute instant before starting fio, so all
+# releases in a multi-release test begin together no matter when helm
+# returned. 180s covers PVC binding and image pull on a cold node.
+BARRIER_LEAD="${BARRIER_LEAD:-180}"
+START_EPOCH=$(( $(date +%s) + BARRIER_LEAD ))
 
-# Logic to handle specific test cases that require different replica counts or multiple phases
+RESULTS_DIR="$CHART_DIR/results/$RUN_ID"
+mkdir -p "$RESULTS_DIR"
+
+log "test=$TEST_ID"
+log "run=$RUN_ID"
+log "ns=$NAMESPACE sc=$STORAGE_CLASS"
+log "synchronised start at $(date -d "@$START_EPOCH" 2>/dev/null || date -r "$START_EPOCH" 2>/dev/null || echo "epoch $START_EPOCH")"
+
+RELEASES=()
+
+# deploy_release <release-suffix> <replicas> <test_id_for_job_file> [extra helm args...]
+deploy_release() {
+  local suffix="$1" replicas="$2" job_id="$3"; shift 3
+
+  preflight "$job_id"
+
+  local cpu mem
+  read -r cpu mem <<< "$(resource_class_for "$job_id")"
+
+  # Read tests declare allow_file_create=0 and need their dataset laid out
+  # first, otherwise they read sparse files and measure nothing.
+  local prep=false
+  case "$job_id" in
+    test8_1pod_max_read_4kb|test11_burst_read_phase2) prep=true ;;
+  esac
+
+  local prefix="fio-${SAFE_TEST_ID}${suffix:+-$suffix}"
+  local release="${prefix:0:53}"
+
+  log "deploying $release: $replicas pods, job $job_id, ${cpu} cpu / ${mem}"
+  helm_deploy "$release" "$NAMESPACE" "$RUN_ID" \
+    --set replicaCount="$replicas" \
+    --set namePrefix="$prefix" \
+    --set startEpoch="$START_EPOCH" \
+    --set prepare.enabled="$prep" \
+    --set pvc.storageClassName="$STORAGE_CLASS" \
+    --set pvc.size="$(pvc_size_for "$job_id")" \
+    --set resources.requests.cpu="$cpu" --set resources.limits.cpu="$cpu" \
+    --set resources.requests.memory="$mem" --set resources.limits.memory="$mem" \
+    --set-file fioJob.content="$(job_file_for "$job_id")" \
+    "$@"
+  RELEASES+=("$release")
+}
+
 case $TEST_ID in
   *1pod*)
-    REPLICAS=1
-    helm install "$HELM_RELEASE" "$CHART_DIR" -n "$NAMESPACE" --create-namespace \
-      --set replicaCount=$REPLICAS \
-      --set namePrefix="fio-$TEST_ID" \
-      --set-file fioJob.content="$CHART_DIR/jobs/tests/$HELM_RELEASE.fio"
+    deploy_release "" 1 "$TEST_ID"
     ;;
-  
+
   *test10_burst_write*)
-    echo "Deploying Phase 1 (5 Pods)..."
-    helm install "$HELM_RELEASE-p1" "$CHART_DIR" -n "$NAMESPACE" --create-namespace \
-      --set replicaCount=5 --set namePrefix="fio-t10-p1" \
-      --set-file fioJob.content="$CHART_DIR/jobs/tests/test10_burst_write_phase1.fio"
-    
-    echo "Waiting 5 minutes for Burst Phase 2..."
-    sleep 300
-    
-    echo "Deploying Phase 2 (+5 Pods)..."
-    helm install "$HELM_RELEASE-p2" "$CHART_DIR" -n "$NAMESPACE" --create-namespace \
-      --set replicaCount=5 --set namePrefix="fio-t10-p2" \
-      --set-file fioJob.content="$CHART_DIR/jobs/tests/test10_burst_write_phase2.fio"
+    # Both phases are deployed up front so PVCs are bound and images pulled
+    # before either starts. The barrier, not a sleep, staggers them: the old
+    # `sleep 300` measured time since helm returned, which is not the same
+    # thing as time since phase 1 began generating load.
+    deploy_release "p1" 5 test10_burst_write_phase1
+    deploy_release "p2" 5 test10_burst_write_phase2 \
+      --set startEpoch=$((START_EPOCH + 300))
     ;;
-    
+
   *test11_burst_read*)
-    echo "Deploying Phase 1 (20 Pods)..."
-    helm install "$HELM_RELEASE-p1" "$CHART_DIR" -n "$NAMESPACE" --create-namespace \
-      --set replicaCount=20 --set namePrefix="fio-t11-p1" \
-      --set-file fioJob.content="$CHART_DIR/jobs/tests/test11_burst_read_phase1.fio"
-    
-    echo "Waiting 5 minutes for Burst Phase 2..."
-    sleep 300
-    
-    echo "Deploying Phase 2 (+5 Pods)..."
-    helm install "$HELM_RELEASE-p2" "$CHART_DIR" -n "$NAMESPACE" --create-namespace \
-      --set replicaCount=5 --set namePrefix="fio-t11-p2" \
-      --set-file fioJob.content="$CHART_DIR/jobs/tests/test11_burst_read_phase2.fio"
+    deploy_release "p1" 20 test11_burst_read_phase1
+    deploy_release "p2" 5 test11_burst_read_phase2 \
+      --set startEpoch=$((START_EPOCH + 300))
     ;;
 
   *test_example*)
-    echo "Running Local Example: Phase 1 (10 Pods)..."
-    helm install "$HELM_RELEASE-p1" "$CHART_DIR" -n "$NAMESPACE" --create-namespace \
-      --set replicaCount=10 --set namePrefix="fio-example-p1" \
-      --set namespace="$NAMESPACE" \
-      --set pvc.size=2Gi \
-      --set resources.requests.cpu=100m \
-      --set resources.requests.memory=128Mi \
-      --set-file fioJob.content="$CHART_DIR/jobs/tests/test_example_phase1.fio"
-    
-    echo "Waiting 2 minutes for Phase 2..."
-    sleep 120
-    
-    echo "Running Local Example: Phase 2 (+1 Pod)..."
-    helm install "$HELM_RELEASE-p2" "$CHART_DIR" -n "$NAMESPACE" --create-namespace \
-      --set replicaCount=1 --set namePrefix="fio-example-p2" \
-      --set namespace="$NAMESPACE" \
-      --set pvc.size=2Gi \
-      --set resources.requests.cpu=100m \
-      --set resources.requests.memory=128Mi \
-      --set-file fioJob.content="$CHART_DIR/jobs/tests/test_example_phase2.fio"
+    deploy_release "p1" 10 test_example_phase1
+    deploy_release "p2" 1 test_example_phase2 \
+      --set startEpoch=$((START_EPOCH + 120))
     ;;
 
   *gradual_scale*)
-    echo "Deploying initial 10 Pods..."
-    helm install "$HELM_RELEASE" "$CHART_DIR" -n "$NAMESPACE" --create-namespace \
-      --set replicaCount=10 --set namePrefix="fio-scale" --set pvc.storageClassName=sc-nas-nfs3 --set pvc.size=250Gi \
-      --set-file fioJob.content="$CHART_DIR/jobs/tests/$TEST_ID.fio"
-    
-    # Scale up by 5 pods every minute for 30 minutes (up to 160 pods? 10 + 5*30 = 160)
-    for i in {1..30}; do
-       sleep 60
-       NEW_REPLICAS=$((10 + i * 5))
-       echo "Scaling to $NEW_REPLICAS Pods..."
-       helm upgrade "$HELM_RELEASE" "$CHART_DIR" -n "$NAMESPACE" \
-         --set replicaCount=$NEW_REPLICAS --set namePrefix="fio-scale" \
-         --reuse-values
-    done
+    exec "$CHART_DIR/scripts/deploy_scale_steps.sh" "$TEST_ID" "$NAMESPACE" "$RUN_ID"
     ;;
 
   *test17_mixed_workload*)
-    echo "Deploying Mixed Workloads (40 Pods total across 4 releases)..."
-    helm install "$HELM_RELEASE-32k" "$CHART_DIR" -n "$NAMESPACE" --create-namespace --set replicaCount=13 --set namePrefix="fio-t17-32k"  --set pvc.storageClassName=sc-nas-nfs3 --set pvc.size=250Gi --set-file fioJob.content="$CHART_DIR/jobs/tests/test17_mixed_workload_32k.fio"
-    helm install "$HELM_RELEASE-64k" "$CHART_DIR" -n "$NAMESPACE" --create-namespace --set replicaCount=17  --set pvc.storageClassName=sc-nas-nfs3 --set pvc.size=250Gi --set namePrefix="fio-t17-64k" --set-file fioJob.content="$CHART_DIR/jobs/tests/test17_mixed_workload_64k.fio"
-    helm install "$HELM_RELEASE-256k" "$CHART_DIR" -n "$NAMESPACE" --create-namespace --set replicaCount=7  --set pvc.storageClassName=sc-nas-nfs3 --set pvc.size=350Gi --set namePrefix="fio-t17-256k" --set-file fioJob.content="$CHART_DIR/jobs/tests/test17_mixed_workload_256k.fio"
-    helm install "$HELM_RELEASE-512k" "$CHART_DIR" -n "$NAMESPACE" --create-namespace --set replicaCount=3 --set pvc.storageClassName=sc-nas-nfs3 --set pvc.size=350Gi --set namePrefix="fio-t17-512k" --set-file fioJob.content="$CHART_DIR/jobs/tests/test17_mixed_workload_512k.fio"
+    deploy_release "32k"  13 test17_mixed_workload_32k
+    deploy_release "64k"  17 test17_mixed_workload_64k
+    deploy_release "256k"  7 test17_mixed_workload_256k
+    deploy_release "512k"  3 test17_mixed_workload_512k
     ;;
 
   *)
-    # Default behavior (Test 1-6)
-    helm install "$HELM_RELEASE" "$CHART_DIR" -n "$NAMESPACE" --create-namespace \
-      --set replicaCount=$REPLICAS \
-      --set namePrefix="fio-$TEST_ID" \
-      --set-file fioJob.content="$CHART_DIR/jobs/tests/$TEST_ID.fio"
+    deploy_release "" 10 "$TEST_ID"
     ;;
 esac
 
-echo ""
-echo "Deployment triggered successfully for $TEST_ID."
-echo "Check pods with: kubectl get pods -n $NAMESPACE"
+# The manifest is what makes a run reproducible and what collect_results.sh
+# and parse_results.py validate against. Without it a set of logs is just a
+# set of logs.
+releases_json=$(printf '"%s",' "${RELEASES[@]}")
+git_dirty=false
+[ -n "$(git -C "$CHART_DIR" status --porcelain 2>/dev/null)" ] && git_dirty=true
+
+cat > "$RESULTS_DIR/manifest.json" <<JSON
+{
+  "run_id": "$RUN_ID",
+  "test_id": "$TEST_ID",
+  "namespace": "$NAMESPACE",
+  "storage_class": "$STORAGE_CLASS",
+  "releases": [${releases_json%,}],
+  "start_epoch": $START_EPOCH,
+  "barrier_lead_s": $BARRIER_LEAD,
+  "git_commit": "$(git -C "$CHART_DIR" rev-parse HEAD 2>/dev/null || echo unknown)",
+  "git_dirty": $git_dirty,
+  "deployed_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+}
+JSON
+
+# Machine-readable handoff. Callers must not have to scrape the log for the
+# run id -- run_repeated.sh depends on this file.
+printf '%s\n' "$RUN_ID" > "$CHART_DIR/results/.last_run_id"
+
+log "manifest: $RESULTS_DIR/manifest.json"
+echo
+log "next:  ./scripts/collect_results.sh $RUN_ID $NAMESPACE"
+log "then:  python3 scripts/parse_results.py results/$RUN_ID"
+log "clean: ./scripts/cleanup_test.sh $RUN_ID $NAMESPACE"

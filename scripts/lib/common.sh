@@ -44,3 +44,49 @@ helm_deploy() {
     --set runId="$run_id" \
     "$@"
 }
+
+# pvc_size_for <test_id> -> size string, dies if unregistered
+pvc_size_for() {
+  local id="$1" conf="$CHART_DIR/scripts/pvc_sizes.conf" name size
+  while read -r name size _rest; do
+    [[ -z "${name:-}" || "${name:0:1}" == "#" ]] && continue
+    [[ "$name" == "$id" ]] && { printf '%s' "$size"; return 0; }
+  done < "$conf"
+  die "no PVC size registered for '$id' in scripts/pvc_sizes.conf.
+  Regenerate it with: ./scripts/gen_pvc_sizes.sh"
+}
+
+# job_file_for <test_id> -> absolute path, dies if missing
+job_file_for() {
+  local f="$CHART_DIR/jobs/tests/$1.fio"
+  [[ -f "$f" ]] || die "no such fio job file: $f"
+  printf '%s' "$f"
+}
+
+# resource_class_for <test_id> -> "<cpu> <memory>"
+#
+# Sized from the observed ceiling run: test7 sustained ~170K IOPS / 665 MiB/s
+# of 4K random writes with refill_buffers=1, i.e. two thirds of a GiB per
+# second of freshly generated incompressible data. That is CPU work, and at
+# 2 cores it is the client that gives out first, not the array.
+#
+# requests == limits on purpose: that is Guaranteed QoS, the only class the
+# kubelet will not throttle first. A throttled client reports CFS stalls as
+# storage latency and there is no way to separate them afterwards.
+resource_class_for() {
+  case "$1" in
+    test_example*)                          echo "1 1Gi" ;;
+    *1pod_max*|test10_burst*|test11_burst*) echo "8 8Gi" ;;
+    *)                                      echo "4 4Gi" ;;
+  esac
+}
+
+# preflight <test_id> -- refuses to deploy a job that cannot fit its PVC
+preflight() {
+  local id="$1" job pvc
+  job="$(job_file_for "$id")"
+  pvc="$(pvc_size_for "$id")"
+  ( cd "$CHART_DIR/scripts" && python3 fio_capacity.py "$job" --pvc "$pvc" >/dev/null ) \
+    || die "capacity preflight failed for $id"
+  log "preflight ok: $id fits $pvc"
+}
