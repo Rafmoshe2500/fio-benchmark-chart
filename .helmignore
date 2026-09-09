@@ -7,3 +7,9 @@
 OWNERS
 .travis.yml
 .circleci/
+results/
+scripts/
+nifi/
+docs/
+jobs/
+.remember/

@@ -14,9 +14,6 @@ image:
 imagePullSecrets: []
 # - name: registry-secret
 
-# OpenShift/Kubernetes namespace
-namespace: default
-
 # Persistent Volume Claim configuration
 pvc:
   enabled: true
@@ -86,3 +83,13 @@ uniqueNames: true
 
 # Prefix for resource names
 namePrefix: "fio-benchmark"
+
+# Unique identifier for this benchmark run. Set by scripts/deploy_test.sh.
+# Every Pod, PVC and ConfigMap carries it as a label so collection and
+# cleanup can select exactly this run and nothing else.
+runId: ""
+
+# Absolute epoch seconds at which every pod should start fio. Lets several
+# releases begin at the same instant regardless of when helm returned.
+# Empty means "start immediately".
+startEpoch: ""

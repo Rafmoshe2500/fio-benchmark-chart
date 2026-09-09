@@ -58,3 +58,13 @@ Get FIO job content
 {{- define "fio-benchmark.fioJobContent" -}}
 {{- .Values.fioJob.content }}
 {{- end }}
+
+{{/*
+Run identity labels. Applied to every object so collection and cleanup can
+select one run precisely instead of guessing from name prefixes.
+*/}}
+{{- define "fio-benchmark.runLabels" -}}
+{{- if .Values.runId }}
+fio.benchmark/run-id: {{ .Values.runId | quote }}
+{{- end }}
+{{- end }}
