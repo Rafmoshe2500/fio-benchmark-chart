@@ -14,8 +14,11 @@ if [ -z "$TEST_ID" ]; then
   echo "  STORAGE_CLASS   storage class to test        (default sc-nas-nfs3)"
   echo "  BARRIER_LEAD    seconds before synchronised start (default 180)"
   echo
-  echo "Available tests:"
+  echo "Scenarios (jobs/tests):"
   for f in "$CHART_DIR"/jobs/tests/*.fio; do echo "  $(basename "$f" .fio)"; done
+  echo
+  echo "Workload profiles (jobs/profiles):"
+  for f in "$CHART_DIR"/jobs/profiles/*.fio; do echo "  $(basename "$f" .fio)"; done
   exit 1
 fi
 
@@ -52,7 +55,7 @@ deploy_release() {
   # first, otherwise they read sparse files and measure nothing.
   local prep=false
   case "$job_id" in
-    test8_1pod_max_read_4kb|test11_burst_read_phase2) prep=true ;;
+    test8_1pod_max_read_4kb|test11_burst_read_phase2|cold_read|warm_read) prep=true ;;
   esac
 
   local prefix="fio-${SAFE_TEST_ID}${suffix:+-$suffix}"

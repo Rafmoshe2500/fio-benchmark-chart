@@ -5,11 +5,16 @@
 > **כן:** מייצר עומס NFS ריאליסטי, מודד עבודה מצטברת, latency של NFS RPC,
 > וכשלים — ומסרב להשוות ריצות שאינן ברות־השוואה.
 >
-> **עדיין לא:** אלה מופעי NiFi **עצמאיים, לא cluster**. הם לא בודקים cluster
-> coordinator, load-balanced connections, primary-node processors או failover.
-> אין גם injection של תקלות ואין אימות recovery. עד שיהיו — אל תטען שהמערך
-> "עומד בעומס production של NiFi"; טען שהוא עומד בעומס ה־repository של
-> מופע NiFi בודד, וזה מה שנמדד.
+> **עדיין לא, ב־`nifi-nfs-loadtest.sh`:** אלה מופעי NiFi **עצמאיים, לא cluster**.
+> לבדיקת cluster אמיתי — coordinator, load-balanced connections, failover —
+> יש עכשיו [`nifi-cluster.sh`](nifi-cluster.sh) **נפרד**. הוא נפרד ולא flag
+> כי השניים עונים על שאלות שונות ואסור לערבב אותם בדוח.
+>
+> **failure injection:** [`chaos.sh`](chaos.sh) הורג node תחת עומס, מודד זמן
+> עד Ready **ובנפרד** עד שהזרימה מתחדשת (על WAL שצריך replay אלה לא אותו
+> מספר), ומאמת שלמות. הוא מתעד במפורש שהסמנטיקה היא **at-least-once** —
+> NiFi משחזר את ה־WAL, ולכן FlowFile שהיה בטיסה בזמן הנפילה נמסר שוב.
+> אל תתאר את הזרימה כ־exactly-once בלי sink שמבצע דדופליקציה.
 >
 > **מה תוקן לאחרונה** (ראה [docs/superpowers/plans/](../docs/superpowers/plans/)):
 >

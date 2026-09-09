@@ -10,6 +10,8 @@
 - [למה זה חשוב](#למה-זה-חשוב)
 - [שני כללים של fio שחייבים להכיר](#שני-כללים-של-fio-שחייבים-להכיר)
 - [הרצה ידנית עם helm](#הרצה-ידנית-עם-helm)
+- [תרחישים מול פרופילים](#תרחישים-מול-פרופילים)
+- [verdict ו־SLO](#verdict-ו־slo)
 - [פרמטרים](#פרמטרים)
 - [פתרון תקלות](#פתרון-תקלות)
 
@@ -36,6 +38,7 @@ python3 scripts/parse_results.py results/<RUN_ID>
 **דרישות מוקדמות:** Helm 3, `kubectl`/`oc` מחובר, Python 3.9+, ו־image עם fio 3.41.
 
 לרשימת הבדיקות ומה כל אחת בודקת: **[jobs/tests/README.md](jobs/tests/README.md)**
+למטריצת העומסים (פרופילים מבודדים): **[jobs/profiles/README.md](jobs/profiles/README.md)**
 לפרטי הסקריפטים ומשתני הסביבה: **[scripts/README.md](scripts/README.md)**
 לבדיקות NiFi: **[nifi/README.md](nifi/README.md)**
 
@@ -143,6 +146,28 @@ helm install my-test . \
 
 ---
 
+## תרחישים מול פרופילים
+
+| | `jobs/tests/` | `jobs/profiles/` |
+|---|---|---|
+| שאלה | "האם המערך עומד בעומס הזה?" | "מה המערך עושה כשמבקשים ממנו את זה?" |
+| דוגמה | `test4` — 10 פודים, 50K IOPS, 32k | `sync_write` — עלות durability |
+| `direct=1` | תמיד | **לא** ב־`nifi_*` |
+
+שניהם נפרסים באותה פקודה. ההבדל הקריטי: הפרופילים `nifi_content`, `nifi_flowfile`, `nifi_provenance` **לא משתמשים ב־`direct=1`**, כי NiFi כותב דרך ה־page cache ולא ב־`O_DIRECT`. בדיקה עם `O_DIRECT` מודדת מסלול I/O אחר, ולכן המספרים שלה **לא ניתנים להעברה ל־NiFi** — וזה נכון לגבי כל בדיקות התקרה ב־`jobs/tests/`.
+
+## verdict ו־SLO
+
+הדוח מציג `VERDICT: none` עד ש־[scripts/slo.json](scripts/slo.json) מכויל:
+
+```json
+{ "calibrated": true, "source": "prod-nifi telemetry, 2026-09", "targets": { ... } }
+```
+
+`parse_results.py` **מסרב** לקובץ שאינו מסומן `calibrated`, ומסרב למכויל שאין לו `source`. זו התנהגות מכוונת: PASS מול סף שהומצא גרוע מאין־verdict, כי הוא נראה כאילו הוא אומר משהו.
+
+אבחנות מוצגות רק כשיש להן ראיה — CPU של הלקוח, throttling של cgroup, ו־retransmits מ־`mountstats`. הגרסה הישנה טענה "NFS lock contention" ו־"server GC" מתוך latency של fio בלבד; אף אחת מהן לא ניתנת לביסוס כך, ולכן הן נמחקו ולא רוככו.
+
 ## פרמטרים
 
 | פרמטר | ברירת מחדל | הערה |
@@ -216,7 +241,8 @@ barrier: WARNING started 45s late; overlap is not guaranteed
 ├── templates/          Helm chart: pods, pvc, configmap
 ├── jobs/tests/         24 בדיקות: <id>.fio + <id>.meta.json  → README
 ├── scripts/            deploy / collect / parse / cleanup     → README
-├── nifi/               בדיקות עומס NiFi על NFS                → README
+├── jobs/profiles/      13 פרופילים: מאפיין I/O אחד כל אחד     → README
+├── nifi/               בדיקות עומס NiFi + chaos + cluster      → README
 ├── results/            תוצאות לפי RUN_ID
 └── docs/               תוכנית התיקון המלאה
 ```
