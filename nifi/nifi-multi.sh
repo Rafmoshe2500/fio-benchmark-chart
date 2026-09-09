@@ -45,7 +45,10 @@ fi
 DRIVER="${DRIVER:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/nifi-nfs-loadtest.sh}"
 PORT_START="${PORT_START:-18443}"
 PORT_STRIDE="${PORT_STRIDE:-100}"
-OUTDIR="${OUTDIR:-./results}"
+# Script-relative, like CONF and DRIVER. A cwd-relative ./results put the
+# NiFi CSVs into the fio results directory whenever this was run from the
+# repository root, mixing two unrelated result sets in one place.
+OUTDIR="${OUTDIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/results}"
 
 log()  { printf '\033[1;36m[multi %s]\033[0m %s\n' "$(date +%H:%M:%S)" "$*"; }
 warn() { printf '\033[1;33m[warn]\033[0m %s\n' "$*" >&2; }
