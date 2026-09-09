@@ -1,401 +1,226 @@
 # FIO Benchmark Helm Chart
 
-Deploy and manage FIO storage benchmarks on OpenShift/Kubernetes clusters using Helm.
+הרצת בדיקות אחסון FIO על OpenShift/Kubernetes, עם דגש אחד: **כל מספר שהחבילה מדווחת חייב לייצג עבודה שבאמת קרתה.**
 
-## Features
+ריצה שנכשלה חלקית נפסלת ולא מדווחת עם ציון נמוך. זו לא החמרה למען ההחמרה — ראה [למה זה חשוב](#למה-זה-חשוב).
 
-- 🚀 Deploy multiple FIO benchmark pods with a single command
-- 💾 Automatic PVC provisioning for each pod
-- 📝 Flexible FIO job configuration (inline or file-based)
-- 🔧 Highly configurable via values.yaml
-- 🧹 Easy cleanup with `helm uninstall`
-- 📊 Supports custom resource limits and scheduling
+## תוכן
 
-## Prerequisites
+- [התחלה מהירה](#התחלה-מהירה)
+- [למה זה חשוב](#למה-זה-חשוב)
+- [שני כללים של fio שחייבים להכיר](#שני-כללים-של-fio-שחייבים-להכיר)
+- [הרצה ידנית עם helm](#הרצה-ידנית-עם-helm)
+- [פרמטרים](#פרמטרים)
+- [פתרון תקלות](#פתרון-תקלות)
 
-- Helm 3.x installed
-- kubectl/oc configured with cluster access
-- FIO container image (with FIO 3.41)
-- Sufficient cluster resources
+---
 
-## Quick Start
-
-### 1. Install with default values
+## התחלה מהירה
 
 ```bash
-helm install my-fio-benchmark ./fio-benchmark-chart
+# 1. פריסה. מדפיס RUN_ID.
+./scripts/deploy_test.sh test_example_phase1 fio-tests
+
+# 2. איסוף (לפי RUN_ID, לא לפי שם הבדיקה)
+./scripts/collect_results.sh <RUN_ID> fio-tests
+
+# 3. ניתוח
+python3 scripts/parse_results.py results/<RUN_ID>
+
+# 4. ניקוי
+./scripts/cleanup_test.sh <RUN_ID> fio-tests
 ```
 
-### 2. Install with custom values
+התחל מ־`test_example_phase1` — היא קטנה (2 GiB לפוד) ומאמתת שהצינור עובד לפני שמזמינים 40 פודים ו־8 טרהבייט.
 
-```bash
-helm install my-fio-benchmark ./fio-benchmark-chart \
-  --set namePrefix=MyPrefix \
-  --set replicaCount=5 \
-  --set pvc.size=20Gi \
-  --set image.repository=your-registry.com/fio \
-  --set image.tag=3.41
+**דרישות מוקדמות:** Helm 3, `kubectl`/`oc` מחובר, Python 3.9+, ו־image עם fio 3.41.
+
+לרשימת הבדיקות ומה כל אחת בודקת: **[jobs/tests/README.md](jobs/tests/README.md)**
+לפרטי הסקריפטים ומשתני הסביבה: **[scripts/README.md](scripts/README.md)**
+לבדיקות NiFi: **[nifi/README.md](nifi/README.md)**
+
+---
+
+## למה זה חשוב
+
+בתיקיית `results/` יש ריצה אמיתית, `test4_10pods_50k_5050_32kb`, שבה **כל עשרת הפודים נכשלו**:
+
+```
+fio: ENOSPC on laying out file, stopping
+fio: pid=0, err=28/file:filesetup.c:241, func=write, error=No space left on device
 ```
 
-### 3. Install with custom FIO job file
+חצי ה־write של עומס 50/50 מת לגמרי. הדוח שיצא מזה:
 
-```bash
-helm install my-fio-benchmark ./fio-benchmark-chart \
-  --set-file fioJob.content=./jobs/my-custom-job.fio \
-  --set replicaCount=10
+```
+OVERALL | 0.4 | 0.0 | 1.6 | 0.0 | ⚠️  WARN
 ```
 
-### 4. Install in specific namespace
+ארבעה פודים ✅ PASS, שישה ⚠️ WARN, **אפס FAIL, ואפס אזכור לשגיאה**.
 
-```bash
-helm install my-fio-benchmark ./fio-benchmark-chart \
-  --namespace benchmark \
-  --create-namespace
+שרשרת הכשל הייתה: PVC קטן פי 8 מהנדרש → fio נכשל חלקית → הקונטיינר יצא ב־0 בכל מקרה → ה־parser אתחל כל שדה חסר ל־`0.0` → כל אפס נמצא מתחת לכל סף אזהרה → ירוק.
+
+היום, אותם לוגים:
+
+```
+RUN REJECTED
+No metrics are reported for a run that did not complete as declared.
+
+  FAIL  fio-benchmark-0: fio error 28 (ENOSPC - the PVC could not hold size x numjobs)
+  FAIL  fio-benchmark-0: no I/O in expected direction 'write'
+  ...
+No summary was written. Fix the run; do not report these numbers.
 ```
 
-## Configuration
+וברמה מוקדמת יותר, הפוד בכלל לא היה מתחיל:
 
-### Key Parameters
-
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `replicaCount` | Number of FIO pods to deploy | `3` |
-| `image.repository` | FIO container image repository | `your-registry.example.com/fio` |
-| `image.tag` | FIO container image tag | `3.41` |
-| `namePrefix` | Set name name for Pods prefix | `nfs-benchmark` |
-| `pvc.size` | Size of PVC for each pod | `10Gi` |
-| `pvc.storageClassName` | Storage class name | `""` (default) |
-| `mountPath` | Mount path for PVC in pod | `/mnt/fio-data` |
-| `namespace` | Kubernetes namespace | `default` |
-| `resources.requests.cpu` | CPU request per pod | `500m` |
-| `resources.requests.memory` | Memory request per pod | `512Mi` |
-| `resources.limits.cpu` | CPU limit per pod | `2000m` |
-| `resources.limits.memory` | Memory limit per pod | `2Gi` |
-
-### Custom values.yaml
-
-Create your own `my-values.yaml`:
-
-```yaml
-replicaCount: 10
-
-image:
-  repository: quay.io/your-org/fio
-  tag: "3.41"
-
-pvc:
-  size: 50Gi
-  storageClassName: fast-ssd
-
-resources:
-  requests:
-    cpu: 1000m
-    memory: 1Gi
-  limits:
-    cpu: 4000m
-    memory: 4Gi
-
-fioJob:
-  content: |
-    [global]
-    ioengine=libaio
-    direct=1
-    size=10G
-    runtime=120
-    
-    [my-test]
-    rw=randread
-    bs=4k
-    iodepth=64
+```
+dataset: size=10G x 8 clones = 80 GiB
+mount:   10 GiB free
+FATAL: PVC is too small for this job.
+  Set pvc.size to at least 96Gi and re-run.
 ```
 
-Install with custom values:
+**הסכנה ההפוכה קיימת גם היא.** `test3_10pods_50k_5050_4kb` הייתה מוגדרת ב־`rate_iops=625`, שנותן 10,000 IOPS לפוד — **חמישית** ממה שהשם מבטיח. היא לא צעקה כלום. כל מי שקרא "50k" בדוח קיבל בפועל 10k, וזה מסוכן יותר מ־ENOSPC כי אין שום סימן.
 
-```bash
-helm install my-benchmark ./fio-benchmark-chart -f my-values.yaml
-```
+---
 
-## Usage Examples
+## שני כללים של fio שחייבים להכיר
 
-### Example 1: Quick Random Read Test
-
-```bash
-helm install quick-read ./fio-benchmark-chart \
-  --set replicaCount=3 \
-  --set pvc.size=5Gi \
-  --set-file fioJob.content=./jobs/example.fio
-```
-
-### Example 2: Large Scale Sequential Write Test
-
-```bash
-helm install large-seq-write ./fio-benchmark-chart \
-  --set replicaCount=20 \
-  --set pvc.size=100Gi \
-  --set pvc.storageClassName=nvme-fast \
-  --set resources.limits.cpu=4000m
-```
-
-### Example 3: Mixed Workload on Specific Nodes
-
-Create `node-specific-values.yaml`:
-
-```yaml
-replicaCount: 5
-
-nodeSelector:
-  node-type: storage-optimized
-
-tolerations:
-  - key: "workload"
-    operator: "Equal"
-    value: "storage-benchmark"
-    effect: "NoSchedule"
-```
-
-Install:
-
-```bash
-helm install node-specific ./fio-benchmark-chart -f node-specific-values.yaml
-```
-
-## Monitoring Results
-
-### View logs from all pods
-
-```bash
-kubectl logs -l app=fio-benchmark --namespace=default
-```
-
-### View logs from specific pod
-
-```bash
-kubectl logs fio-benchmark-0 --namespace=default
-```
-
-### Follow logs in real-time
-
-```bash
-kubectl logs -f fio-benchmark-0 --namespace=default
-```
-
-### Check pod status
-
-```bash
-kubectl get pods -l app=fio-benchmark --namespace=default
-```
-
-### Export results
-
-```bash
-for i in {0..2}; do
-  kubectl logs fio-benchmark-$i > results-pod-$i.txt
-done
-```
-
-## Cleanup
-
-### Uninstall the release
-
-```bash
-helm uninstall my-fio-benchmark
-```
-
-This will delete:
-- All pods
-- All PVCs
-- ConfigMap
-
-### Verify cleanup
-
-```bash
-kubectl get pods,pvc,configmap -l app=fio-benchmark
-```
-
-## Advanced Usage
-
-### Upgrade running benchmark
-
-```bash
-helm upgrade my-fio-benchmark ./fio-benchmark-chart \
-  --set replicaCount=15 \
-  --reuse-values
-```
-
-### Dry run to see generated manifests
-
-```bash
-helm install my-fio-benchmark ./fio-benchmark-chart \
-  --dry-run --debug
-```
-
-### Template rendering
-
-```bash
-helm template my-fio-benchmark ./fio-benchmark-chart \
-  --set replicaCount=5 > rendered-manifests.yaml
-```
-
-### List all releases
-
-```bash
-helm list
-```
-
-### Get release values
-
-```bash
-helm get values my-fio-benchmark
-```
-
-## FIO Job Configuration
-
-### Creating Custom FIO Jobs
-
-Create a file `my-job.fio`:
+### `size` הוא לכל clone
 
 ```ini
-[global]
-ioengine=libaio
-direct=1
 size=10G
-runtime=300
-time_based=1
-group_reporting=1
-directory=/mnt/fio-data
-
-[random-read-4k]
-rw=randread
-bs=4k
-iodepth=32
-numjobs=4
-
-[random-write-4k]
-rw=randwrite
-bs=4k
-iodepth=32
-numjobs=4
+numjobs=8      ->  80 GiB, לא 10
 ```
-
-Use it:
 
 ```bash
-helm install my-test ./fio-benchmark-chart \
-  --set-file fioJob.content=./my-job.fio
+python3 scripts/fio_capacity.py jobs/tests/<test>.fio     # כמה באמת צריך
 ```
 
-### FIO Parameters Reference
+`pvc_sizes.conf` נוצר אוטומטית מהערכים האלה. אחרי שינוי `size` או `numjobs` הרץ `./scripts/gen_pvc_sizes.sh`.
 
-Common FIO parameters:
+### `rate` ו־`rate_iops` הם לכל clone ולכל כיוון
 
-- `ioengine`: I/O engine (libaio, sync, psync)
-- `direct`: 1 for direct I/O, 0 for buffered
-- `size`: Size of test file
-- `runtime`: Test duration in seconds
-- `rw`: Read/write pattern (read, write, randread, randwrite, randrw)
-- `bs`: Block size (4k, 8k, 1M, etc.)
-- `iodepth`: I/O depth (queue depth)
-- `numjobs`: Number of threads/jobs
+ערך יחיד מגביל **כל כיוון בנפרד** — על job מעורב הוא נותן **פי 2** ממה שכתבת. אומת מול fio 3.41:
 
-## Troubleshooting
-
-### Pods stuck in Pending
-
-Check PVC status:
-```bash
-kubectl get pvc
+```
+rate_iops=100    על randrw 50/50  ->  read: IOPS=99  write: IOPS=99
+rate_iops=150,50 על randrw 70/30  ->  read: IOPS=149 write: IOPS=49
+rate_iops=100    על randwrite     ->  write: IOPS=99          (חד־כיווני: תקין)
 ```
 
-Check storage class:
-```bash
-kubectl get storageclass
+```
+per_clone = target_iops_per_pod / numjobs
+rate_iops = <per_clone * rwmixread>,<per_clone * (1 - rwmixread)>
 ```
 
-Describe pod for more details:
-```bash
-kubectl describe pod fio-benchmark-0
-```
+**היעד בשם הקובץ הוא לכל פוד.** `test1_10pods_30k_5050_4kb` = 30,000 IOPS לפוד = 300,000 בקלאסטר.
 
-### Image pull errors
+---
 
-Check image exists and is accessible:
-```bash
-kubectl describe pod fio-benchmark-0 | grep -A 10 Events
-```
+## הרצה ידנית עם helm
 
-Add image pull secret if using private registry:
-```yaml
-imagePullSecrets:
-  - name: my-registry-secret
-```
+אפשר, אבל שים לב לשינוי אחד:
 
-### Out of resources
-
-Check node resources:
-```bash
-kubectl top nodes
-kubectl describe nodes
-```
-
-Reduce resource requests:
-```bash
-helm upgrade my-benchmark ./fio-benchmark-chart \
-  --set resources.requests.cpu=250m \
-  --set resources.requests.memory=256Mi \
-  --reuse-values
-```
-
-### FIO not installed in image
-
-Verify FIO is in your image:
-```bash
-kubectl exec fio-benchmark-0 -- fio --version
-```
-
-Build proper image with FIO 3.41 installed.
-
-## Building FIO Container Image
-
-Example Dockerfile:
-
-```dockerfile
-FROM ubuntu:22.04
-
-RUN apt-get update && \
-    apt-get install -y fio && \
-    rm -rf /var/lib/apt/lists/*
-
-WORKDIR /workspace
-
-CMD ["bash"]
-```
-
-Build and push:
+> **`namespace` הוסר מ־`values.yaml`.** אם השתמשת ב־`--set namespace=X` — הוא כבר לא קיים. ה־namespace נקבע **רק** מ־`helm -n`.
+>
+> זה היה באג אמיתי: ה־templates כתבו `metadata.namespace` מ־`.Values.namespace` (ברירת מחדל `default`) בעוד הסקריפט העביר את ה־namespace רק ל־`helm -n`. ה־release נרשם ב־namespace אחד וה־Pods נוצרו באחר, ולכן איסוף וניקוי לא מצאו אותם, ושתי ריצות ב־namespaces שונים התנגשו ב־`default`.
 
 ```bash
-docker build -t your-registry.com/fio:3.41 .
-docker push your-registry.com/fio:3.41
+helm install my-test . \
+  -n fio-tests --create-namespace \
+  --set replicaCount=10 \
+  --set namePrefix=my-test \
+  --set pvc.size=96Gi \
+  --set pvc.storageClassName=sc-nas-nfs3 \
+  --set-file fioJob.content=./jobs/tests/test4_10pods_50k_5050_32kb.fio
 ```
 
-## Best Practices
+**גם בלי הסקריפט אתה מוגן:** שער הקיבולת רץ בתוך הפוד. אם ה־PVC קטן מדי הפוד יוצא ב־28 עם הסבר, לפני ש־fio נוגע בדיסק.
 
-1. **Start Small**: Test with 1-2 pods before scaling
-2. **Monitor Resources**: Watch CPU, memory, and I/O during tests
-3. **Use StorageClass**: Specify appropriate storage class for workload
-4. **Set Limits**: Always set resource limits to prevent node exhaustion
-5. **Unique Names**: Keep uniqueNames enabled to avoid conflicts
-6. **Clean Up**: Always uninstall after testing
-7. **Save Results**: Export logs before cleanup
-8. **Version Control**: Keep FIO job files in Git
+מה שמפסידים בהרצה ידנית: `run-id` (ולכן איסוף וניקוי מדויקים), התחלה מסונכרנת, `manifest.json`, ומחלקת המשאבים המתאימה לבדיקה. הסקריפט קיים בשביל אלה.
 
-## Contributing
+---
 
-Contributions are welcome! Please submit pull requests or open issues.
+## פרמטרים
 
-## License
+| פרמטר | ברירת מחדל | הערה |
+|---|---|---|
+| `replicaCount` | `3` | מספר פודים |
+| `image.repository` / `image.tag` | `rafmoshe2500/fio` / `3.41` | |
+| `namePrefix` | `fio-benchmark` | חייב להיות DNS-1123: אותיות קטנות, ספרות, מקפים |
+| `pvc.size` | `10Gi` | **חייב להיות ≥ `size × numjobs`** |
+| `pvc.storageClassName` | `""` | |
+| `mountPath` | `/mnt/fio-data` | |
+| `resources.*` | `4` CPU / `4Gi` | `requests == limits` = Guaranteed QoS |
+| `runId` | `""` | תווית `fio.benchmark/run-id` על כל משאב |
+| `startEpoch` | `""` | epoch מוחלט להתחלה מסונכרנת. ריק = מיד |
+| `prepare.enabled` | `false` | initContainer שמכין dataset. חובה לבדיקות read |
+| `fioOutput.json` | `true` | `--output-format=json+` בין markers |
+| `fioOutput.timeSeries` | `true` | לוגים של IOPS/BW/latency לשנייה |
+| `podAntiAffinity.enabled` | `true` | פודים על workers שונים |
 
-MIT License
+> `namespace` **אינו** פרמטר יותר. השתמש ב־`helm -n`.
 
-## Support
+---
 
-For issues and questions, please open an issue in the repository.
+## פתרון תקלות
+
+### פוד יצא ב־28
+
+שער הקיבולת עצר אותו. הלוג אומר בדיוק כמה צריך:
+
+```
+dataset: size=10G x 8 clones = 80 GiB
+mount:   10 GiB free
+FATAL: PVC is too small... Set pvc.size to at least 96Gi
+```
+
+### ה־parser פסל ריצה תקינה לכאורה
+
+הוא בודק מול `jobs/tests/<test_id>.meta.json`. אם ערכת `.fio` בלי לעדכן את ה־meta — הם לא מסונכרנים. ראה [טבלת ההתאמה](jobs/tests/README.md#מה-שינוי-ב-fio-מחייב).
+
+### "CPU cgroup throttled for Ns during the run"
+
+הלקוח היה החסם, לא האחסון. ה־tail latency שנמדד הוא של מתזמן ה־CFS. הרץ מחדש עם מחלקת משאבים גבוהה יותר — `resource_class_for()` ב־[scripts/lib/common.sh](scripts/lib/common.sh).
+
+### "no ===FIO_JSON_BEGIN=== marker"
+
+הפוד נאסף לפני שסיים, או רץ עם `fioOutput.json=false`. `collect_results.sh` ממתין למצב סופי, אז זה בדרך כלל אומר שהאיסוף רץ עם timeout קצר מדי (`COLLECT_TIMEOUT`).
+
+### פודים תקועים ב־Pending
+
+```bash
+kubectl get pvc -n fio-tests
+kubectl describe pod <pod> -n fio-tests | sed -n '/Events:/,$p'
+```
+
+בדיקות גדולות מבקשות 4–8 CPU ו־96–384 GiB לפוד. אם ה־cluster קטן מדי, זה יראה כאן.
+
+### התחלה לא מסונכרנת
+
+הלוג יגיד:
+
+```
+barrier: WARNING started 45s late; overlap is not guaranteed
+```
+
+העלה את `BARRIER_LEAD` (ברירת מחדל 180 שניות) כדי לתת יותר זמן לקשירת PVC ומשיכת image.
+
+---
+
+## מבנה
+
+```
+├── templates/          Helm chart: pods, pvc, configmap
+├── jobs/tests/         24 בדיקות: <id>.fio + <id>.meta.json  → README
+├── scripts/            deploy / collect / parse / cleanup     → README
+├── nifi/               בדיקות עומס NiFi על NFS                → README
+├── results/            תוצאות לפי RUN_ID
+└── docs/               תוכנית התיקון המלאה
+```
+
+## רישיון
+
+MIT
