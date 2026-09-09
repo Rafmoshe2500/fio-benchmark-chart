@@ -1,0 +1,34 @@
+{
+  "_comment": [
+    "SLO thresholds for pass/fail verdicts. UNCALIBRATED TEMPLATE.",
+    "",
+    "parse_results.py will refuse to use this file until \"calibrated\" is",
+    "true, and will refuse it then unless \"source\" records where the numbers",
+    "came from. Until both are set the suite reports figures and no verdict,",
+    "which is the correct behaviour: a PASS against an invented threshold is",
+    "worse than no verdict, because it looks like it means something.",
+    "",
+    "To calibrate, measure the target environment and record:",
+    "  - block size distribution and read/write ratio of the real NiFi flow",
+    "  - sustained and peak rate the environment actually needs",
+    "  - the latency at which the application degrades, not a round number",
+    "  - how those were obtained, in \"source\"",
+    "",
+    "Every threshold is optional; omit what you have not measured rather",
+    "than filling it with a guess."
+  ],
+  "calibrated": false,
+  "source": "",
+  "targets": {
+    "test4_10pods_50k_5050_32kb": {
+      "min_iops": null,
+      "min_bw_mibps": null,
+      "max_p99_ms": null,
+      "max_p999_ms": null
+    },
+    "target_rate_steady": {
+      "min_iops": null,
+      "max_p99_ms": null
+    }
+  }
+}

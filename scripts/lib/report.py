@@ -1,13 +1,15 @@
 """Turn validated pod results into something reportable.
 
-Two deliberate omissions: there are no letter grades, and there are no
-diagnoses.
+There are no letter grades here and never will be. A grade compresses several
+incommensurable things into one symbol and implies a calibrated scale; what
+replaces it is attainment against the target each test declares, plus an
+explicit PASS/FAIL from lib.slo when a calibrated SLO exists. When one does
+not, the verdict is "none" rather than a guess -- see lib/slo.py.
 
-A grade implies a calibrated SLO and this suite has none yet -- the old
-thresholds were picked by hand and had no relationship to what NiFi or the
-array actually require. A claim like "NFS lock contention" or "server GC"
-cannot be made from fio output alone; it needs array-side telemetry. Both
-come back once there is something real to calibrate against.
+Diagnoses live in lib.slo.diagnose and are limited to what the collected
+telemetry can support. The strings this module used to print -- "NFS lock
+contention", "server GC", "network retry" -- were inferred from fio latency
+alone, which cannot establish any of them.
 """
 
 import csv
@@ -107,7 +109,7 @@ def _f(v, spec):
     return "n/a".rjust(len(format(0, spec))) if v is None else format(v, spec)
 
 
-def print_report(pods, meta, agg, validation):
+def print_report(pods, meta, agg, validation, verdict=None, observations=None):
     w = 96
     print("=" * w)
     kind = "rate-limited" if meta.get("rate_limited") else "ceiling (uncapped)"
@@ -160,6 +162,23 @@ def print_report(pods, meta, agg, validation):
     if agg["iops_attainment_pct"] is None and agg["bw_attainment_pct"] is None:
         print("  No target declared for this test; these are ceiling figures,")
         print("  not a verdict against a requirement.")
+
+    if observations:
+        print()
+        print("  Observations (each supported by collected telemetry):")
+        for o in observations:
+            print("    - %s" % o)
+
+    if verdict is not None:
+        print()
+        if verdict["pass"] is None:
+            print("  VERDICT: none. %s" % verdict["reason"])
+        elif verdict["pass"]:
+            print("  VERDICT: PASS - %s" % verdict["reason"])
+        else:
+            print("  VERDICT: FAIL - %s" % verdict["reason"])
+            for b in verdict["breaches"]:
+                print("    - %s" % b)
     print("=" * w)
 
 
@@ -184,7 +203,8 @@ def write_csv(path, pods):
             ])
 
 
-def write_json(path, meta, agg, validation, pods):
+def write_json(path, meta, agg, validation, pods, verdict=None,
+               observations=None):
     with open(path, "w") as fh:
         json.dump({
             "test_id": meta["test_id"],
@@ -198,6 +218,8 @@ def write_json(path, meta, agg, validation, pods):
                 "expected_directions": meta.get("expected_directions"),
                 "rate_limited": meta.get("rate_limited"),
             },
+            "verdict": verdict,
+            "observations": observations or [],
             "aggregate": agg,
             "pods": [{
                 "pod": p.pod, "error": p.error, "elapsed_s": p.elapsed_s,

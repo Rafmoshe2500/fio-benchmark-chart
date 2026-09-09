@@ -18,6 +18,7 @@ import sys
 from lib.fiojson import (MissingMetric, parse_cgroup_throttling,
                          parse_pod_json, validate_run)
 from lib.report import aggregate, print_report, write_csv, write_json
+from lib.slo import SloError, diagnose, load_slo, verdict
 from lib.testmeta import MetaError, load_meta
 
 JSON_BEGIN = "===FIO_JSON_BEGIN==="
@@ -47,7 +48,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("results_dir")
     ap.add_argument("--meta-dir", default=None,
-                    help="defaults to <repo>/jobs/tests")
+                    help="defaults to <repo>/jobs/tests or jobs/profiles")
+    ap.add_argument("--slo", default=None,
+                    help="SLO file for a pass/fail verdict "
+                         "(defaults to <repo>/scripts/slo.json when calibrated)")
     a = ap.parse_args()
 
     repo = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -109,12 +113,26 @@ def main():
         validation.fail(f)
 
     agg = aggregate(pods, meta) if pods else {}
-    print_report(pods, meta, agg, validation)
+
+    # An uncalibrated SLO file is not an error at this point -- it just means
+    # no verdict. Only an explicitly requested one is fatal.
+    slo_path = a.slo or os.path.join(repo, "scripts", "slo.json")
+    try:
+        slo = load_slo(slo_path)
+    except SloError as e:
+        if a.slo:
+            sys.stderr.write(str(e) + "\n")
+            return 3
+        slo = None
+    the_verdict = verdict(agg, slo, meta["test_id"]) if pods else None
+    observations = diagnose(pods, {}) if pods else []
+
+    print_report(pods, meta, agg, validation, the_verdict, observations)
 
     if validation.ok:
         write_csv(os.path.join(a.results_dir, "summary_report.csv"), pods)
         write_json(os.path.join(a.results_dir, "summary_report.json"),
-                   meta, agg, validation, pods)
+                   meta, agg, validation, pods, the_verdict, observations)
         print("\nwrote summary_report.csv and summary_report.json to %s"
               % a.results_dir)
         return 0
