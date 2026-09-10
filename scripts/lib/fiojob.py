@@ -8,7 +8,6 @@ minutes into results/test4_10pods_50k_5050_32kb.
 """
 
 import re
-from dataclasses import dataclass, field
 
 _SUFFIX = {"k": 1024, "m": 1024 ** 2, "g": 1024 ** 3, "t": 1024 ** 4}
 
@@ -27,15 +26,21 @@ def parse_size(text):
     return int(float(t))
 
 
-@dataclass
 class JobSpec:
-    path: str
-    numjobs: int = 1
-    size_bytes: int = 0
-    directions: set = field(default_factory=set)
-    sections: list = field(default_factory=list)
-    job_options: list = field(default_factory=list)
-    globals: dict = field(default_factory=dict)
+    """Plain class rather than a dataclass on purpose: dataclasses arrived in
+    Python 3.7, and RHEL 8 -- a common OpenShift jump host -- ships 3.6 as its
+    default python3. Keeping this importable there avoids requiring a newer
+    interpreter on a machine that may have no package repository."""
+
+    def __init__(self, path, numjobs=1, size_bytes=0, directions=None,
+                 sections=None, job_options=None, globals=None):
+        self.path = path
+        self.numjobs = numjobs
+        self.size_bytes = size_bytes
+        self.directions = set() if directions is None else directions
+        self.sections = [] if sections is None else sections
+        self.job_options = [] if job_options is None else job_options
+        self.globals = {} if globals is None else globals
 
     @property
     def required_bytes(self):

@@ -10,7 +10,6 @@ mention of the error. See results/test4_10pods_50k_5050_32kb.
 """
 
 import json
-from dataclasses import dataclass, field
 
 
 class MissingMetric(Exception):
@@ -37,38 +36,46 @@ def _pct(percentile_map, key):
     return None
 
 
-@dataclass
 class DirectionResult:
-    name: str
-    iops: float = None
-    bw_mibps: float = None
-    io_bytes: int = None
-    runtime_ms: int = None
-    iops_stddev: float = None
-    clat_mean_ms: float = None
-    clat_stddev_ms: float = None
-    clat_p50_ms: float = None
-    clat_p95_ms: float = None
-    clat_p99_ms: float = None
-    clat_p999_ms: float = None
-    clat_bins: dict = None
+    """Plain class rather than a dataclass: dataclasses need Python 3.7 and
+    RHEL 8 ships 3.6 as its default python3."""
+
+    def __init__(self, name, iops=None, bw_mibps=None, io_bytes=None,
+                 runtime_ms=None, iops_stddev=None, clat_mean_ms=None,
+                 clat_stddev_ms=None, clat_p50_ms=None, clat_p95_ms=None,
+                 clat_p99_ms=None, clat_p999_ms=None, clat_bins=None):
+        self.name = name
+        self.iops = iops
+        self.bw_mibps = bw_mibps
+        self.io_bytes = io_bytes
+        self.runtime_ms = runtime_ms
+        self.iops_stddev = iops_stddev
+        self.clat_mean_ms = clat_mean_ms
+        self.clat_stddev_ms = clat_stddev_ms
+        self.clat_p50_ms = clat_p50_ms
+        self.clat_p95_ms = clat_p95_ms
+        self.clat_p99_ms = clat_p99_ms
+        self.clat_p999_ms = clat_p999_ms
+        self.clat_bins = clat_bins
 
     @property
     def had_io(self):
         return bool(self.io_bytes) and bool(self.runtime_ms)
 
 
-@dataclass
 class PodResult:
-    pod: str
-    error: int = 0
-    elapsed_s: int = None
-    read: DirectionResult = None
-    write: DirectionResult = None
-    usr_cpu: float = None
-    sys_cpu: float = None
-    ctx_switches: int = None
-    throttled_usec: int = None
+    def __init__(self, pod, error=0, elapsed_s=None, read=None, write=None,
+                 usr_cpu=None, sys_cpu=None, ctx_switches=None,
+                 throttled_usec=None):
+        self.pod = pod
+        self.error = error
+        self.elapsed_s = elapsed_s
+        self.read = read
+        self.write = write
+        self.usr_cpu = usr_cpu
+        self.sys_cpu = sys_cpu
+        self.ctx_switches = ctx_switches
+        self.throttled_usec = throttled_usec
 
     @property
     def directions_with_io(self):
@@ -174,11 +181,11 @@ def parse_cgroup_throttling(log_text):
     return after - before
 
 
-@dataclass
 class RunValidation:
-    ok: bool = True
-    failures: list = field(default_factory=list)
-    warnings: list = field(default_factory=list)
+    def __init__(self):
+        self.ok = True
+        self.failures = []
+        self.warnings = []
 
     def fail(self, msg):
         self.ok = False

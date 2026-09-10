@@ -48,7 +48,9 @@ python3 scripts/parse_results.py results/<RUN_ID>
 
 התחל מ־`test_example_phase1` — היא קטנה (2 GiB לפוד) ומאמתת שהצינור עובד לפני שמזמינים 40 פודים ו־8 טרהבייט.
 
-**דרישות מוקדמות:** Helm 3, `kubectl`/`oc` מחובר, Python 3.9+, ו־image עם fio 3.41.
+**דרישות מוקדמות:** Helm 3, `kubectl`/`oc` מחובר, **Python 3.6+** (stdlib בלבד — אין `pip install`), ו־image עם fio 3.41 ב־registry נגיש.
+
+**סביבה סגורה:** אין שום קריאת רשת החוצה. צריך רק שה־image יהיה ב־registry הפנימי. פירוט מלא ב־[RUNBOOK.md](RUNBOOK.md#תלויות--כולל-סביבה-סגורה).
 
 איך מריצים כל דבר: **[RUNBOOK.md](RUNBOOK.md)**
 לרשימת הבדיקות ומה כל אחת בודקת: **[jobs/tests/README.md](jobs/tests/README.md)**

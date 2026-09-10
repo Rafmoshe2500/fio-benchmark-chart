@@ -36,6 +36,53 @@ python3 scripts/compare_envs.py results/suites/characterise-nfs3-* results/suite
 
 ---
 
+## תלויות — כולל סביבה סגורה
+
+### מה חייב להיות על המכונה שממנה אתה מריץ
+
+| כלי | נדרש ל | הערה |
+|---|---|---|
+| `kubectl` / `oc` | הכל | |
+| `helm` 3 | הכל | |
+| **`python3` 3.6+** | **הכל, כולל הבדיקה הפשוטה ביותר** | ראה למטה |
+| `bash` 4+ | `run_suite.sh` (משתמש ב־`mapfile`) | שאר הסקריפטים עובדים עם bash 3 |
+| `git` | אופציונלי | רק כדי לרשום commit ב־manifest |
+
+**אין `pip install`. אין תלויות חיצוניות.** כל ה־Python הוא stdlib בלבד:
+`argparse, csv, glob, json, math, os, re, ssl, sys, time, urllib`
+
+אומת שהטסטים עוברים על **Python 3.6, 3.8, 3.9 ו־3.12**. 3.6 חשוב כי זה מה ש־RHEL 8 מספק כברירת מחדל.
+
+### כן, Python נדרש גם לבדיקה הפשוטה ביותר
+
+`deploy_test.sh` קורא ל־`preflight()` שמריץ `fio_capacity.py` — חישוב `size × numjobs` לפני הפריסה. גם `cleanup_test.sh` קורא JSON ב־Python, ו־`parse_results.py` הוא כמובן Python.
+
+**אבל ה־pod עצמו לא צריך Python.** שער הקיבולת בתוך הקונטיינר כתוב ב־bash טהור, אז גם אם משהו ישתבש בצד הלקוח — ההגנה בפוד עדיין פועלת.
+
+### סביבה סגורה ללא רשת
+
+**אין שום קריאת רשת החוצה.** ה־`curl` היחיד שקיים פונה ל־`127.0.0.1` דרך `kubectl port-forward` (רק ב־NiFi).
+
+מה שכן צריך להיות ב־registry הפנימי שלך:
+
+| image | בשביל | |
+|---|---|---|
+| `rafmoshe2500/fio:3.41` | **כל בדיקות fio** | חובה |
+| `apache/nifi:2.11.0` | NiFi | רק אם משתמשים |
+| `zookeeper:3.9` | NiFi cluster | רק אם משתמשים |
+
+אם ה־registry שלך שונה:
+
+```bash
+# ב-values.yaml, או ב-CLI:
+--set image.repository=my-registry.internal/fio --set image.tag=3.41
+```
+או ל־NiFi: `NIFI_IMAGE=my-registry.internal/nifi:2.11.0`.
+
+ה־chart עצמו מקומי (`helm install .`) — אין `helm repo add` ואין הורדה של תלויות.
+
+---
+
 ## שכבה 1 — הריצה שאתה באמת צריך
 
 ### `run_suite.sh` — סט בדיקות מול סביבה אחת
