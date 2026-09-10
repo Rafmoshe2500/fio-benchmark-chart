@@ -271,6 +271,41 @@ STORAGE_CLASS=sc-nas-nfs3 ./nifi/nifi-cluster.sh deploy
 
 ---
 
+## הבדיקה שרצה לפני שכלום נפרס
+
+`run_suite.sh` מריץ עכשיו **validation מלא לפני הפריסה הראשונה**. הכל נבדק מקבצים על הדיסק, לוקח שנייה, וכל בדיקה שם מתאימה לדרך שבה ריצה גמורה נפסלת:
+
+```bash
+python3 scripts/validate_tests.py            # הכל
+python3 scripts/validate_tests.py low_qd_latency max_throughput
+```
+
+| מה נבדק | הכישלון שזה מונע |
+|---|---|
+| קיים `.meta.json` ותקין | `return 3` אחרי הריצה |
+| `numjobs` בקובץ ה־fio == meta | חישוב קיבולת שגוי |
+| `runtime` בקובץ == `runtime_s` | `ran 660s, expected at least 1620s` |
+| `ramp_time` == `ramp_s` | חלון מדידה לא כפי שהוצהר |
+| `expected_directions` אפשריים בפועל | `no I/O in expected direction 'write'` |
+| PVC רשום ומספיק | ENOSPC באמצע הריצה |
+
+**למה זה נוסף:** ה־suite `characterise` רץ שעות וכל שמונה הבדיקות נפסלו בסוף עם `expected 10 pods, got 4`. מספר ה־pods היה כתוב **פעמיים** — ב־`.meta.json` של כל פרופיל, ושוב כברירת מחדל קשיחה ב־`deploy_test.sh` — והשניים נפרדו בכל 13 הפרופילים.
+
+התיקון האמיתי הוא שהמספר נמחק מ־`deploy_test.sh`. הוא מגיע עכשיו מ־`replicas_for()` שקורא את אותו `.meta.json` שה־parser מאמת מולו. הם לא יכולים לסתור כי יש רק אחד. `validate_tests.py` שומר על שאר המשפחה.
+
+### בדיקות מדורגות (12–16) לא רצות ב־suite
+
+`test12`–`test16` מודדות את אותו job בכמה מספרי pods, ריצה מלאה לכל שלב ב־`step-<n>/`. זו עקומת scaling ולא מספר בודד להשוואה, ולכן `run_suite.sh` **מסרב להן בשנייה הראשונה** במקום לגלות את זה אחרי שעתיים:
+
+```bash
+./scripts/deploy_test.sh test12_gradual_scale_32kb_7030 fio-tests
+python3 scripts/parse_results.py results/<RUN_ID>/step-40
+```
+
+ה־parser לוקח את מספר ה־pods משם התיקייה `step-<n>`, לא מה־meta. קודם רק שלב אחד מתוך ארבעה עבר.
+
+---
+
 ## מה עדיין דורש כיול
 
 `scripts/slo.json` הוא template **לא־מכויל**, ולכן הדוח מציג `VERDICT: none`.

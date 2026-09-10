@@ -12,6 +12,7 @@ Exit codes:
 import argparse
 import glob
 import json
+import re
 import os
 import sys
 
@@ -93,6 +94,17 @@ def main():
     except MetaError as e:
         sys.stderr.write(str(e) + "\n")
         return 3
+
+    # A stepped run measures the same job at several replica counts, one
+    # complete run per step in results/<run>/step-<n>/. The metadata declares
+    # a single number, so every step but one was rejected for "expected 10
+    # pods, got 40" -- after the whole curve had already been measured. The
+    # directory name is the authority for a step; the metadata is not.
+    step = re.match(r"^step-(\d+)$",
+                    os.path.basename(os.path.normpath(a.results_dir)))
+    if step:
+        meta = dict(meta)
+        meta["replicas"] = int(step.group(1))
 
     logs = sorted(glob.glob(os.path.join(a.results_dir, "*.log")))
     if not logs:

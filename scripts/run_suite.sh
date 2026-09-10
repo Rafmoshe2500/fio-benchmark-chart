@@ -53,7 +53,7 @@ for k in sorted(d): print('  %-14s %-22s %s' % (k, d[k]['storage_class'], d[k].g
 [ -n "$SUITE" ] && [ -n "$ENVNAME" ] || usage
 
 # ---- resolve suite and environment -----------------------------------
-read -r SC ENV_EXTRA < <(python3 - "$(native_path "$CHART_DIR")" "$ENVNAME" <<'PY'
+read -r SC ENV_EXTRA < <(python3 - "$(native_path "$CHART_DIR")" "$ENVNAME" <<'PY' | nocr
 import json, sys
 repo, name = sys.argv[1], sys.argv[2]
 envs = json.load(open(repo + "/scripts/environments.json"))["environments"]
@@ -72,7 +72,7 @@ PY
 # `mapfile < <(...)` the exit status is mapfile's, not the command's, so a
 # failure here used to produce an empty test list and a suite that reported
 # "0 valid run(s)" as though that were a result.
-TESTS_RAW="$(python3 - "$(native_path "$CHART_DIR")" "$SUITE" <<'PY'
+TESTS_RAW="$(python3 - "$(native_path "$CHART_DIR")" "$SUITE" <<'PY' | nocr
 import glob, json, os, sys
 sys.path.insert(0, os.path.join(sys.argv[1], "scripts"))
 from lib.testselect import SelectionError, resolve_selection
@@ -104,6 +104,41 @@ mapfile -t TESTS <<< "$TESTS_RAW"
 SUITE_LABEL="$SUITE"
 case "$SUITE" in *[,-]*|[0-9]*) SUITE_LABEL="manual" ;; esac
 [ -n "${SUITES_JSON_NAME:-}" ] && SUITE_LABEL="$SUITES_JSON_NAME"
+
+# ---- fail before spending the time, not after ------------------------
+#
+# Everything below is knowable from files on disk in about a second, and each
+# check corresponds to a way a finished run gets rejected. The `characterise`
+# suite once ran for hours and every test was thrown away at the end with
+# "expected 10 pods, got 4". That must be a two-second failure, not a
+# two-hour one.
+log "validating ${#TESTS[@]} test(s) before deploying anything"
+if ! ( cd "$CHART_DIR/scripts" && python3 validate_tests.py --quiet "${TESTS[@]}" ); then
+  die "the suite was not started. Every problem above would have rejected a
+  healthy run after it finished. Fix the declaration or the job file, then
+  re-run. To check without running anything:
+    python3 scripts/validate_tests.py"
+fi
+
+# Stepped tests produce one result per replica count in step-<n> subdirectories
+# rather than one summary, so there is nothing for the suite to record as this
+# test's result. Refusing here costs a second; discovering it after a four-step
+# curve costs two hours and produces nothing.
+STEPPED=()
+for t in "${TESTS[@]}"; do
+  case "$t" in *gradual_scale*) STEPPED+=("$t") ;; esac
+done
+if [ ${#STEPPED[@]} -gt 0 ]; then
+  die "run_suite.sh cannot run stepped tests: ${STEPPED[*]}
+  Each measures several replica counts and writes one result per step, which
+  is a scaling curve rather than a single number to compare across arrays.
+  Run one directly instead:
+    ./scripts/deploy_test.sh ${STEPPED[0]} $NAMESPACE
+    python3 scripts/parse_results.py results/<run-id>/step-<n>
+  Then drop them from the selection and re-run the rest."
+fi
+log "validation ok"
+echo
 
 STAMP="$(date +%Y%m%d-%H%M%S)"
 SUITE_ID="${SUITE_LABEL}-${ENVNAME}-${STAMP}"

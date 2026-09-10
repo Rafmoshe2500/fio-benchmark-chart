@@ -42,7 +42,7 @@ if [ -f "$MANIFEST" ]; then
     log "uninstalling $release"
     helm uninstall "$release" -n "$NAMESPACE" 2>/dev/null || warn "$release already gone"
   done < <(python3 -c 'import json,sys
-for r in json.load(open(sys.argv[1])).get("releases", []): print(r)' "$MANIFEST")
+for r in json.load(open(sys.argv[1])).get("releases", []): print(r)' "$MANIFEST" | nocr)
 else
   warn "no manifest for $RUN_ID; falling back to label-scoped deletion only"
 fi

@@ -27,7 +27,7 @@ fi
 # more than one test is refused here: deploy_test.sh deploys one test, and
 # quietly picking the first would be worse than saying so.
 if [ ! -f "$CHART_DIR/jobs/tests/$TEST_ID.fio" ] &&    [ ! -f "$CHART_DIR/jobs/profiles/$TEST_ID.fio" ]; then
-  RESOLVED="$(python3 - "$(native_path "$CHART_DIR")" "$TEST_ID" <<'PYSEL'
+  RESOLVED="$(python3 - "$(native_path "$CHART_DIR")" "$TEST_ID" <<'PYSEL' | nocr
 import glob, os, sys
 sys.path.insert(0, os.path.join(sys.argv[1], "scripts"))
 from lib.testselect import SelectionError, resolve_selection
@@ -73,9 +73,16 @@ log "synchronised start at $(date -d "@$START_EPOCH" 2>/dev/null || date -r "$ST
 
 RELEASES=()
 
-# deploy_release <release-suffix> <replicas> <test_id_for_job_file> [extra helm args...]
+# deploy_release <release-suffix> <test_id_for_job_file> [extra helm args...]
+#
+# The pod count is NOT an argument. It comes from the job's .meta.json, which
+# is the same file parse_results.py validates the finished run against. When
+# it was passed here as well the two disagreed for every profile and whole
+# suites were rejected after running.
 deploy_release() {
-  local suffix="$1" replicas="$2" job_id="$3"; shift 3
+  local suffix="$1" job_id="$2"; shift 2
+  local replicas
+  replicas="$(replicas_for "$job_id")"
 
   preflight "$job_id"
 
@@ -107,30 +114,28 @@ deploy_release() {
   RELEASES+=("$release")
 }
 
+# Only tests that deploy MORE THAN ONE release need a branch here. A plain
+# test needs no entry: how many pods it wants is in its metadata.
 case $TEST_ID in
-  *1pod*)
-    deploy_release "" 1 "$TEST_ID"
-    ;;
-
   *test10_burst_write*)
     # Both phases are deployed up front so PVCs are bound and images pulled
     # before either starts. The barrier, not a sleep, staggers them: the old
     # `sleep 300` measured time since helm returned, which is not the same
     # thing as time since phase 1 began generating load.
-    deploy_release "p1" 5 test10_burst_write_phase1
-    deploy_release "p2" 5 test10_burst_write_phase2 \
+    deploy_release "p1" test10_burst_write_phase1
+    deploy_release "p2" test10_burst_write_phase2 \
       --set startEpoch=$((START_EPOCH + 300))
     ;;
 
   *test11_burst_read*)
-    deploy_release "p1" 20 test11_burst_read_phase1
-    deploy_release "p2" 5 test11_burst_read_phase2 \
+    deploy_release "p1" test11_burst_read_phase1
+    deploy_release "p2" test11_burst_read_phase2 \
       --set startEpoch=$((START_EPOCH + 300))
     ;;
 
   *test_example*)
-    deploy_release "p1" 10 test_example_phase1
-    deploy_release "p2" 1 test_example_phase2 \
+    deploy_release "p1" test_example_phase1
+    deploy_release "p2" test_example_phase2 \
       --set startEpoch=$((START_EPOCH + 120))
     ;;
 
@@ -139,14 +144,14 @@ case $TEST_ID in
     ;;
 
   *test17_mixed_workload*)
-    deploy_release "32k"  13 test17_mixed_workload_32k
-    deploy_release "64k"  17 test17_mixed_workload_64k
-    deploy_release "256k"  7 test17_mixed_workload_256k
-    deploy_release "512k"  3 test17_mixed_workload_512k
+    deploy_release "32k"  test17_mixed_workload_32k
+    deploy_release "64k"  test17_mixed_workload_64k
+    deploy_release "256k" test17_mixed_workload_256k
+    deploy_release "512k" test17_mixed_workload_512k
     ;;
 
   *)
-    deploy_release "" 10 "$TEST_ID"
+    deploy_release "" "$TEST_ID"
     ;;
 esac
 

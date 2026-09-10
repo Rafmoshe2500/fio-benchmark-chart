@@ -98,7 +98,7 @@ parse_table() {
 
 parse_json() {
   local parsed
-  parsed="$(python3 - "$CONF" "$PORT_START" "$PORT_STRIDE" <<'PYEOF'
+  parsed="$(python3 - "$CONF" "$PORT_START" "$PORT_STRIDE" <<'PYEOF' | tr -d '\r'
 import json, shlex, sys
 
 path, port_start, stride = sys.argv[1], int(sys.argv[2]), int(sys.argv[3])

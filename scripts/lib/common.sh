@@ -17,6 +17,16 @@ native_path() {
   if command -v cygpath >/dev/null 2>&1; then cygpath -w "$1"; else printf '%s' "$1"; fi
 }
 
+# Strip carriage returns from a pipeline.
+#
+# A native Windows python3 writes CRLF, and $(...) only strips the trailing
+# newline -- so every line but the last comes back with a \r glued to it.
+# `run_suite.sh characterise` resolved to 'low_qd_latency\r' and seven other
+# names no file matched, which surfaces as "no such fio job file" rather than
+# as anything pointing at line endings. Every capture from python3 goes
+# through this.
+nocr() { tr -d '\r'; }
+
 log()  { printf '\033[1;34m[%s]\033[0m %s\n' "$(date +%H:%M:%S)" "$*"; }
 warn() { printf '\033[1;33m[warn]\033[0m %s\n' "$*" >&2; }
 die()  { printf '\033[1;31m[fail]\033[0m %s\n' "$*" >&2; exit 1; }
@@ -83,6 +93,28 @@ meta_dir_for() {
     [[ -f "$CHART_DIR/jobs/$d/$1.meta.json" ]] && { printf '%s' "$CHART_DIR/jobs/$d"; return 0; }
   done
   die "no metadata for $1 in jobs/tests or jobs/profiles"
+}
+
+# replicas_for <test_id> -> pod count declared in its .meta.json
+#
+# The single source of truth. This number used to be written twice: here as a
+# hardcoded default in deploy_test.sh's case statement, and again in each
+# test's .meta.json which parse_results.py validates the run against. They
+# drifted for every profile in jobs/profiles, so the `characterise` suite
+# deployed 10 pods, the metadata expected 4, and every test was rejected
+# after the suite had already run for hours.
+replicas_for() {
+  local id="$1" md n
+  md="$(meta_dir_for "$id")" || die "no metadata for $id"
+  [ -n "$md" ] || die "no metadata for $id"
+  n="$(python3 -c "
+import json, sys
+m = json.load(open(sys.argv[1]))
+n = m.get('replicas')
+if not isinstance(n, int) or n < 1:
+    sys.exit('replicas in %s is %r; must be a positive integer' % (sys.argv[1], n))
+print(n)" "$(native_path "$md/$id.meta.json")" | nocr)" || die "bad replicas for $id"
+  printf '%s' "$n"
 }
 
 # resource_class_for <test_id> -> "<cpu> <memory>"

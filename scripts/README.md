@@ -43,12 +43,13 @@ python3 scripts/parse_results.py results/<RUN_ID>
 | `collect_results.sh` | איסוף scoped, המתנה למצב סופי, בדיקת exit code ו־restarts |
 | `cleanup_test.sh` | ניקוי לפי ה־release שנרשם, עם preview לפני מחיקה |
 | `parse_results.py` | ניתוח — או פסילה |
+| `validate_tests.py` | מוודא שההצהרה וקובץ ה־fio מסכימים — **לפני** שנפרס משהו |
 | `fio_capacity.py` | כמה מקום הבדיקה באמת צריכה |
 | `gen_pvc_sizes.sh` | מייצר את `pvc_sizes.conf` מקובצי ה־fio |
 | `gen_tests_table.sh` | מייצר את הטבלה ב־`jobs/tests/README.md` |
 | `pvc_sizes.conf` | גודל PVC לכל בדיקה — **נוצר אוטומטית, לא לערוך ביד** |
 | `lib/` | `common.sh`, `fiojob.py`, `fiojson.py`, `testmeta.py`, `report.py` |
-| `tests/` | 38 טסטים + fixtures |
+| `tests/` | 118 טסטים + fixtures |
 
 ## משתני סביבה
 
@@ -60,7 +61,7 @@ python3 scripts/parse_results.py results/<RUN_ID>
 | `COLLECT_TIMEOUT` | `3600` | כמה לחכות שהפודים יסיימו |
 | `FORCE` | `false` | `true` = ניקוי בלי לשאול |
 
-## שלוש הגנות שמונעות תוצאה שקרית
+## ארבע הגנות שמונעות תוצאה שקרית
 
 ### 1. preflight קיבולת
 
@@ -108,6 +109,20 @@ No summary was written. Fix the run; do not report these numbers.
 ```
 
 exit 2, ואין `summary_report.csv`.
+
+### 4. validation לפני הפריסה
+
+שלוש ההגנות הקודמות עוצרות ריצה פגומה, אבל רק **אחרי** שהיא כבר עלתה. הרביעית עוצרת לפני.
+
+```bash
+python3 scripts/validate_tests.py
+```
+
+היא משווה כל `.meta.json` מול קובץ ה־fio שלו: `numjobs`, `runtime`, `ramp_time`, הכיוונים שה־job בכלל מסוגל לייצר, וגודל ה־PVC הרשום. `run_suite.sh` מריץ אותה על כל הבדיקות שנבחרו לפני הפריסה הראשונה ומסרב להתחיל אם משהו לא מסתדר.
+
+**מה זה מונע:** ה־suite `characterise` רץ שעות וכל שמונה הבדיקות נפסלו בסוף עם `expected 10 pods, got 4`. מספר ה־pods היה מוצהר פעמיים — ב־meta ובברירת מחדל קשיחה ב־`deploy_test.sh` — ובכל 13 הפרופילים הם נפרדו.
+
+הכפילות עצמה נמחקה: `deploy_release` כבר לא מקבל מספר pods, הוא קורא `replicas_for()` שקורא את אותו `.meta.json` שה־parser מאמת מולו. `validate_tests.py` שומר על שאר השדות, ושני טסטים מבניים מונעים החזרה של הכפילות.
 
 ## מחלקות משאבים
 
