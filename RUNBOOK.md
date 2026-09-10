@@ -263,7 +263,8 @@ STORAGE_CLASS=sc-nas-nfs3 ./nifi/nifi-cluster.sh deploy
 |---|---|---|
 | `exit 28` + `FATAL: PVC is too small` | שער הקיבולת עצר לפני fio | הלוג אומר את הגודל הנדרש |
 | `RUN REJECTED` | ריצה לא הושלמה כפי שהוצהר | תקן; אל תצטט את המספרים |
-| `CPU cgroup throttled` | **הלקוח** היה החסם, לא האחסון | הרץ שוב עם מחלקת משאבים גבוהה |
+| `CPU cgroup throttled` **warn** | חנק קל (<5%) | הריצה **תקפה**. throughput ו־p99 שמישים, p99.9 לא |
+| `CPU cgroup throttled` **FAIL** | חנק ≥5% מזמן הריצה | הלקוח קבע את ה־latency. העלה משאבים או הרץ על node פנוי |
 | `VERDICT: none` | אין SLO מכויל | תקין. ראה למטה |
 | `no difference established` | הפער קטן מהרעש | הוסף חזרות, או שאין הפרש |
 | `NOT COMPARABLE` (NiFi) | ההגדרות שונות | שנה משתנה אחד בלבד |
@@ -284,6 +285,26 @@ STORAGE_CLASS=sc-nas-nfs3 ./nifi/nifi-cluster.sh deploy
 ```
 
 אותו דבר ל־`rate_iops` ב־`jobs/profiles/target_rate_steady.fio`.
+
+---
+
+## חנק CPU (`throttled`) — מתי זה באמת פוסל
+
+ה־pod קורא `cgroup cpu.stat` לפני ואחרי, וה־parser מדרג לפי **אחוז מזמן הריצה**:
+
+| חנק | תוצאה | למה |
+|---|---|---|
+| 0 | נקי | |
+| < 5% | **warning, הריצה תקפה** | throughput ו־p99 שמישים; p99.9 מזוהם |
+| ≥ 5% | **FAIL** | הלקוח קבע את ה־latency, לא המערך |
+
+**החישוב:** מחזור CFS הוא 100ms. חנק של 8.2 שניות = ~82 מחזורים תקועים מתוך 6,600. כל מחזור מעכב לכל היותר את עומק התור (1024) — כלומר ~84K מתוך ~112M פעולות, שהם **0.08%**. זה בתוך p99.9 אבל רחוק מ־p99.
+
+אם הריצה נועדה לטענת **latency** ולא לתקרה, הדק את הסף:
+
+```bash
+python3 scripts/parse_results.py results/<RUN_ID> --max-throttle-pct 0.5
+```
 
 ---
 

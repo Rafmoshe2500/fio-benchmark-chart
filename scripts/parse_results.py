@@ -49,6 +49,10 @@ def main():
     ap.add_argument("results_dir")
     ap.add_argument("--meta-dir", default=None,
                     help="defaults to <repo>/jobs/tests or jobs/profiles")
+    ap.add_argument("--max-throttle-pct", type=float, default=None,
+                    help="reject a run whose cgroup was throttled for more "
+                         "than this share of wall time (default 5.0; lower it "
+                         "when the run exists to make a latency claim)")
     ap.add_argument("--slo", default=None,
                     help="SLO file for a pass/fail verdict "
                          "(defaults to <repo>/scripts/slo.json when calibrated)")
@@ -108,7 +112,10 @@ def main():
         result.throttled_usec = parse_cgroup_throttling(text)
         pods.append(result)
 
-    validation = validate_run(pods, meta)
+    validation = validate_run(
+        pods, meta,
+        **({"max_throttle_pct": a.max_throttle_pct}
+           if a.max_throttle_pct is not None else {}))
     for f in load_failures:
         validation.fail(f)
 

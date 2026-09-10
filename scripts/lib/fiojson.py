@@ -19,6 +19,22 @@ class MissingMetric(Exception):
 NS_PER_MS = 1_000_000.0
 BYTES_PER_MIB = 1024.0 ** 2
 
+# Above this share of wall time spent fully stalled by the CFS scheduler, a
+# run is rejected rather than reported.
+#
+# Not zero, which is what this was first written as. A CFS period is 100ms,
+# so throttled time divided by 100ms is the number of fully stalled periods,
+# and each can delay at most the outstanding queue depth. On a 600s ceiling
+# run at 1024 queue depth, 1.2% of wall time works out at roughly 0.08% of
+# IOs -- inside the p99.9 tail and nowhere near p99 or the throughput. The
+# zero-tolerance rule discarded runs like that entirely, which reported
+# nothing at all about an array that was performing fine.
+#
+# 5% is where roughly 1 IO in 300 is affected and p99 itself starts to move.
+# Tighten it with --max-throttle-pct when the run exists to make a latency
+# claim rather than to find a ceiling.
+MAX_THROTTLE_PCT = 5.0
+
 CGROUP_BEGIN = "===FIO_CGROUP_BEGIN==="
 CGROUP_END = "===FIO_CGROUP_END==="
 
@@ -195,7 +211,7 @@ class RunValidation:
         self.warnings.append(msg)
 
 
-def validate_run(pods, meta):
+def validate_run(pods, meta, max_throttle_pct=MAX_THROTTLE_PCT):
     """Decide whether this run may be reported at all.
 
     A run that fails here produces no tables and no summary files. Reporting
@@ -235,10 +251,20 @@ def validate_run(pods, meta):
                 v.fail("%s: ran %ds, expected at least %.0fs"
                        % (p.pod, p.elapsed_s, floor))
 
-        if p.throttled_usec:
-            v.fail("%s: CPU cgroup throttled for %.1fs during the run; the "
-                   "client was the bottleneck, not the storage. Raise the "
-                   "resource class and re-run."
-                   % (p.pod, p.throttled_usec / 1e6))
+        # None means the cgroup could not be read; 0 means it was read and
+        # nothing happened. Only a measured, non-zero value is a finding.
+        if p.throttled_usec and p.elapsed_s:
+            secs = p.throttled_usec / 1e6
+            pct = 100.0 * secs / p.elapsed_s
+            if pct >= max_throttle_pct:
+                v.fail("%s: CPU cgroup throttled %.1fs of %ds (%.1f%% of wall "
+                       "time); at this level the client, not the storage, sets "
+                       "the latency. Raise the resource class and re-run."
+                       % (p.pod, secs, p.elapsed_s, pct))
+            else:
+                v.warn("%s: CPU cgroup throttled %.1fs of %ds (%.1f%%); "
+                       "throughput and p99 are usable, the p99.9 tail is not "
+                       "-- some of it is the CFS scheduler, not the array"
+                       % (p.pod, secs, p.elapsed_s, pct))
 
     return v
