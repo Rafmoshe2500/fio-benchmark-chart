@@ -117,6 +117,15 @@ REPEATS=3 ./scripts/run_suite.sh characterise nfs3
 
 במקום שם suite אפשר להעביר **מספרי בדיקות**:
 
+הקיצור עובד גם ב־`deploy_test.sh` לבדיקה בודדת:
+
+```bash
+./scripts/deploy_test.sh test7        # ==  test7_1pod_max_write_4kb
+./scripts/deploy_test.sh 7            # אותו דבר
+```
+
+קיצור שמתאים ליותר מבדיקה אחת (`1-3`) **נדחה** ולא נבחר עבורך — `deploy_test.sh` מריץ בדיקה אחת.
+
 ```bash
 ./scripts/run_suite.sh 1-4,7-9,12,17 nfs3      # טווחים ובודדים
 ./scripts/run_suite.sh 5-8 nfs3

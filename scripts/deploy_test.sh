@@ -22,6 +22,37 @@ if [ -z "$TEST_ID" ]; then
   exit 1
 fi
 
+# Accept the same shorthand run_suite.sh takes, so "test7" and "7" both work
+# rather than only the full test7_1pod_max_write_4kb. A shorthand that names
+# more than one test is refused here: deploy_test.sh deploys one test, and
+# quietly picking the first would be worse than saying so.
+if [ ! -f "$CHART_DIR/jobs/tests/$TEST_ID.fio" ] &&    [ ! -f "$CHART_DIR/jobs/profiles/$TEST_ID.fio" ]; then
+  RESOLVED="$(python3 - "$(native_path "$CHART_DIR")" "$TEST_ID" <<'PYSEL'
+import glob, os, sys
+sys.path.insert(0, os.path.join(sys.argv[1], "scripts"))
+from lib.testselect import SelectionError, resolve_selection
+
+repo, spec = sys.argv[1], sys.argv[2]
+spec = spec[4:] if spec.startswith("test") and spec[4:].isdigit() else spec
+available = sorted(
+    os.path.basename(f)[:-4]
+    for d in ("tests", "profiles")
+    for f in glob.glob(os.path.join(repo, "jobs", d, "*.fio")))
+try:
+    picked = resolve_selection(spec, available)
+except SelectionError as e:
+    sys.exit(str(e))
+if len(picked) > 1:
+    sys.exit("%r matches %d tests: %s"
+             % (sys.argv[2], len(picked), ", ".join(picked))
+             + "\n  deploy_test.sh runs one test. Use run_suite.sh for a set.")
+print(picked[0])
+PYSEL
+)" || die "could not resolve '$TEST_ID'"
+  log "resolved '$TEST_ID' -> $RESOLVED"
+  TEST_ID="$RESOLVED"
+fi
+
 SAFE_TEST_ID="$(safe_id "$TEST_ID")"
 RUN_ID="$(new_run_id "$SAFE_TEST_ID")"
 STORAGE_CLASS="${STORAGE_CLASS:-sc-nas-nfs3}"

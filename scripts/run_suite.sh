@@ -67,7 +67,12 @@ PY
 [ "$ENV_EXTRA" = "-" ] && ENV_EXTRA=""
 
 # A named suite from suites.json, or an ad-hoc selection like "1-4,7-9".
-mapfile -t TESTS < <(python3 - "$(native_path "$CHART_DIR")" "$SUITE" <<'PY'
+#
+# Resolved into a variable rather than straight into mapfile: with
+# `mapfile < <(...)` the exit status is mapfile's, not the command's, so a
+# failure here used to produce an empty test list and a suite that reported
+# "0 valid run(s)" as though that were a result.
+TESTS_RAW="$(python3 - "$(native_path "$CHART_DIR")" "$SUITE" <<'PY'
 import glob, json, os, sys
 sys.path.insert(0, os.path.join(sys.argv[1], "scripts"))
 from lib.testselect import SelectionError, resolve_selection
@@ -87,10 +92,12 @@ try:
     for t in resolve_selection(name, available):
         print(t)
 except SelectionError as e:
-    sys.exit("%s
-  Named suites: %s" % (e, ", ".join(sorted(suites))))
+    sys.exit("%s\n  Named suites: %s" % (e, ", ".join(sorted(suites))))
 PY
-) || die "could not resolve '$SUITE'"
+)" || die "could not resolve '$SUITE'"
+
+mapfile -t TESTS <<< "$TESTS_RAW"
+[ ${#TESTS[@]} -gt 0 ] && [ -n "${TESTS[0]}" ] ||   die "'$SUITE' resolved to no tests"
 
 # A named suite keeps its name; an ad-hoc selection is recorded as "manual",
 # and its identity is the recorded test list rather than the label.
