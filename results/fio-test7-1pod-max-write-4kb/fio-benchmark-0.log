@@ -40,29 +40,29 @@ test7-1pod-max-write-4k: Laying out IO file (1 file / 10240MiB)
 test7-1pod-max-write-4k: Laying out IO file (1 file / 10240MiB)
 test7-1pod-max-write-4k: Laying out IO file (1 file / 10240MiB)
 
-test7-1pod-max-write-4k: (groupid=0, jobs=8): err= 0: pid=79: Thu Sep  3 11:08:14 2026
-  write: IOPS=170k, BW=665MiB/s (697MB/s)(390GiB/600014msec); 0 zone resets
-    slat (nsec): min=1529, max=35118k, avg=16459.45, stdev=53296.65
-    clat (usec): min=238, max=384272, avg=5996.90, stdev=4757.75
-     lat (usec): min=339, max=384281, avg=6013.36, stdev=4755.53
+test7-1pod-max-write-4k: (groupid=0, jobs=8): err= 0: pid=79: Thu Sep 10 09:25:39 2026
+  write: IOPS=192k, BW=748MiB/s (785MB/s)(438GiB/600024msec); 0 zone resets
+    slat (nsec): min=1751, max=3954.5k, avg=22704.18, stdev=49273.15
+    clat (usec): min=44, max=546427, avg=5320.46, stdev=13007.26
+     lat (usec): min=145, max=546432, avg=5343.16, stdev=13007.08
     clat percentiles (usec):
-     |  1.00th=[  1663],  5.00th=[  2606], 10.00th=[  3195], 20.00th=[  3949],
-     | 30.00th=[  4424], 40.00th=[  4883], 50.00th=[  5276], 60.00th=[  5735],
-     | 70.00th=[  6325], 80.00th=[  7111], 90.00th=[  8586], 95.00th=[ 10945],
-     | 99.00th=[ 22676], 99.50th=[ 25560], 99.90th=[ 31327], 99.95th=[ 35390],
-     | 99.99th=[214959]
-   bw (  KiB/s): min=295456, max=778939, per=100.00%, avg=680973.74, stdev=6598.03, samples=9600
-   iops        : min=73864, max=194734, avg=170243.07, stdev=1649.51, samples=9600
-  lat (usec)   : 250=0.01%, 500=0.01%, 750=0.01%, 1000=0.04%
-  lat (msec)   : 2=2.03%, 4=19.09%, 10=72.71%, 20=4.52%, 50=1.57%
-  lat (msec)   : 100=0.01%, 250=0.02%, 500=0.01%
-  cpu          : usr=3.14%, sys=21.46%, ctx=69181944, majf=0, minf=2547
+     |  1.00th=[  1106],  5.00th=[  2008], 10.00th=[  2573], 20.00th=[  3195],
+     | 30.00th=[  3589], 40.00th=[  3916], 50.00th=[  4228], 60.00th=[  4555],
+     | 70.00th=[  4948], 80.00th=[  5604], 90.00th=[  6915], 95.00th=[  8848],
+     | 99.00th=[ 16188], 99.50th=[ 24773], 99.90th=[246416], 99.95th=[325059],
+     | 99.99th=[413139]
+   bw (  KiB/s): min=46800, max=944736, per=100.00%, avg=766262.27, stdev=21510.78, samples=9600
+   iops        : min=11700, max=236184, avg=191565.39, stdev=5377.70, samples=9600
+  lat (usec)   : 50=0.01%, 250=0.01%, 500=0.13%, 750=0.25%, 1000=0.40%
+  lat (msec)   : 2=4.19%, 4=37.73%, 10=53.72%, 20=2.92%, 50=0.30%
+  lat (msec)   : 100=0.08%, 250=0.19%, 500=0.10%, 750=0.01%
+  cpu          : usr=3.53%, sys=26.57%, ctx=67706762, majf=0, minf=2848
   IO depths    : 1=0.0%, 2=0.0%, 4=0.0%, 8=0.0%, 16=0.0%, 32=0.0%, >=64=100.0%
-     submit    : 0=0.0%, 4=99.4%, 8=0.3%, 16=0.3%, 32=0.0%, 64=0.0%, >=64=0.0%
-     complete  : 0=0.0%, 4=99.5%, 8=0.1%, 16=0.4%, 32=0.0%, 64=0.0%, >=64=0.1%
-     issued rwts: total=0,102121501,0,0 short=0,0,0,0 dropped=0,0,0,0
+     submit    : 0=0.0%, 4=99.3%, 8=0.6%, 16=0.2%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=99.2%, 8=0.6%, 16=0.2%, 32=0.0%, 64=0.0%, >=64=0.1%
+     issued rwts: total=0,114924431,0,0 short=0,0,0,0 dropped=0,0,0,0
      latency   : target=0, window=0, percentile=100.00%, depth=128
 
 Run status group 0 (all jobs):
-  WRITE: bw=665MiB/s (697MB/s), 665MiB/s-665MiB/s (697MB/s-697MB/s), io=390GiB (418GB), run=600014-600014msec
+  WRITE: bw=748MiB/s (785MB/s), 748MiB/s-748MiB/s (785MB/s-785MB/s), io=438GiB (471GB), run=600024-600024msec
 FIO benchmark completed on pod 0
