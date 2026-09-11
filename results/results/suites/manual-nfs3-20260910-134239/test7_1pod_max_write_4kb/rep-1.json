@@ -1,0 +1,54 @@
+{
+  "test_id": "test7_1pod_max_write_4kb",
+  "valid": true,
+  "failures": [],
+  "warnings": [
+    "fio-test7-1pod-max-write-4kb-0: CPU cgroup throttled 9.3s of 661s (1.4%); throughput and p99 are usable, the p99.9 tail is not -- some of it is the CFS scheduler, not the array"
+  ],
+  "declared": {
+    "replicas": 1,
+    "target_iops_total": null,
+    "target_bw_mibps_total": null,
+    "expected_directions": [
+      "write"
+    ],
+    "rate_limited": false
+  },
+  "verdict": {
+    "pass": null,
+    "breaches": [],
+    "reason": "no SLO file; figures only, no verdict"
+  },
+  "observations": [
+    "cgroup CPU throttling on 1 pod(s), worst 9.3s: the tail latency measured here is the CFS scheduler and cannot be attributed to storage"
+  ],
+  "aggregate": {
+    "pods": 1,
+    "read_iops_total": 0.0,
+    "write_iops_total": 188968.313063,
+    "total_iops": 188968.313063,
+    "read_bw_mibps_total": 0.0,
+    "write_bw_mibps_total": 738.1640930175781,
+    "total_bw_mibps": 738.1640930175781,
+    "read_p99_worst_ms": null,
+    "write_p99_worst_ms": 21.364736,
+    "read_p999_worst_ms": null,
+    "write_p999_worst_ms": 83.361792,
+    "read_p99_merged_ms": null,
+    "write_p99_merged_ms": 21.364736,
+    "iops_attainment_pct": null,
+    "bw_attainment_pct": null
+  },
+  "pods": [
+    {
+      "pod": "fio-test7-1pod-max-write-4kb-0",
+      "error": 0,
+      "elapsed_s": 661,
+      "read_iops": null,
+      "write_iops": 188968.313063,
+      "read_p99_ms": null,
+      "write_p99_ms": 21.364736,
+      "throttled_usec": 9278024
+    }
+  ]
+}

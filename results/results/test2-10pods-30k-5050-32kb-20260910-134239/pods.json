@@ -1,0 +1,3349 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "annotations": {
+                    "k8s.ovn.org/pod-networks": "{\"default\":{\"ip_addresses\":[\"10.128.0.192/23\"],\"mac_address\":\"0a:58:0a:80:00:c0\",\"gateway_ips\":[\"10.128.0.1\"],\"routes\":[{\"dest\":\"10.128.0.0/14\",\"nextHop\":\"10.128.0.1\"},{\"dest\":\"172.30.0.0/16\",\"nextHop\":\"10.128.0.1\"},{\"dest\":\"169.254.0.5/32\",\"nextHop\":\"10.128.0.1\"},{\"dest\":\"100.64.0.0/16\",\"nextHop\":\"10.128.0.1\"}],\"ip_address\":\"10.128.0.192/23\",\"gateway_ip\":\"10.128.0.1\",\"role\":\"primary\"}}",
+                    "k8s.v1.cni.cncf.io/network-status": "[{\n    \"name\": \"ovn-kubernetes\",\n    \"interface\": \"eth0\",\n    \"ips\": [\n        \"10.128.0.192\"\n    ],\n    \"mac\": \"0a:58:0a:80:00:c0\",\n    \"default\": true,\n    \"dns\": {}\n}]",
+                    "meta.helm.sh/release-name": "fio-test2-10pods-30k-5050-32kb",
+                    "meta.helm.sh/release-namespace": "fio-tests",
+                    "openshift.io/scc": "anyuid",
+                    "security.openshift.io/validated-scc-subject-type": "user"
+                },
+                "creationTimestamp": "2026-09-10T17:42:40Z",
+                "generation": 1,
+                "labels": {
+                    "app": "fio-benchmark",
+                    "app.kubernetes.io/instance": "fio-test2-10pods-30k-5050-32kb",
+                    "app.kubernetes.io/managed-by": "Helm",
+                    "app.kubernetes.io/name": "fio-benchmark",
+                    "app.kubernetes.io/version": "3.41",
+                    "component": "storage-test",
+                    "fio.benchmark/run-id": "test2-10pods-30k-5050-32kb-20260910-134239",
+                    "helm.sh/chart": "fio-benchmark-1.0.0",
+                    "pod-index": "0"
+                },
+                "name": "fio-test2-10pods-30k-5050-32kb-0",
+                "namespace": "fio-tests",
+                "resourceVersion": "14985857",
+                "uid": "777254c0-cf91-4c56-8674-3f3f9dd6bf63"
+            },
+            "spec": {
+                "affinity": {
+                    "podAntiAffinity": {
+                        "preferredDuringSchedulingIgnoredDuringExecution": [
+                            {
+                                "podAffinityTerm": {
+                                    "labelSelector": {
+                                        "matchLabels": {
+                                            "fio.benchmark/run-id": "test2-10pods-30k-5050-32kb-20260910-134239"
+                                        }
+                                    },
+                                    "topologyKey": "kubernetes.io/hostname"
+                                },
+                                "weight": 100
+                            }
+                        ]
+                    }
+                },
+                "containers": [
+                    {
+                        "args": [
+                            "set -o pipefail\necho \"pod 0 of 10, run test2-10pods-30k-5050-32kb-20260910-134239\"\ncp /fio-config/fio.job /tmp/fio.job\nsed -i 's|directory=.*|directory=/mnt/fio-data|g' /tmp/fio.job\nmkdir -p /tmp/fiolog\n\necho \"=== environment ===\"\necho \"node=${NODE_NAME} pod=${POD_NAME}\"\nfio --version\ndf -h /mnt/fio-data\ngrep \"/mnt/fio-data\" /proc/mounts || true\n\necho \"=== fio job ===\"\ncat /tmp/fio.job\n\n# Capacity gate. size is per clone, so the dataset is size x clones.\n# This runs inside the pod on purpose: scripts/deploy_test.sh checks\n# the same thing beforehand, but a bare `helm install` bypasses it,\n# and this is the failure that killed results/test4_*.\nNUMJOBS=$(sed -n 's/^[[:space:]]*numjobs[[:space:]]*=[[:space:]]*\\([0-9]\\+\\).*/\\1/p' /tmp/fio.job | head -1)\nSECTIONS=$(grep -c '^\\[' /tmp/fio.job)\nSECTIONS=$((SECTIONS \u003e 1 ? SECTIONS - 1 : 1))\nif [ -n \"$NUMJOBS\" ]; then CLONES=$((NUMJOBS * SECTIONS)); else CLONES=$SECTIONS; fi\nSIZE_RAW=$(sed -n 's/^[[:space:]]*size[[:space:]]*=[[:space:]]*\\([0-9]\\+[KMGTkmgt]\\?\\).*/\\1/p' /tmp/fio.job | head -1)\nSIZE_NUM=$(echo \"$SIZE_RAW\" | tr -cd '0-9')\ncase \"$(echo \"$SIZE_RAW\" | tr -cd 'KMGTkmgt' | tr '[:lower:]' '[:upper:]')\" in\n  K) MULT=1 ;; M) MULT=1024 ;; G) MULT=$((1024*1024)) ;;\n  T) MULT=$((1024*1024*1024)) ;; *) MULT=1 ;;\nesac\nNEED_KB=$((SIZE_NUM * MULT * CLONES))\nAVAIL_KB=$(df -Pk /mnt/fio-data | awk 'NR==2 {print $4}')\necho \"=== capacity ===\"\necho \"dataset: size=${SIZE_RAW} x ${CLONES} clones = $((NEED_KB/1024/1024)) GiB\"\necho \"mount:   $((AVAIL_KB/1024/1024)) GiB free\"\nif [ \"$NEED_KB\" -gt \"$AVAIL_KB\" ]; then\n  echo \"FATAL: PVC is too small for this job.\"\n  echo \"  fio would lay out files until ENOSPC, kill part of the workload,\"\n  echo \"  and still exit having produced a plausible-looking log.\"\n  echo \"  Set pvc.size to at least $(( (NEED_KB * 12 / 10) / 1024 / 1024 ))Gi and re-run.\"\n  exit 28\nfi\n\n# cgroup CPU pressure, before. If the client is throttled during the\n# run then its tail latency describes the CFS scheduler, not NFS.\nCG=\"\"\nif [ -r /sys/fs/cgroup/cpu.stat ]; then CG=/sys/fs/cgroup/cpu.stat\nelif [ -r /sys/fs/cgroup/cpu/cpu.stat ]; then CG=/sys/fs/cgroup/cpu/cpu.stat\nfi\nCG_BEFORE=$([ -n \"$CG\" ] \u0026\u0026 tr '\\n' ' ' \u003c \"$CG\" || echo \"\")\n# Absolute-time barrier. Every pod in every release of this run waits\n# for the same instant, so a burst phase actually overlaps the phase\n# it is meant to burst against, rather than starting whenever helm\n# happened to return.\nTARGET=1789062339\nNOW=$(date +%s)\nif [ \"$NOW\" -lt \"$TARGET\" ]; then\n  echo \"barrier: waiting $((TARGET - NOW))s until $(date -d @$TARGET)\"\n  while [ \"$(date +%s)\" -lt \"$TARGET\" ]; do sleep 0.2; done\nelse\n  echo \"barrier: WARNING started $((NOW - TARGET))s late; overlap is not guaranteed\"\nfi\n\necho \"=== fio start $(date -u +%Y-%m-%dT%H:%M:%SZ) epoch=$(date +%s) ===\"\nfio /tmp/fio.job --output-format=json+ --output=/tmp/fio.json\nFIO_RC=$?\necho \"=== fio end $(date -u +%Y-%m-%dT%H:%M:%SZ) epoch=$(date +%s) rc=$FIO_RC ===\"\n\necho \"===FIO_CGROUP_BEGIN===\"\necho \"before: ${CG_BEFORE}\"\necho \"after: $([ -n \"$CG\" ] \u0026\u0026 tr '\\n' ' ' \u003c \"$CG\" || echo \"\")\"\necho \"===FIO_CGROUP_END===\"\n# Markers let collect_results.sh extract the JSON from kubectl logs\n# without needing a shared volume or a sidecar.\necho \"===FIO_JSON_BEGIN===\"\ncat /tmp/fio.json\necho \"===FIO_JSON_END===\"\necho \"===FIO_TSLOG_BEGIN===\"\nfor l in /tmp/fiolog/*.log; do\n  [ -f \"$l\" ] || continue\n  echo \"--- $(basename \"$l\") ---\"\n  cat \"$l\"\ndone\necho \"===FIO_TSLOG_END===\"\n\n# Propagate the real result. Without this the container exits 0 on a\n# failed fio and kubectl reports Completed for a run that died.\nexit $FIO_RC\n"
+                        ],
+                        "command": [
+                            "/bin/bash",
+                            "-c"
+                        ],
+                        "env": [
+                            {
+                                "name": "NODE_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "spec.nodeName"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "POD_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "metadata.name"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "rafmoshe2500/fio:3.41",
+                        "imagePullPolicy": "IfNotPresent",
+                        "name": "fio",
+                        "resources": {
+                            "limits": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            },
+                            "requests": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            }
+                        },
+                        "securityContext": {
+                            "capabilities": {
+                                "drop": [
+                                    "MKNOD"
+                                ]
+                            }
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/mnt/fio-data",
+                                "name": "fio-data"
+                            },
+                            {
+                                "mountPath": "/fio-config",
+                                "name": "fio-config"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-kb6ln",
+                                "readOnly": true
+                            }
+                        ]
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "enableServiceLinks": true,
+                "nodeName": "s3",
+                "preemptionPolicy": "PreemptLowerPriority",
+                "priority": 0,
+                "restartPolicy": "Never",
+                "schedulerName": "default-scheduler",
+                "securityContext": {
+                    "seLinuxOptions": {
+                        "level": "s0:c32,c14"
+                    }
+                },
+                "serviceAccount": "default",
+                "serviceAccountName": "default",
+                "terminationGracePeriodSeconds": 30,
+                "tolerations": [
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoSchedule",
+                        "key": "node.kubernetes.io/memory-pressure",
+                        "operator": "Exists"
+                    }
+                ],
+                "volumes": [
+                    {
+                        "name": "fio-data",
+                        "persistentVolumeClaim": {
+                            "claimName": "fio-test2-10pods-30k-5050-32kb-pvc-0"
+                        }
+                    },
+                    {
+                        "configMap": {
+                            "defaultMode": 420,
+                            "name": "fio-test2-10pods-30k-5050-32kb-fio-benchmark-config"
+                        },
+                        "name": "fio-config"
+                    },
+                    {
+                        "name": "kube-api-access-kb6ln",
+                        "projected": {
+                            "defaultMode": 420,
+                            "sources": [
+                                {
+                                    "serviceAccountToken": {
+                                        "expirationSeconds": 3607,
+                                        "path": "token"
+                                    }
+                                },
+                                {
+                                    "configMap": {
+                                        "items": [
+                                            {
+                                                "key": "ca.crt",
+                                                "path": "ca.crt"
+                                            }
+                                        ],
+                                        "name": "kube-root-ca.crt"
+                                    }
+                                },
+                                {
+                                    "downwardAPI": {
+                                        "items": [
+                                            {
+                                                "fieldRef": {
+                                                    "apiVersion": "v1",
+                                                    "fieldPath": "metadata.namespace"
+                                                },
+                                                "path": "namespace"
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "configMap": {
+                                        "items": [
+                                            {
+                                                "key": "service-ca.crt",
+                                                "path": "service-ca.crt"
+                                            }
+                                        ],
+                                        "name": "openshift-service-ca.crt"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:19Z",
+                        "observedGeneration": 1,
+                        "status": "False",
+                        "type": "PodReadyToStartContainers"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:43:12Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "True",
+                        "type": "Initialized"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:18Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "False",
+                        "type": "Ready"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:18Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "False",
+                        "type": "ContainersReady"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:43:12Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodScheduled"
+                    }
+                ],
+                "containerStatuses": [
+                    {
+                        "allocatedResources": {
+                            "cpu": "4",
+                            "memory": "4Gi"
+                        },
+                        "containerID": "cri-o://4cdee3c4266b8e5527164c92a06e15131906a64702f3333a561550aa5d628534",
+                        "image": "docker.io/rafmoshe2500/fio:3.41",
+                        "imageID": "docker.io/rafmoshe2500/fio@sha256:5fe85a0bb0ae82616cd1aa0825ca13f692a14623a82a2f4ad31d01fd8c1f8766",
+                        "lastState": {},
+                        "name": "fio",
+                        "ready": false,
+                        "resources": {
+                            "limits": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            },
+                            "requests": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            }
+                        },
+                        "restartCount": 0,
+                        "started": false,
+                        "state": {
+                            "terminated": {
+                                "containerID": "cri-o://4cdee3c4266b8e5527164c92a06e15131906a64702f3333a561550aa5d628534",
+                                "exitCode": 0,
+                                "finishedAt": "2026-09-10T17:57:18Z",
+                                "reason": "Completed",
+                                "startedAt": "2026-09-10T17:43:43Z"
+                            }
+                        },
+                        "user": {
+                            "linux": {
+                                "gid": 0,
+                                "supplementalGroups": [
+                                    0
+                                ],
+                                "uid": 0
+                            }
+                        },
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/mnt/fio-data",
+                                "name": "fio-data"
+                            },
+                            {
+                                "mountPath": "/fio-config",
+                                "name": "fio-config"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-kb6ln",
+                                "readOnly": true,
+                                "recursiveReadOnly": "Disabled"
+                            }
+                        ]
+                    }
+                ],
+                "hostIP": "10.61.103.157",
+                "hostIPs": [
+                    {
+                        "ip": "10.61.103.157"
+                    }
+                ],
+                "observedGeneration": 1,
+                "phase": "Succeeded",
+                "podIP": "10.128.0.192",
+                "podIPs": [
+                    {
+                        "ip": "10.128.0.192"
+                    }
+                ],
+                "qosClass": "Guaranteed",
+                "startTime": "2026-09-10T17:43:12Z"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "annotations": {
+                    "k8s.ovn.org/pod-networks": "{\"default\":{\"ip_addresses\":[\"10.130.0.105/23\"],\"mac_address\":\"0a:58:0a:82:00:69\",\"gateway_ips\":[\"10.130.0.1\"],\"routes\":[{\"dest\":\"10.128.0.0/14\",\"nextHop\":\"10.130.0.1\"},{\"dest\":\"172.30.0.0/16\",\"nextHop\":\"10.130.0.1\"},{\"dest\":\"169.254.0.5/32\",\"nextHop\":\"10.130.0.1\"},{\"dest\":\"100.64.0.0/16\",\"nextHop\":\"10.130.0.1\"}],\"ip_address\":\"10.130.0.105/23\",\"gateway_ip\":\"10.130.0.1\",\"role\":\"primary\"}}",
+                    "k8s.v1.cni.cncf.io/network-status": "[{\n    \"name\": \"ovn-kubernetes\",\n    \"interface\": \"eth0\",\n    \"ips\": [\n        \"10.130.0.105\"\n    ],\n    \"mac\": \"0a:58:0a:82:00:69\",\n    \"default\": true,\n    \"dns\": {}\n}]",
+                    "meta.helm.sh/release-name": "fio-test2-10pods-30k-5050-32kb",
+                    "meta.helm.sh/release-namespace": "fio-tests",
+                    "openshift.io/scc": "anyuid",
+                    "security.openshift.io/validated-scc-subject-type": "user"
+                },
+                "creationTimestamp": "2026-09-10T17:42:40Z",
+                "generation": 1,
+                "labels": {
+                    "app": "fio-benchmark",
+                    "app.kubernetes.io/instance": "fio-test2-10pods-30k-5050-32kb",
+                    "app.kubernetes.io/managed-by": "Helm",
+                    "app.kubernetes.io/name": "fio-benchmark",
+                    "app.kubernetes.io/version": "3.41",
+                    "component": "storage-test",
+                    "fio.benchmark/run-id": "test2-10pods-30k-5050-32kb-20260910-134239",
+                    "helm.sh/chart": "fio-benchmark-1.0.0",
+                    "pod-index": "1"
+                },
+                "name": "fio-test2-10pods-30k-5050-32kb-1",
+                "namespace": "fio-tests",
+                "resourceVersion": "14985899",
+                "uid": "ab8cb6d2-7784-454f-ac5f-5f590526b9a2"
+            },
+            "spec": {
+                "affinity": {
+                    "podAntiAffinity": {
+                        "preferredDuringSchedulingIgnoredDuringExecution": [
+                            {
+                                "podAffinityTerm": {
+                                    "labelSelector": {
+                                        "matchLabels": {
+                                            "fio.benchmark/run-id": "test2-10pods-30k-5050-32kb-20260910-134239"
+                                        }
+                                    },
+                                    "topologyKey": "kubernetes.io/hostname"
+                                },
+                                "weight": 100
+                            }
+                        ]
+                    }
+                },
+                "containers": [
+                    {
+                        "args": [
+                            "set -o pipefail\necho \"pod 1 of 10, run test2-10pods-30k-5050-32kb-20260910-134239\"\ncp /fio-config/fio.job /tmp/fio.job\nsed -i 's|directory=.*|directory=/mnt/fio-data|g' /tmp/fio.job\nmkdir -p /tmp/fiolog\n\necho \"=== environment ===\"\necho \"node=${NODE_NAME} pod=${POD_NAME}\"\nfio --version\ndf -h /mnt/fio-data\ngrep \"/mnt/fio-data\" /proc/mounts || true\n\necho \"=== fio job ===\"\ncat /tmp/fio.job\n\n# Capacity gate. size is per clone, so the dataset is size x clones.\n# This runs inside the pod on purpose: scripts/deploy_test.sh checks\n# the same thing beforehand, but a bare `helm install` bypasses it,\n# and this is the failure that killed results/test4_*.\nNUMJOBS=$(sed -n 's/^[[:space:]]*numjobs[[:space:]]*=[[:space:]]*\\([0-9]\\+\\).*/\\1/p' /tmp/fio.job | head -1)\nSECTIONS=$(grep -c '^\\[' /tmp/fio.job)\nSECTIONS=$((SECTIONS \u003e 1 ? SECTIONS - 1 : 1))\nif [ -n \"$NUMJOBS\" ]; then CLONES=$((NUMJOBS * SECTIONS)); else CLONES=$SECTIONS; fi\nSIZE_RAW=$(sed -n 's/^[[:space:]]*size[[:space:]]*=[[:space:]]*\\([0-9]\\+[KMGTkmgt]\\?\\).*/\\1/p' /tmp/fio.job | head -1)\nSIZE_NUM=$(echo \"$SIZE_RAW\" | tr -cd '0-9')\ncase \"$(echo \"$SIZE_RAW\" | tr -cd 'KMGTkmgt' | tr '[:lower:]' '[:upper:]')\" in\n  K) MULT=1 ;; M) MULT=1024 ;; G) MULT=$((1024*1024)) ;;\n  T) MULT=$((1024*1024*1024)) ;; *) MULT=1 ;;\nesac\nNEED_KB=$((SIZE_NUM * MULT * CLONES))\nAVAIL_KB=$(df -Pk /mnt/fio-data | awk 'NR==2 {print $4}')\necho \"=== capacity ===\"\necho \"dataset: size=${SIZE_RAW} x ${CLONES} clones = $((NEED_KB/1024/1024)) GiB\"\necho \"mount:   $((AVAIL_KB/1024/1024)) GiB free\"\nif [ \"$NEED_KB\" -gt \"$AVAIL_KB\" ]; then\n  echo \"FATAL: PVC is too small for this job.\"\n  echo \"  fio would lay out files until ENOSPC, kill part of the workload,\"\n  echo \"  and still exit having produced a plausible-looking log.\"\n  echo \"  Set pvc.size to at least $(( (NEED_KB * 12 / 10) / 1024 / 1024 ))Gi and re-run.\"\n  exit 28\nfi\n\n# cgroup CPU pressure, before. If the client is throttled during the\n# run then its tail latency describes the CFS scheduler, not NFS.\nCG=\"\"\nif [ -r /sys/fs/cgroup/cpu.stat ]; then CG=/sys/fs/cgroup/cpu.stat\nelif [ -r /sys/fs/cgroup/cpu/cpu.stat ]; then CG=/sys/fs/cgroup/cpu/cpu.stat\nfi\nCG_BEFORE=$([ -n \"$CG\" ] \u0026\u0026 tr '\\n' ' ' \u003c \"$CG\" || echo \"\")\n# Absolute-time barrier. Every pod in every release of this run waits\n# for the same instant, so a burst phase actually overlaps the phase\n# it is meant to burst against, rather than starting whenever helm\n# happened to return.\nTARGET=1789062339\nNOW=$(date +%s)\nif [ \"$NOW\" -lt \"$TARGET\" ]; then\n  echo \"barrier: waiting $((TARGET - NOW))s until $(date -d @$TARGET)\"\n  while [ \"$(date +%s)\" -lt \"$TARGET\" ]; do sleep 0.2; done\nelse\n  echo \"barrier: WARNING started $((NOW - TARGET))s late; overlap is not guaranteed\"\nfi\n\necho \"=== fio start $(date -u +%Y-%m-%dT%H:%M:%SZ) epoch=$(date +%s) ===\"\nfio /tmp/fio.job --output-format=json+ --output=/tmp/fio.json\nFIO_RC=$?\necho \"=== fio end $(date -u +%Y-%m-%dT%H:%M:%SZ) epoch=$(date +%s) rc=$FIO_RC ===\"\n\necho \"===FIO_CGROUP_BEGIN===\"\necho \"before: ${CG_BEFORE}\"\necho \"after: $([ -n \"$CG\" ] \u0026\u0026 tr '\\n' ' ' \u003c \"$CG\" || echo \"\")\"\necho \"===FIO_CGROUP_END===\"\n# Markers let collect_results.sh extract the JSON from kubectl logs\n# without needing a shared volume or a sidecar.\necho \"===FIO_JSON_BEGIN===\"\ncat /tmp/fio.json\necho \"===FIO_JSON_END===\"\necho \"===FIO_TSLOG_BEGIN===\"\nfor l in /tmp/fiolog/*.log; do\n  [ -f \"$l\" ] || continue\n  echo \"--- $(basename \"$l\") ---\"\n  cat \"$l\"\ndone\necho \"===FIO_TSLOG_END===\"\n\n# Propagate the real result. Without this the container exits 0 on a\n# failed fio and kubectl reports Completed for a run that died.\nexit $FIO_RC\n"
+                        ],
+                        "command": [
+                            "/bin/bash",
+                            "-c"
+                        ],
+                        "env": [
+                            {
+                                "name": "NODE_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "spec.nodeName"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "POD_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "metadata.name"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "rafmoshe2500/fio:3.41",
+                        "imagePullPolicy": "IfNotPresent",
+                        "name": "fio",
+                        "resources": {
+                            "limits": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            },
+                            "requests": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            }
+                        },
+                        "securityContext": {
+                            "capabilities": {
+                                "drop": [
+                                    "MKNOD"
+                                ]
+                            }
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/mnt/fio-data",
+                                "name": "fio-data"
+                            },
+                            {
+                                "mountPath": "/fio-config",
+                                "name": "fio-config"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-ld99p",
+                                "readOnly": true
+                            }
+                        ]
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "enableServiceLinks": true,
+                "nodeName": "s1",
+                "preemptionPolicy": "PreemptLowerPriority",
+                "priority": 0,
+                "restartPolicy": "Never",
+                "schedulerName": "default-scheduler",
+                "securityContext": {
+                    "seLinuxOptions": {
+                        "level": "s0:c32,c14"
+                    }
+                },
+                "serviceAccount": "default",
+                "serviceAccountName": "default",
+                "terminationGracePeriodSeconds": 30,
+                "tolerations": [
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoSchedule",
+                        "key": "node.kubernetes.io/memory-pressure",
+                        "operator": "Exists"
+                    }
+                ],
+                "volumes": [
+                    {
+                        "name": "fio-data",
+                        "persistentVolumeClaim": {
+                            "claimName": "fio-test2-10pods-30k-5050-32kb-pvc-1"
+                        }
+                    },
+                    {
+                        "configMap": {
+                            "defaultMode": 420,
+                            "name": "fio-test2-10pods-30k-5050-32kb-fio-benchmark-config"
+                        },
+                        "name": "fio-config"
+                    },
+                    {
+                        "name": "kube-api-access-ld99p",
+                        "projected": {
+                            "defaultMode": 420,
+                            "sources": [
+                                {
+                                    "serviceAccountToken": {
+                                        "expirationSeconds": 3607,
+                                        "path": "token"
+                                    }
+                                },
+                                {
+                                    "configMap": {
+                                        "items": [
+                                            {
+                                                "key": "ca.crt",
+                                                "path": "ca.crt"
+                                            }
+                                        ],
+                                        "name": "kube-root-ca.crt"
+                                    }
+                                },
+                                {
+                                    "downwardAPI": {
+                                        "items": [
+                                            {
+                                                "fieldRef": {
+                                                    "apiVersion": "v1",
+                                                    "fieldPath": "metadata.namespace"
+                                                },
+                                                "path": "namespace"
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "configMap": {
+                                        "items": [
+                                            {
+                                                "key": "service-ca.crt",
+                                                "path": "service-ca.crt"
+                                            }
+                                        ],
+                                        "name": "openshift-service-ca.crt"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:24Z",
+                        "observedGeneration": 1,
+                        "status": "False",
+                        "type": "PodReadyToStartContainers"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:43:41Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "True",
+                        "type": "Initialized"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:23Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "False",
+                        "type": "Ready"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:23Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "False",
+                        "type": "ContainersReady"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:43:41Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodScheduled"
+                    }
+                ],
+                "containerStatuses": [
+                    {
+                        "allocatedResources": {
+                            "cpu": "4",
+                            "memory": "4Gi"
+                        },
+                        "containerID": "cri-o://b2ab307244d58267726ca4c81cc2cc3065e7b0cd0c40453785fc810c03b2fee9",
+                        "image": "docker.io/rafmoshe2500/fio:3.41",
+                        "imageID": "docker.io/rafmoshe2500/fio@sha256:5fe85a0bb0ae82616cd1aa0825ca13f692a14623a82a2f4ad31d01fd8c1f8766",
+                        "lastState": {},
+                        "name": "fio",
+                        "ready": false,
+                        "resources": {
+                            "limits": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            },
+                            "requests": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            }
+                        },
+                        "restartCount": 0,
+                        "started": false,
+                        "state": {
+                            "terminated": {
+                                "containerID": "cri-o://b2ab307244d58267726ca4c81cc2cc3065e7b0cd0c40453785fc810c03b2fee9",
+                                "exitCode": 0,
+                                "finishedAt": "2026-09-10T17:57:22Z",
+                                "reason": "Completed",
+                                "startedAt": "2026-09-10T17:43:50Z"
+                            }
+                        },
+                        "user": {
+                            "linux": {
+                                "gid": 0,
+                                "supplementalGroups": [
+                                    0
+                                ],
+                                "uid": 0
+                            }
+                        },
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/mnt/fio-data",
+                                "name": "fio-data"
+                            },
+                            {
+                                "mountPath": "/fio-config",
+                                "name": "fio-config"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-ld99p",
+                                "readOnly": true,
+                                "recursiveReadOnly": "Disabled"
+                            }
+                        ]
+                    }
+                ],
+                "hostIP": "10.61.103.155",
+                "hostIPs": [
+                    {
+                        "ip": "10.61.103.155"
+                    }
+                ],
+                "observedGeneration": 1,
+                "phase": "Succeeded",
+                "podIP": "10.130.0.105",
+                "podIPs": [
+                    {
+                        "ip": "10.130.0.105"
+                    }
+                ],
+                "qosClass": "Guaranteed",
+                "startTime": "2026-09-10T17:43:41Z"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "annotations": {
+                    "k8s.ovn.org/pod-networks": "{\"default\":{\"ip_addresses\":[\"10.130.0.102/23\"],\"mac_address\":\"0a:58:0a:82:00:66\",\"gateway_ips\":[\"10.130.0.1\"],\"routes\":[{\"dest\":\"10.128.0.0/14\",\"nextHop\":\"10.130.0.1\"},{\"dest\":\"172.30.0.0/16\",\"nextHop\":\"10.130.0.1\"},{\"dest\":\"169.254.0.5/32\",\"nextHop\":\"10.130.0.1\"},{\"dest\":\"100.64.0.0/16\",\"nextHop\":\"10.130.0.1\"}],\"ip_address\":\"10.130.0.102/23\",\"gateway_ip\":\"10.130.0.1\",\"role\":\"primary\"}}",
+                    "k8s.v1.cni.cncf.io/network-status": "[{\n    \"name\": \"ovn-kubernetes\",\n    \"interface\": \"eth0\",\n    \"ips\": [\n        \"10.130.0.102\"\n    ],\n    \"mac\": \"0a:58:0a:82:00:66\",\n    \"default\": true,\n    \"dns\": {}\n}]",
+                    "meta.helm.sh/release-name": "fio-test2-10pods-30k-5050-32kb",
+                    "meta.helm.sh/release-namespace": "fio-tests",
+                    "openshift.io/scc": "anyuid",
+                    "security.openshift.io/validated-scc-subject-type": "user"
+                },
+                "creationTimestamp": "2026-09-10T17:42:40Z",
+                "generation": 1,
+                "labels": {
+                    "app": "fio-benchmark",
+                    "app.kubernetes.io/instance": "fio-test2-10pods-30k-5050-32kb",
+                    "app.kubernetes.io/managed-by": "Helm",
+                    "app.kubernetes.io/name": "fio-benchmark",
+                    "app.kubernetes.io/version": "3.41",
+                    "component": "storage-test",
+                    "fio.benchmark/run-id": "test2-10pods-30k-5050-32kb-20260910-134239",
+                    "helm.sh/chart": "fio-benchmark-1.0.0",
+                    "pod-index": "2"
+                },
+                "name": "fio-test2-10pods-30k-5050-32kb-2",
+                "namespace": "fio-tests",
+                "resourceVersion": "14985900",
+                "uid": "c1d83fb4-3085-47dc-8b80-87758fc96c17"
+            },
+            "spec": {
+                "affinity": {
+                    "podAntiAffinity": {
+                        "preferredDuringSchedulingIgnoredDuringExecution": [
+                            {
+                                "podAffinityTerm": {
+                                    "labelSelector": {
+                                        "matchLabels": {
+                                            "fio.benchmark/run-id": "test2-10pods-30k-5050-32kb-20260910-134239"
+                                        }
+                                    },
+                                    "topologyKey": "kubernetes.io/hostname"
+                                },
+                                "weight": 100
+                            }
+                        ]
+                    }
+                },
+                "containers": [
+                    {
+                        "args": [
+                            "set -o pipefail\necho \"pod 2 of 10, run test2-10pods-30k-5050-32kb-20260910-134239\"\ncp /fio-config/fio.job /tmp/fio.job\nsed -i 's|directory=.*|directory=/mnt/fio-data|g' /tmp/fio.job\nmkdir -p /tmp/fiolog\n\necho \"=== environment ===\"\necho \"node=${NODE_NAME} pod=${POD_NAME}\"\nfio --version\ndf -h /mnt/fio-data\ngrep \"/mnt/fio-data\" /proc/mounts || true\n\necho \"=== fio job ===\"\ncat /tmp/fio.job\n\n# Capacity gate. size is per clone, so the dataset is size x clones.\n# This runs inside the pod on purpose: scripts/deploy_test.sh checks\n# the same thing beforehand, but a bare `helm install` bypasses it,\n# and this is the failure that killed results/test4_*.\nNUMJOBS=$(sed -n 's/^[[:space:]]*numjobs[[:space:]]*=[[:space:]]*\\([0-9]\\+\\).*/\\1/p' /tmp/fio.job | head -1)\nSECTIONS=$(grep -c '^\\[' /tmp/fio.job)\nSECTIONS=$((SECTIONS \u003e 1 ? SECTIONS - 1 : 1))\nif [ -n \"$NUMJOBS\" ]; then CLONES=$((NUMJOBS * SECTIONS)); else CLONES=$SECTIONS; fi\nSIZE_RAW=$(sed -n 's/^[[:space:]]*size[[:space:]]*=[[:space:]]*\\([0-9]\\+[KMGTkmgt]\\?\\).*/\\1/p' /tmp/fio.job | head -1)\nSIZE_NUM=$(echo \"$SIZE_RAW\" | tr -cd '0-9')\ncase \"$(echo \"$SIZE_RAW\" | tr -cd 'KMGTkmgt' | tr '[:lower:]' '[:upper:]')\" in\n  K) MULT=1 ;; M) MULT=1024 ;; G) MULT=$((1024*1024)) ;;\n  T) MULT=$((1024*1024*1024)) ;; *) MULT=1 ;;\nesac\nNEED_KB=$((SIZE_NUM * MULT * CLONES))\nAVAIL_KB=$(df -Pk /mnt/fio-data | awk 'NR==2 {print $4}')\necho \"=== capacity ===\"\necho \"dataset: size=${SIZE_RAW} x ${CLONES} clones = $((NEED_KB/1024/1024)) GiB\"\necho \"mount:   $((AVAIL_KB/1024/1024)) GiB free\"\nif [ \"$NEED_KB\" -gt \"$AVAIL_KB\" ]; then\n  echo \"FATAL: PVC is too small for this job.\"\n  echo \"  fio would lay out files until ENOSPC, kill part of the workload,\"\n  echo \"  and still exit having produced a plausible-looking log.\"\n  echo \"  Set pvc.size to at least $(( (NEED_KB * 12 / 10) / 1024 / 1024 ))Gi and re-run.\"\n  exit 28\nfi\n\n# cgroup CPU pressure, before. If the client is throttled during the\n# run then its tail latency describes the CFS scheduler, not NFS.\nCG=\"\"\nif [ -r /sys/fs/cgroup/cpu.stat ]; then CG=/sys/fs/cgroup/cpu.stat\nelif [ -r /sys/fs/cgroup/cpu/cpu.stat ]; then CG=/sys/fs/cgroup/cpu/cpu.stat\nfi\nCG_BEFORE=$([ -n \"$CG\" ] \u0026\u0026 tr '\\n' ' ' \u003c \"$CG\" || echo \"\")\n# Absolute-time barrier. Every pod in every release of this run waits\n# for the same instant, so a burst phase actually overlaps the phase\n# it is meant to burst against, rather than starting whenever helm\n# happened to return.\nTARGET=1789062339\nNOW=$(date +%s)\nif [ \"$NOW\" -lt \"$TARGET\" ]; then\n  echo \"barrier: waiting $((TARGET - NOW))s until $(date -d @$TARGET)\"\n  while [ \"$(date +%s)\" -lt \"$TARGET\" ]; do sleep 0.2; done\nelse\n  echo \"barrier: WARNING started $((NOW - TARGET))s late; overlap is not guaranteed\"\nfi\n\necho \"=== fio start $(date -u +%Y-%m-%dT%H:%M:%SZ) epoch=$(date +%s) ===\"\nfio /tmp/fio.job --output-format=json+ --output=/tmp/fio.json\nFIO_RC=$?\necho \"=== fio end $(date -u +%Y-%m-%dT%H:%M:%SZ) epoch=$(date +%s) rc=$FIO_RC ===\"\n\necho \"===FIO_CGROUP_BEGIN===\"\necho \"before: ${CG_BEFORE}\"\necho \"after: $([ -n \"$CG\" ] \u0026\u0026 tr '\\n' ' ' \u003c \"$CG\" || echo \"\")\"\necho \"===FIO_CGROUP_END===\"\n# Markers let collect_results.sh extract the JSON from kubectl logs\n# without needing a shared volume or a sidecar.\necho \"===FIO_JSON_BEGIN===\"\ncat /tmp/fio.json\necho \"===FIO_JSON_END===\"\necho \"===FIO_TSLOG_BEGIN===\"\nfor l in /tmp/fiolog/*.log; do\n  [ -f \"$l\" ] || continue\n  echo \"--- $(basename \"$l\") ---\"\n  cat \"$l\"\ndone\necho \"===FIO_TSLOG_END===\"\n\n# Propagate the real result. Without this the container exits 0 on a\n# failed fio and kubectl reports Completed for a run that died.\nexit $FIO_RC\n"
+                        ],
+                        "command": [
+                            "/bin/bash",
+                            "-c"
+                        ],
+                        "env": [
+                            {
+                                "name": "NODE_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "spec.nodeName"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "POD_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "metadata.name"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "rafmoshe2500/fio:3.41",
+                        "imagePullPolicy": "IfNotPresent",
+                        "name": "fio",
+                        "resources": {
+                            "limits": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            },
+                            "requests": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            }
+                        },
+                        "securityContext": {
+                            "capabilities": {
+                                "drop": [
+                                    "MKNOD"
+                                ]
+                            }
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/mnt/fio-data",
+                                "name": "fio-data"
+                            },
+                            {
+                                "mountPath": "/fio-config",
+                                "name": "fio-config"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-ssl6d",
+                                "readOnly": true
+                            }
+                        ]
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "enableServiceLinks": true,
+                "nodeName": "s1",
+                "preemptionPolicy": "PreemptLowerPriority",
+                "priority": 0,
+                "restartPolicy": "Never",
+                "schedulerName": "default-scheduler",
+                "securityContext": {
+                    "seLinuxOptions": {
+                        "level": "s0:c32,c14"
+                    }
+                },
+                "serviceAccount": "default",
+                "serviceAccountName": "default",
+                "terminationGracePeriodSeconds": 30,
+                "tolerations": [
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoSchedule",
+                        "key": "node.kubernetes.io/memory-pressure",
+                        "operator": "Exists"
+                    }
+                ],
+                "volumes": [
+                    {
+                        "name": "fio-data",
+                        "persistentVolumeClaim": {
+                            "claimName": "fio-test2-10pods-30k-5050-32kb-pvc-2"
+                        }
+                    },
+                    {
+                        "configMap": {
+                            "defaultMode": 420,
+                            "name": "fio-test2-10pods-30k-5050-32kb-fio-benchmark-config"
+                        },
+                        "name": "fio-config"
+                    },
+                    {
+                        "name": "kube-api-access-ssl6d",
+                        "projected": {
+                            "defaultMode": 420,
+                            "sources": [
+                                {
+                                    "serviceAccountToken": {
+                                        "expirationSeconds": 3607,
+                                        "path": "token"
+                                    }
+                                },
+                                {
+                                    "configMap": {
+                                        "items": [
+                                            {
+                                                "key": "ca.crt",
+                                                "path": "ca.crt"
+                                            }
+                                        ],
+                                        "name": "kube-root-ca.crt"
+                                    }
+                                },
+                                {
+                                    "downwardAPI": {
+                                        "items": [
+                                            {
+                                                "fieldRef": {
+                                                    "apiVersion": "v1",
+                                                    "fieldPath": "metadata.namespace"
+                                                },
+                                                "path": "namespace"
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "configMap": {
+                                        "items": [
+                                            {
+                                                "key": "service-ca.crt",
+                                                "path": "service-ca.crt"
+                                            }
+                                        ],
+                                        "name": "openshift-service-ca.crt"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:24Z",
+                        "observedGeneration": 1,
+                        "status": "False",
+                        "type": "PodReadyToStartContainers"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:42:46Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "True",
+                        "type": "Initialized"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:23Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "False",
+                        "type": "Ready"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:23Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "False",
+                        "type": "ContainersReady"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:42:46Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodScheduled"
+                    }
+                ],
+                "containerStatuses": [
+                    {
+                        "allocatedResources": {
+                            "cpu": "4",
+                            "memory": "4Gi"
+                        },
+                        "containerID": "cri-o://c17239ee550c7f60d7b2d150bb33b79ee3282a116a4f4ebad35fb81deff3d0d9",
+                        "image": "docker.io/rafmoshe2500/fio:3.41",
+                        "imageID": "docker.io/rafmoshe2500/fio@sha256:5fe85a0bb0ae82616cd1aa0825ca13f692a14623a82a2f4ad31d01fd8c1f8766",
+                        "lastState": {},
+                        "name": "fio",
+                        "ready": false,
+                        "resources": {
+                            "limits": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            },
+                            "requests": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            }
+                        },
+                        "restartCount": 0,
+                        "started": false,
+                        "state": {
+                            "terminated": {
+                                "containerID": "cri-o://c17239ee550c7f60d7b2d150bb33b79ee3282a116a4f4ebad35fb81deff3d0d9",
+                                "exitCode": 0,
+                                "finishedAt": "2026-09-10T17:57:22Z",
+                                "reason": "Completed",
+                                "startedAt": "2026-09-10T17:43:43Z"
+                            }
+                        },
+                        "user": {
+                            "linux": {
+                                "gid": 0,
+                                "supplementalGroups": [
+                                    0
+                                ],
+                                "uid": 0
+                            }
+                        },
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/mnt/fio-data",
+                                "name": "fio-data"
+                            },
+                            {
+                                "mountPath": "/fio-config",
+                                "name": "fio-config"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-ssl6d",
+                                "readOnly": true,
+                                "recursiveReadOnly": "Disabled"
+                            }
+                        ]
+                    }
+                ],
+                "hostIP": "10.61.103.155",
+                "hostIPs": [
+                    {
+                        "ip": "10.61.103.155"
+                    }
+                ],
+                "observedGeneration": 1,
+                "phase": "Succeeded",
+                "podIP": "10.130.0.102",
+                "podIPs": [
+                    {
+                        "ip": "10.130.0.102"
+                    }
+                ],
+                "qosClass": "Guaranteed",
+                "startTime": "2026-09-10T17:42:46Z"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "annotations": {
+                    "k8s.ovn.org/pod-networks": "{\"default\":{\"ip_addresses\":[\"10.129.0.222/23\"],\"mac_address\":\"0a:58:0a:81:00:de\",\"gateway_ips\":[\"10.129.0.1\"],\"routes\":[{\"dest\":\"10.128.0.0/14\",\"nextHop\":\"10.129.0.1\"},{\"dest\":\"172.30.0.0/16\",\"nextHop\":\"10.129.0.1\"},{\"dest\":\"169.254.0.5/32\",\"nextHop\":\"10.129.0.1\"},{\"dest\":\"100.64.0.0/16\",\"nextHop\":\"10.129.0.1\"}],\"ip_address\":\"10.129.0.222/23\",\"gateway_ip\":\"10.129.0.1\",\"role\":\"primary\"}}",
+                    "k8s.v1.cni.cncf.io/network-status": "[{\n    \"name\": \"ovn-kubernetes\",\n    \"interface\": \"eth0\",\n    \"ips\": [\n        \"10.129.0.222\"\n    ],\n    \"mac\": \"0a:58:0a:81:00:de\",\n    \"default\": true,\n    \"dns\": {}\n}]",
+                    "meta.helm.sh/release-name": "fio-test2-10pods-30k-5050-32kb",
+                    "meta.helm.sh/release-namespace": "fio-tests",
+                    "openshift.io/scc": "anyuid",
+                    "security.openshift.io/validated-scc-subject-type": "user"
+                },
+                "creationTimestamp": "2026-09-10T17:42:40Z",
+                "generation": 1,
+                "labels": {
+                    "app": "fio-benchmark",
+                    "app.kubernetes.io/instance": "fio-test2-10pods-30k-5050-32kb",
+                    "app.kubernetes.io/managed-by": "Helm",
+                    "app.kubernetes.io/name": "fio-benchmark",
+                    "app.kubernetes.io/version": "3.41",
+                    "component": "storage-test",
+                    "fio.benchmark/run-id": "test2-10pods-30k-5050-32kb-20260910-134239",
+                    "helm.sh/chart": "fio-benchmark-1.0.0",
+                    "pod-index": "3"
+                },
+                "name": "fio-test2-10pods-30k-5050-32kb-3",
+                "namespace": "fio-tests",
+                "resourceVersion": "14985876",
+                "uid": "c8657fc1-1f0c-4686-be67-102fd6336353"
+            },
+            "spec": {
+                "affinity": {
+                    "podAntiAffinity": {
+                        "preferredDuringSchedulingIgnoredDuringExecution": [
+                            {
+                                "podAffinityTerm": {
+                                    "labelSelector": {
+                                        "matchLabels": {
+                                            "fio.benchmark/run-id": "test2-10pods-30k-5050-32kb-20260910-134239"
+                                        }
+                                    },
+                                    "topologyKey": "kubernetes.io/hostname"
+                                },
+                                "weight": 100
+                            }
+                        ]
+                    }
+                },
+                "containers": [
+                    {
+                        "args": [
+                            "set -o pipefail\necho \"pod 3 of 10, run test2-10pods-30k-5050-32kb-20260910-134239\"\ncp /fio-config/fio.job /tmp/fio.job\nsed -i 's|directory=.*|directory=/mnt/fio-data|g' /tmp/fio.job\nmkdir -p /tmp/fiolog\n\necho \"=== environment ===\"\necho \"node=${NODE_NAME} pod=${POD_NAME}\"\nfio --version\ndf -h /mnt/fio-data\ngrep \"/mnt/fio-data\" /proc/mounts || true\n\necho \"=== fio job ===\"\ncat /tmp/fio.job\n\n# Capacity gate. size is per clone, so the dataset is size x clones.\n# This runs inside the pod on purpose: scripts/deploy_test.sh checks\n# the same thing beforehand, but a bare `helm install` bypasses it,\n# and this is the failure that killed results/test4_*.\nNUMJOBS=$(sed -n 's/^[[:space:]]*numjobs[[:space:]]*=[[:space:]]*\\([0-9]\\+\\).*/\\1/p' /tmp/fio.job | head -1)\nSECTIONS=$(grep -c '^\\[' /tmp/fio.job)\nSECTIONS=$((SECTIONS \u003e 1 ? SECTIONS - 1 : 1))\nif [ -n \"$NUMJOBS\" ]; then CLONES=$((NUMJOBS * SECTIONS)); else CLONES=$SECTIONS; fi\nSIZE_RAW=$(sed -n 's/^[[:space:]]*size[[:space:]]*=[[:space:]]*\\([0-9]\\+[KMGTkmgt]\\?\\).*/\\1/p' /tmp/fio.job | head -1)\nSIZE_NUM=$(echo \"$SIZE_RAW\" | tr -cd '0-9')\ncase \"$(echo \"$SIZE_RAW\" | tr -cd 'KMGTkmgt' | tr '[:lower:]' '[:upper:]')\" in\n  K) MULT=1 ;; M) MULT=1024 ;; G) MULT=$((1024*1024)) ;;\n  T) MULT=$((1024*1024*1024)) ;; *) MULT=1 ;;\nesac\nNEED_KB=$((SIZE_NUM * MULT * CLONES))\nAVAIL_KB=$(df -Pk /mnt/fio-data | awk 'NR==2 {print $4}')\necho \"=== capacity ===\"\necho \"dataset: size=${SIZE_RAW} x ${CLONES} clones = $((NEED_KB/1024/1024)) GiB\"\necho \"mount:   $((AVAIL_KB/1024/1024)) GiB free\"\nif [ \"$NEED_KB\" -gt \"$AVAIL_KB\" ]; then\n  echo \"FATAL: PVC is too small for this job.\"\n  echo \"  fio would lay out files until ENOSPC, kill part of the workload,\"\n  echo \"  and still exit having produced a plausible-looking log.\"\n  echo \"  Set pvc.size to at least $(( (NEED_KB * 12 / 10) / 1024 / 1024 ))Gi and re-run.\"\n  exit 28\nfi\n\n# cgroup CPU pressure, before. If the client is throttled during the\n# run then its tail latency describes the CFS scheduler, not NFS.\nCG=\"\"\nif [ -r /sys/fs/cgroup/cpu.stat ]; then CG=/sys/fs/cgroup/cpu.stat\nelif [ -r /sys/fs/cgroup/cpu/cpu.stat ]; then CG=/sys/fs/cgroup/cpu/cpu.stat\nfi\nCG_BEFORE=$([ -n \"$CG\" ] \u0026\u0026 tr '\\n' ' ' \u003c \"$CG\" || echo \"\")\n# Absolute-time barrier. Every pod in every release of this run waits\n# for the same instant, so a burst phase actually overlaps the phase\n# it is meant to burst against, rather than starting whenever helm\n# happened to return.\nTARGET=1789062339\nNOW=$(date +%s)\nif [ \"$NOW\" -lt \"$TARGET\" ]; then\n  echo \"barrier: waiting $((TARGET - NOW))s until $(date -d @$TARGET)\"\n  while [ \"$(date +%s)\" -lt \"$TARGET\" ]; do sleep 0.2; done\nelse\n  echo \"barrier: WARNING started $((NOW - TARGET))s late; overlap is not guaranteed\"\nfi\n\necho \"=== fio start $(date -u +%Y-%m-%dT%H:%M:%SZ) epoch=$(date +%s) ===\"\nfio /tmp/fio.job --output-format=json+ --output=/tmp/fio.json\nFIO_RC=$?\necho \"=== fio end $(date -u +%Y-%m-%dT%H:%M:%SZ) epoch=$(date +%s) rc=$FIO_RC ===\"\n\necho \"===FIO_CGROUP_BEGIN===\"\necho \"before: ${CG_BEFORE}\"\necho \"after: $([ -n \"$CG\" ] \u0026\u0026 tr '\\n' ' ' \u003c \"$CG\" || echo \"\")\"\necho \"===FIO_CGROUP_END===\"\n# Markers let collect_results.sh extract the JSON from kubectl logs\n# without needing a shared volume or a sidecar.\necho \"===FIO_JSON_BEGIN===\"\ncat /tmp/fio.json\necho \"===FIO_JSON_END===\"\necho \"===FIO_TSLOG_BEGIN===\"\nfor l in /tmp/fiolog/*.log; do\n  [ -f \"$l\" ] || continue\n  echo \"--- $(basename \"$l\") ---\"\n  cat \"$l\"\ndone\necho \"===FIO_TSLOG_END===\"\n\n# Propagate the real result. Without this the container exits 0 on a\n# failed fio and kubectl reports Completed for a run that died.\nexit $FIO_RC\n"
+                        ],
+                        "command": [
+                            "/bin/bash",
+                            "-c"
+                        ],
+                        "env": [
+                            {
+                                "name": "NODE_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "spec.nodeName"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "POD_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "metadata.name"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "rafmoshe2500/fio:3.41",
+                        "imagePullPolicy": "IfNotPresent",
+                        "name": "fio",
+                        "resources": {
+                            "limits": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            },
+                            "requests": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            }
+                        },
+                        "securityContext": {
+                            "capabilities": {
+                                "drop": [
+                                    "MKNOD"
+                                ]
+                            }
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/mnt/fio-data",
+                                "name": "fio-data"
+                            },
+                            {
+                                "mountPath": "/fio-config",
+                                "name": "fio-config"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-zcd9d",
+                                "readOnly": true
+                            }
+                        ]
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "enableServiceLinks": true,
+                "nodeName": "s2",
+                "preemptionPolicy": "PreemptLowerPriority",
+                "priority": 0,
+                "restartPolicy": "Never",
+                "schedulerName": "default-scheduler",
+                "securityContext": {
+                    "seLinuxOptions": {
+                        "level": "s0:c32,c14"
+                    }
+                },
+                "serviceAccount": "default",
+                "serviceAccountName": "default",
+                "terminationGracePeriodSeconds": 30,
+                "tolerations": [
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoSchedule",
+                        "key": "node.kubernetes.io/memory-pressure",
+                        "operator": "Exists"
+                    }
+                ],
+                "volumes": [
+                    {
+                        "name": "fio-data",
+                        "persistentVolumeClaim": {
+                            "claimName": "fio-test2-10pods-30k-5050-32kb-pvc-3"
+                        }
+                    },
+                    {
+                        "configMap": {
+                            "defaultMode": 420,
+                            "name": "fio-test2-10pods-30k-5050-32kb-fio-benchmark-config"
+                        },
+                        "name": "fio-config"
+                    },
+                    {
+                        "name": "kube-api-access-zcd9d",
+                        "projected": {
+                            "defaultMode": 420,
+                            "sources": [
+                                {
+                                    "serviceAccountToken": {
+                                        "expirationSeconds": 3607,
+                                        "path": "token"
+                                    }
+                                },
+                                {
+                                    "configMap": {
+                                        "items": [
+                                            {
+                                                "key": "ca.crt",
+                                                "path": "ca.crt"
+                                            }
+                                        ],
+                                        "name": "kube-root-ca.crt"
+                                    }
+                                },
+                                {
+                                    "downwardAPI": {
+                                        "items": [
+                                            {
+                                                "fieldRef": {
+                                                    "apiVersion": "v1",
+                                                    "fieldPath": "metadata.namespace"
+                                                },
+                                                "path": "namespace"
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "configMap": {
+                                        "items": [
+                                            {
+                                                "key": "service-ca.crt",
+                                                "path": "service-ca.crt"
+                                            }
+                                        ],
+                                        "name": "openshift-service-ca.crt"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:21Z",
+                        "observedGeneration": 1,
+                        "status": "False",
+                        "type": "PodReadyToStartContainers"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:43:18Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "True",
+                        "type": "Initialized"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:20Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "False",
+                        "type": "Ready"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:20Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "False",
+                        "type": "ContainersReady"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:43:18Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodScheduled"
+                    }
+                ],
+                "containerStatuses": [
+                    {
+                        "allocatedResources": {
+                            "cpu": "4",
+                            "memory": "4Gi"
+                        },
+                        "containerID": "cri-o://2f014c80b80d28421d2e3eb8368db5c54fce79b3e2f4a45dd7d6c6eaf09737ae",
+                        "image": "docker.io/rafmoshe2500/fio:3.41",
+                        "imageID": "docker.io/rafmoshe2500/fio@sha256:5fe85a0bb0ae82616cd1aa0825ca13f692a14623a82a2f4ad31d01fd8c1f8766",
+                        "lastState": {},
+                        "name": "fio",
+                        "ready": false,
+                        "resources": {
+                            "limits": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            },
+                            "requests": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            }
+                        },
+                        "restartCount": 0,
+                        "started": false,
+                        "state": {
+                            "terminated": {
+                                "containerID": "cri-o://2f014c80b80d28421d2e3eb8368db5c54fce79b3e2f4a45dd7d6c6eaf09737ae",
+                                "exitCode": 0,
+                                "finishedAt": "2026-09-10T17:57:19Z",
+                                "reason": "Completed",
+                                "startedAt": "2026-09-10T17:43:43Z"
+                            }
+                        },
+                        "user": {
+                            "linux": {
+                                "gid": 0,
+                                "supplementalGroups": [
+                                    0
+                                ],
+                                "uid": 0
+                            }
+                        },
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/mnt/fio-data",
+                                "name": "fio-data"
+                            },
+                            {
+                                "mountPath": "/fio-config",
+                                "name": "fio-config"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-zcd9d",
+                                "readOnly": true,
+                                "recursiveReadOnly": "Disabled"
+                            }
+                        ]
+                    }
+                ],
+                "hostIP": "10.61.103.156",
+                "hostIPs": [
+                    {
+                        "ip": "10.61.103.156"
+                    }
+                ],
+                "observedGeneration": 1,
+                "phase": "Succeeded",
+                "podIP": "10.129.0.222",
+                "podIPs": [
+                    {
+                        "ip": "10.129.0.222"
+                    }
+                ],
+                "qosClass": "Guaranteed",
+                "startTime": "2026-09-10T17:43:18Z"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "annotations": {
+                    "k8s.ovn.org/pod-networks": "{\"default\":{\"ip_addresses\":[\"10.129.0.221/23\"],\"mac_address\":\"0a:58:0a:81:00:dd\",\"gateway_ips\":[\"10.129.0.1\"],\"routes\":[{\"dest\":\"10.128.0.0/14\",\"nextHop\":\"10.129.0.1\"},{\"dest\":\"172.30.0.0/16\",\"nextHop\":\"10.129.0.1\"},{\"dest\":\"169.254.0.5/32\",\"nextHop\":\"10.129.0.1\"},{\"dest\":\"100.64.0.0/16\",\"nextHop\":\"10.129.0.1\"}],\"ip_address\":\"10.129.0.221/23\",\"gateway_ip\":\"10.129.0.1\",\"role\":\"primary\"}}",
+                    "k8s.v1.cni.cncf.io/network-status": "[{\n    \"name\": \"ovn-kubernetes\",\n    \"interface\": \"eth0\",\n    \"ips\": [\n        \"10.129.0.221\"\n    ],\n    \"mac\": \"0a:58:0a:81:00:dd\",\n    \"default\": true,\n    \"dns\": {}\n}]",
+                    "meta.helm.sh/release-name": "fio-test2-10pods-30k-5050-32kb",
+                    "meta.helm.sh/release-namespace": "fio-tests",
+                    "openshift.io/scc": "anyuid",
+                    "security.openshift.io/validated-scc-subject-type": "user"
+                },
+                "creationTimestamp": "2026-09-10T17:42:40Z",
+                "generation": 1,
+                "labels": {
+                    "app": "fio-benchmark",
+                    "app.kubernetes.io/instance": "fio-test2-10pods-30k-5050-32kb",
+                    "app.kubernetes.io/managed-by": "Helm",
+                    "app.kubernetes.io/name": "fio-benchmark",
+                    "app.kubernetes.io/version": "3.41",
+                    "component": "storage-test",
+                    "fio.benchmark/run-id": "test2-10pods-30k-5050-32kb-20260910-134239",
+                    "helm.sh/chart": "fio-benchmark-1.0.0",
+                    "pod-index": "4"
+                },
+                "name": "fio-test2-10pods-30k-5050-32kb-4",
+                "namespace": "fio-tests",
+                "resourceVersion": "14985836",
+                "uid": "8e8c32f6-3212-4bad-939e-7382f8598dbe"
+            },
+            "spec": {
+                "affinity": {
+                    "podAntiAffinity": {
+                        "preferredDuringSchedulingIgnoredDuringExecution": [
+                            {
+                                "podAffinityTerm": {
+                                    "labelSelector": {
+                                        "matchLabels": {
+                                            "fio.benchmark/run-id": "test2-10pods-30k-5050-32kb-20260910-134239"
+                                        }
+                                    },
+                                    "topologyKey": "kubernetes.io/hostname"
+                                },
+                                "weight": 100
+                            }
+                        ]
+                    }
+                },
+                "containers": [
+                    {
+                        "args": [
+                            "set -o pipefail\necho \"pod 4 of 10, run test2-10pods-30k-5050-32kb-20260910-134239\"\ncp /fio-config/fio.job /tmp/fio.job\nsed -i 's|directory=.*|directory=/mnt/fio-data|g' /tmp/fio.job\nmkdir -p /tmp/fiolog\n\necho \"=== environment ===\"\necho \"node=${NODE_NAME} pod=${POD_NAME}\"\nfio --version\ndf -h /mnt/fio-data\ngrep \"/mnt/fio-data\" /proc/mounts || true\n\necho \"=== fio job ===\"\ncat /tmp/fio.job\n\n# Capacity gate. size is per clone, so the dataset is size x clones.\n# This runs inside the pod on purpose: scripts/deploy_test.sh checks\n# the same thing beforehand, but a bare `helm install` bypasses it,\n# and this is the failure that killed results/test4_*.\nNUMJOBS=$(sed -n 's/^[[:space:]]*numjobs[[:space:]]*=[[:space:]]*\\([0-9]\\+\\).*/\\1/p' /tmp/fio.job | head -1)\nSECTIONS=$(grep -c '^\\[' /tmp/fio.job)\nSECTIONS=$((SECTIONS \u003e 1 ? SECTIONS - 1 : 1))\nif [ -n \"$NUMJOBS\" ]; then CLONES=$((NUMJOBS * SECTIONS)); else CLONES=$SECTIONS; fi\nSIZE_RAW=$(sed -n 's/^[[:space:]]*size[[:space:]]*=[[:space:]]*\\([0-9]\\+[KMGTkmgt]\\?\\).*/\\1/p' /tmp/fio.job | head -1)\nSIZE_NUM=$(echo \"$SIZE_RAW\" | tr -cd '0-9')\ncase \"$(echo \"$SIZE_RAW\" | tr -cd 'KMGTkmgt' | tr '[:lower:]' '[:upper:]')\" in\n  K) MULT=1 ;; M) MULT=1024 ;; G) MULT=$((1024*1024)) ;;\n  T) MULT=$((1024*1024*1024)) ;; *) MULT=1 ;;\nesac\nNEED_KB=$((SIZE_NUM * MULT * CLONES))\nAVAIL_KB=$(df -Pk /mnt/fio-data | awk 'NR==2 {print $4}')\necho \"=== capacity ===\"\necho \"dataset: size=${SIZE_RAW} x ${CLONES} clones = $((NEED_KB/1024/1024)) GiB\"\necho \"mount:   $((AVAIL_KB/1024/1024)) GiB free\"\nif [ \"$NEED_KB\" -gt \"$AVAIL_KB\" ]; then\n  echo \"FATAL: PVC is too small for this job.\"\n  echo \"  fio would lay out files until ENOSPC, kill part of the workload,\"\n  echo \"  and still exit having produced a plausible-looking log.\"\n  echo \"  Set pvc.size to at least $(( (NEED_KB * 12 / 10) / 1024 / 1024 ))Gi and re-run.\"\n  exit 28\nfi\n\n# cgroup CPU pressure, before. If the client is throttled during the\n# run then its tail latency describes the CFS scheduler, not NFS.\nCG=\"\"\nif [ -r /sys/fs/cgroup/cpu.stat ]; then CG=/sys/fs/cgroup/cpu.stat\nelif [ -r /sys/fs/cgroup/cpu/cpu.stat ]; then CG=/sys/fs/cgroup/cpu/cpu.stat\nfi\nCG_BEFORE=$([ -n \"$CG\" ] \u0026\u0026 tr '\\n' ' ' \u003c \"$CG\" || echo \"\")\n# Absolute-time barrier. Every pod in every release of this run waits\n# for the same instant, so a burst phase actually overlaps the phase\n# it is meant to burst against, rather than starting whenever helm\n# happened to return.\nTARGET=1789062339\nNOW=$(date +%s)\nif [ \"$NOW\" -lt \"$TARGET\" ]; then\n  echo \"barrier: waiting $((TARGET - NOW))s until $(date -d @$TARGET)\"\n  while [ \"$(date +%s)\" -lt \"$TARGET\" ]; do sleep 0.2; done\nelse\n  echo \"barrier: WARNING started $((NOW - TARGET))s late; overlap is not guaranteed\"\nfi\n\necho \"=== fio start $(date -u +%Y-%m-%dT%H:%M:%SZ) epoch=$(date +%s) ===\"\nfio /tmp/fio.job --output-format=json+ --output=/tmp/fio.json\nFIO_RC=$?\necho \"=== fio end $(date -u +%Y-%m-%dT%H:%M:%SZ) epoch=$(date +%s) rc=$FIO_RC ===\"\n\necho \"===FIO_CGROUP_BEGIN===\"\necho \"before: ${CG_BEFORE}\"\necho \"after: $([ -n \"$CG\" ] \u0026\u0026 tr '\\n' ' ' \u003c \"$CG\" || echo \"\")\"\necho \"===FIO_CGROUP_END===\"\n# Markers let collect_results.sh extract the JSON from kubectl logs\n# without needing a shared volume or a sidecar.\necho \"===FIO_JSON_BEGIN===\"\ncat /tmp/fio.json\necho \"===FIO_JSON_END===\"\necho \"===FIO_TSLOG_BEGIN===\"\nfor l in /tmp/fiolog/*.log; do\n  [ -f \"$l\" ] || continue\n  echo \"--- $(basename \"$l\") ---\"\n  cat \"$l\"\ndone\necho \"===FIO_TSLOG_END===\"\n\n# Propagate the real result. Without this the container exits 0 on a\n# failed fio and kubectl reports Completed for a run that died.\nexit $FIO_RC\n"
+                        ],
+                        "command": [
+                            "/bin/bash",
+                            "-c"
+                        ],
+                        "env": [
+                            {
+                                "name": "NODE_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "spec.nodeName"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "POD_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "metadata.name"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "rafmoshe2500/fio:3.41",
+                        "imagePullPolicy": "IfNotPresent",
+                        "name": "fio",
+                        "resources": {
+                            "limits": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            },
+                            "requests": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            }
+                        },
+                        "securityContext": {
+                            "capabilities": {
+                                "drop": [
+                                    "MKNOD"
+                                ]
+                            }
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/mnt/fio-data",
+                                "name": "fio-data"
+                            },
+                            {
+                                "mountPath": "/fio-config",
+                                "name": "fio-config"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-4p6c8",
+                                "readOnly": true
+                            }
+                        ]
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "enableServiceLinks": true,
+                "nodeName": "s2",
+                "preemptionPolicy": "PreemptLowerPriority",
+                "priority": 0,
+                "restartPolicy": "Never",
+                "schedulerName": "default-scheduler",
+                "securityContext": {
+                    "seLinuxOptions": {
+                        "level": "s0:c32,c14"
+                    }
+                },
+                "serviceAccount": "default",
+                "serviceAccountName": "default",
+                "terminationGracePeriodSeconds": 30,
+                "tolerations": [
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoSchedule",
+                        "key": "node.kubernetes.io/memory-pressure",
+                        "operator": "Exists"
+                    }
+                ],
+                "volumes": [
+                    {
+                        "name": "fio-data",
+                        "persistentVolumeClaim": {
+                            "claimName": "fio-test2-10pods-30k-5050-32kb-pvc-4"
+                        }
+                    },
+                    {
+                        "configMap": {
+                            "defaultMode": 420,
+                            "name": "fio-test2-10pods-30k-5050-32kb-fio-benchmark-config"
+                        },
+                        "name": "fio-config"
+                    },
+                    {
+                        "name": "kube-api-access-4p6c8",
+                        "projected": {
+                            "defaultMode": 420,
+                            "sources": [
+                                {
+                                    "serviceAccountToken": {
+                                        "expirationSeconds": 3607,
+                                        "path": "token"
+                                    }
+                                },
+                                {
+                                    "configMap": {
+                                        "items": [
+                                            {
+                                                "key": "ca.crt",
+                                                "path": "ca.crt"
+                                            }
+                                        ],
+                                        "name": "kube-root-ca.crt"
+                                    }
+                                },
+                                {
+                                    "downwardAPI": {
+                                        "items": [
+                                            {
+                                                "fieldRef": {
+                                                    "apiVersion": "v1",
+                                                    "fieldPath": "metadata.namespace"
+                                                },
+                                                "path": "namespace"
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "configMap": {
+                                        "items": [
+                                            {
+                                                "key": "service-ca.crt",
+                                                "path": "service-ca.crt"
+                                            }
+                                        ],
+                                        "name": "openshift-service-ca.crt"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:15Z",
+                        "observedGeneration": 1,
+                        "status": "False",
+                        "type": "PodReadyToStartContainers"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:42:52Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "True",
+                        "type": "Initialized"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:14Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "False",
+                        "type": "Ready"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:14Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "False",
+                        "type": "ContainersReady"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:42:52Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodScheduled"
+                    }
+                ],
+                "containerStatuses": [
+                    {
+                        "allocatedResources": {
+                            "cpu": "4",
+                            "memory": "4Gi"
+                        },
+                        "containerID": "cri-o://aefd8431580d85fb2cd001ee00f521b645dde7a076c2d47db10f0c17cd98ad69",
+                        "image": "docker.io/rafmoshe2500/fio:3.41",
+                        "imageID": "docker.io/rafmoshe2500/fio@sha256:5fe85a0bb0ae82616cd1aa0825ca13f692a14623a82a2f4ad31d01fd8c1f8766",
+                        "lastState": {},
+                        "name": "fio",
+                        "ready": false,
+                        "resources": {
+                            "limits": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            },
+                            "requests": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            }
+                        },
+                        "restartCount": 0,
+                        "started": false,
+                        "state": {
+                            "terminated": {
+                                "containerID": "cri-o://aefd8431580d85fb2cd001ee00f521b645dde7a076c2d47db10f0c17cd98ad69",
+                                "exitCode": 0,
+                                "finishedAt": "2026-09-10T17:57:14Z",
+                                "reason": "Completed",
+                                "startedAt": "2026-09-10T17:43:43Z"
+                            }
+                        },
+                        "user": {
+                            "linux": {
+                                "gid": 0,
+                                "supplementalGroups": [
+                                    0
+                                ],
+                                "uid": 0
+                            }
+                        },
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/mnt/fio-data",
+                                "name": "fio-data"
+                            },
+                            {
+                                "mountPath": "/fio-config",
+                                "name": "fio-config"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-4p6c8",
+                                "readOnly": true,
+                                "recursiveReadOnly": "Disabled"
+                            }
+                        ]
+                    }
+                ],
+                "hostIP": "10.61.103.156",
+                "hostIPs": [
+                    {
+                        "ip": "10.61.103.156"
+                    }
+                ],
+                "observedGeneration": 1,
+                "phase": "Succeeded",
+                "podIP": "10.129.0.221",
+                "podIPs": [
+                    {
+                        "ip": "10.129.0.221"
+                    }
+                ],
+                "qosClass": "Guaranteed",
+                "startTime": "2026-09-10T17:42:52Z"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "annotations": {
+                    "k8s.ovn.org/pod-networks": "{\"default\":{\"ip_addresses\":[\"10.128.0.191/23\"],\"mac_address\":\"0a:58:0a:80:00:bf\",\"gateway_ips\":[\"10.128.0.1\"],\"routes\":[{\"dest\":\"10.128.0.0/14\",\"nextHop\":\"10.128.0.1\"},{\"dest\":\"172.30.0.0/16\",\"nextHop\":\"10.128.0.1\"},{\"dest\":\"169.254.0.5/32\",\"nextHop\":\"10.128.0.1\"},{\"dest\":\"100.64.0.0/16\",\"nextHop\":\"10.128.0.1\"}],\"ip_address\":\"10.128.0.191/23\",\"gateway_ip\":\"10.128.0.1\",\"role\":\"primary\"}}",
+                    "k8s.v1.cni.cncf.io/network-status": "[{\n    \"name\": \"ovn-kubernetes\",\n    \"interface\": \"eth0\",\n    \"ips\": [\n        \"10.128.0.191\"\n    ],\n    \"mac\": \"0a:58:0a:80:00:bf\",\n    \"default\": true,\n    \"dns\": {}\n}]",
+                    "meta.helm.sh/release-name": "fio-test2-10pods-30k-5050-32kb",
+                    "meta.helm.sh/release-namespace": "fio-tests",
+                    "openshift.io/scc": "anyuid",
+                    "security.openshift.io/validated-scc-subject-type": "user"
+                },
+                "creationTimestamp": "2026-09-10T17:42:40Z",
+                "generation": 1,
+                "labels": {
+                    "app": "fio-benchmark",
+                    "app.kubernetes.io/instance": "fio-test2-10pods-30k-5050-32kb",
+                    "app.kubernetes.io/managed-by": "Helm",
+                    "app.kubernetes.io/name": "fio-benchmark",
+                    "app.kubernetes.io/version": "3.41",
+                    "component": "storage-test",
+                    "fio.benchmark/run-id": "test2-10pods-30k-5050-32kb-20260910-134239",
+                    "helm.sh/chart": "fio-benchmark-1.0.0",
+                    "pod-index": "5"
+                },
+                "name": "fio-test2-10pods-30k-5050-32kb-5",
+                "namespace": "fio-tests",
+                "resourceVersion": "14985889",
+                "uid": "c2b667cc-de86-47c1-88a9-23b014df6a77"
+            },
+            "spec": {
+                "affinity": {
+                    "podAntiAffinity": {
+                        "preferredDuringSchedulingIgnoredDuringExecution": [
+                            {
+                                "podAffinityTerm": {
+                                    "labelSelector": {
+                                        "matchLabels": {
+                                            "fio.benchmark/run-id": "test2-10pods-30k-5050-32kb-20260910-134239"
+                                        }
+                                    },
+                                    "topologyKey": "kubernetes.io/hostname"
+                                },
+                                "weight": 100
+                            }
+                        ]
+                    }
+                },
+                "containers": [
+                    {
+                        "args": [
+                            "set -o pipefail\necho \"pod 5 of 10, run test2-10pods-30k-5050-32kb-20260910-134239\"\ncp /fio-config/fio.job /tmp/fio.job\nsed -i 's|directory=.*|directory=/mnt/fio-data|g' /tmp/fio.job\nmkdir -p /tmp/fiolog\n\necho \"=== environment ===\"\necho \"node=${NODE_NAME} pod=${POD_NAME}\"\nfio --version\ndf -h /mnt/fio-data\ngrep \"/mnt/fio-data\" /proc/mounts || true\n\necho \"=== fio job ===\"\ncat /tmp/fio.job\n\n# Capacity gate. size is per clone, so the dataset is size x clones.\n# This runs inside the pod on purpose: scripts/deploy_test.sh checks\n# the same thing beforehand, but a bare `helm install` bypasses it,\n# and this is the failure that killed results/test4_*.\nNUMJOBS=$(sed -n 's/^[[:space:]]*numjobs[[:space:]]*=[[:space:]]*\\([0-9]\\+\\).*/\\1/p' /tmp/fio.job | head -1)\nSECTIONS=$(grep -c '^\\[' /tmp/fio.job)\nSECTIONS=$((SECTIONS \u003e 1 ? SECTIONS - 1 : 1))\nif [ -n \"$NUMJOBS\" ]; then CLONES=$((NUMJOBS * SECTIONS)); else CLONES=$SECTIONS; fi\nSIZE_RAW=$(sed -n 's/^[[:space:]]*size[[:space:]]*=[[:space:]]*\\([0-9]\\+[KMGTkmgt]\\?\\).*/\\1/p' /tmp/fio.job | head -1)\nSIZE_NUM=$(echo \"$SIZE_RAW\" | tr -cd '0-9')\ncase \"$(echo \"$SIZE_RAW\" | tr -cd 'KMGTkmgt' | tr '[:lower:]' '[:upper:]')\" in\n  K) MULT=1 ;; M) MULT=1024 ;; G) MULT=$((1024*1024)) ;;\n  T) MULT=$((1024*1024*1024)) ;; *) MULT=1 ;;\nesac\nNEED_KB=$((SIZE_NUM * MULT * CLONES))\nAVAIL_KB=$(df -Pk /mnt/fio-data | awk 'NR==2 {print $4}')\necho \"=== capacity ===\"\necho \"dataset: size=${SIZE_RAW} x ${CLONES} clones = $((NEED_KB/1024/1024)) GiB\"\necho \"mount:   $((AVAIL_KB/1024/1024)) GiB free\"\nif [ \"$NEED_KB\" -gt \"$AVAIL_KB\" ]; then\n  echo \"FATAL: PVC is too small for this job.\"\n  echo \"  fio would lay out files until ENOSPC, kill part of the workload,\"\n  echo \"  and still exit having produced a plausible-looking log.\"\n  echo \"  Set pvc.size to at least $(( (NEED_KB * 12 / 10) / 1024 / 1024 ))Gi and re-run.\"\n  exit 28\nfi\n\n# cgroup CPU pressure, before. If the client is throttled during the\n# run then its tail latency describes the CFS scheduler, not NFS.\nCG=\"\"\nif [ -r /sys/fs/cgroup/cpu.stat ]; then CG=/sys/fs/cgroup/cpu.stat\nelif [ -r /sys/fs/cgroup/cpu/cpu.stat ]; then CG=/sys/fs/cgroup/cpu/cpu.stat\nfi\nCG_BEFORE=$([ -n \"$CG\" ] \u0026\u0026 tr '\\n' ' ' \u003c \"$CG\" || echo \"\")\n# Absolute-time barrier. Every pod in every release of this run waits\n# for the same instant, so a burst phase actually overlaps the phase\n# it is meant to burst against, rather than starting whenever helm\n# happened to return.\nTARGET=1789062339\nNOW=$(date +%s)\nif [ \"$NOW\" -lt \"$TARGET\" ]; then\n  echo \"barrier: waiting $((TARGET - NOW))s until $(date -d @$TARGET)\"\n  while [ \"$(date +%s)\" -lt \"$TARGET\" ]; do sleep 0.2; done\nelse\n  echo \"barrier: WARNING started $((NOW - TARGET))s late; overlap is not guaranteed\"\nfi\n\necho \"=== fio start $(date -u +%Y-%m-%dT%H:%M:%SZ) epoch=$(date +%s) ===\"\nfio /tmp/fio.job --output-format=json+ --output=/tmp/fio.json\nFIO_RC=$?\necho \"=== fio end $(date -u +%Y-%m-%dT%H:%M:%SZ) epoch=$(date +%s) rc=$FIO_RC ===\"\n\necho \"===FIO_CGROUP_BEGIN===\"\necho \"before: ${CG_BEFORE}\"\necho \"after: $([ -n \"$CG\" ] \u0026\u0026 tr '\\n' ' ' \u003c \"$CG\" || echo \"\")\"\necho \"===FIO_CGROUP_END===\"\n# Markers let collect_results.sh extract the JSON from kubectl logs\n# without needing a shared volume or a sidecar.\necho \"===FIO_JSON_BEGIN===\"\ncat /tmp/fio.json\necho \"===FIO_JSON_END===\"\necho \"===FIO_TSLOG_BEGIN===\"\nfor l in /tmp/fiolog/*.log; do\n  [ -f \"$l\" ] || continue\n  echo \"--- $(basename \"$l\") ---\"\n  cat \"$l\"\ndone\necho \"===FIO_TSLOG_END===\"\n\n# Propagate the real result. Without this the container exits 0 on a\n# failed fio and kubectl reports Completed for a run that died.\nexit $FIO_RC\n"
+                        ],
+                        "command": [
+                            "/bin/bash",
+                            "-c"
+                        ],
+                        "env": [
+                            {
+                                "name": "NODE_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "spec.nodeName"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "POD_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "metadata.name"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "rafmoshe2500/fio:3.41",
+                        "imagePullPolicy": "IfNotPresent",
+                        "name": "fio",
+                        "resources": {
+                            "limits": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            },
+                            "requests": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            }
+                        },
+                        "securityContext": {
+                            "capabilities": {
+                                "drop": [
+                                    "MKNOD"
+                                ]
+                            }
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/mnt/fio-data",
+                                "name": "fio-data"
+                            },
+                            {
+                                "mountPath": "/fio-config",
+                                "name": "fio-config"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-74w46",
+                                "readOnly": true
+                            }
+                        ]
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "enableServiceLinks": true,
+                "nodeName": "s3",
+                "preemptionPolicy": "PreemptLowerPriority",
+                "priority": 0,
+                "restartPolicy": "Never",
+                "schedulerName": "default-scheduler",
+                "securityContext": {
+                    "seLinuxOptions": {
+                        "level": "s0:c32,c14"
+                    }
+                },
+                "serviceAccount": "default",
+                "serviceAccountName": "default",
+                "terminationGracePeriodSeconds": 30,
+                "tolerations": [
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoSchedule",
+                        "key": "node.kubernetes.io/memory-pressure",
+                        "operator": "Exists"
+                    }
+                ],
+                "volumes": [
+                    {
+                        "name": "fio-data",
+                        "persistentVolumeClaim": {
+                            "claimName": "fio-test2-10pods-30k-5050-32kb-pvc-5"
+                        }
+                    },
+                    {
+                        "configMap": {
+                            "defaultMode": 420,
+                            "name": "fio-test2-10pods-30k-5050-32kb-fio-benchmark-config"
+                        },
+                        "name": "fio-config"
+                    },
+                    {
+                        "name": "kube-api-access-74w46",
+                        "projected": {
+                            "defaultMode": 420,
+                            "sources": [
+                                {
+                                    "serviceAccountToken": {
+                                        "expirationSeconds": 3607,
+                                        "path": "token"
+                                    }
+                                },
+                                {
+                                    "configMap": {
+                                        "items": [
+                                            {
+                                                "key": "ca.crt",
+                                                "path": "ca.crt"
+                                            }
+                                        ],
+                                        "name": "kube-root-ca.crt"
+                                    }
+                                },
+                                {
+                                    "downwardAPI": {
+                                        "items": [
+                                            {
+                                                "fieldRef": {
+                                                    "apiVersion": "v1",
+                                                    "fieldPath": "metadata.namespace"
+                                                },
+                                                "path": "namespace"
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "configMap": {
+                                        "items": [
+                                            {
+                                                "key": "service-ca.crt",
+                                                "path": "service-ca.crt"
+                                            }
+                                        ],
+                                        "name": "openshift-service-ca.crt"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:22Z",
+                        "observedGeneration": 1,
+                        "status": "False",
+                        "type": "PodReadyToStartContainers"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:42:59Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "True",
+                        "type": "Initialized"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:21Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "False",
+                        "type": "Ready"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:21Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "False",
+                        "type": "ContainersReady"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:42:59Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodScheduled"
+                    }
+                ],
+                "containerStatuses": [
+                    {
+                        "allocatedResources": {
+                            "cpu": "4",
+                            "memory": "4Gi"
+                        },
+                        "containerID": "cri-o://ea7b9cff41635b5631c7b5369aa982b4332ecd4f788a7695213cbed747d42951",
+                        "image": "docker.io/rafmoshe2500/fio:3.41",
+                        "imageID": "docker.io/rafmoshe2500/fio@sha256:5fe85a0bb0ae82616cd1aa0825ca13f692a14623a82a2f4ad31d01fd8c1f8766",
+                        "lastState": {},
+                        "name": "fio",
+                        "ready": false,
+                        "resources": {
+                            "limits": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            },
+                            "requests": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            }
+                        },
+                        "restartCount": 0,
+                        "started": false,
+                        "state": {
+                            "terminated": {
+                                "containerID": "cri-o://ea7b9cff41635b5631c7b5369aa982b4332ecd4f788a7695213cbed747d42951",
+                                "exitCode": 0,
+                                "finishedAt": "2026-09-10T17:57:21Z",
+                                "reason": "Completed",
+                                "startedAt": "2026-09-10T17:43:45Z"
+                            }
+                        },
+                        "user": {
+                            "linux": {
+                                "gid": 0,
+                                "supplementalGroups": [
+                                    0
+                                ],
+                                "uid": 0
+                            }
+                        },
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/mnt/fio-data",
+                                "name": "fio-data"
+                            },
+                            {
+                                "mountPath": "/fio-config",
+                                "name": "fio-config"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-74w46",
+                                "readOnly": true,
+                                "recursiveReadOnly": "Disabled"
+                            }
+                        ]
+                    }
+                ],
+                "hostIP": "10.61.103.157",
+                "hostIPs": [
+                    {
+                        "ip": "10.61.103.157"
+                    }
+                ],
+                "observedGeneration": 1,
+                "phase": "Succeeded",
+                "podIP": "10.128.0.191",
+                "podIPs": [
+                    {
+                        "ip": "10.128.0.191"
+                    }
+                ],
+                "qosClass": "Guaranteed",
+                "startTime": "2026-09-10T17:42:59Z"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "annotations": {
+                    "k8s.ovn.org/pod-networks": "{\"default\":{\"ip_addresses\":[\"10.130.0.104/23\"],\"mac_address\":\"0a:58:0a:82:00:68\",\"gateway_ips\":[\"10.130.0.1\"],\"routes\":[{\"dest\":\"10.128.0.0/14\",\"nextHop\":\"10.130.0.1\"},{\"dest\":\"172.30.0.0/16\",\"nextHop\":\"10.130.0.1\"},{\"dest\":\"169.254.0.5/32\",\"nextHop\":\"10.130.0.1\"},{\"dest\":\"100.64.0.0/16\",\"nextHop\":\"10.130.0.1\"}],\"ip_address\":\"10.130.0.104/23\",\"gateway_ip\":\"10.130.0.1\",\"role\":\"primary\"}}",
+                    "k8s.v1.cni.cncf.io/network-status": "[{\n    \"name\": \"ovn-kubernetes\",\n    \"interface\": \"eth0\",\n    \"ips\": [\n        \"10.130.0.104\"\n    ],\n    \"mac\": \"0a:58:0a:82:00:68\",\n    \"default\": true,\n    \"dns\": {}\n}]",
+                    "meta.helm.sh/release-name": "fio-test2-10pods-30k-5050-32kb",
+                    "meta.helm.sh/release-namespace": "fio-tests",
+                    "openshift.io/scc": "anyuid",
+                    "security.openshift.io/validated-scc-subject-type": "user"
+                },
+                "creationTimestamp": "2026-09-10T17:42:40Z",
+                "generation": 1,
+                "labels": {
+                    "app": "fio-benchmark",
+                    "app.kubernetes.io/instance": "fio-test2-10pods-30k-5050-32kb",
+                    "app.kubernetes.io/managed-by": "Helm",
+                    "app.kubernetes.io/name": "fio-benchmark",
+                    "app.kubernetes.io/version": "3.41",
+                    "component": "storage-test",
+                    "fio.benchmark/run-id": "test2-10pods-30k-5050-32kb-20260910-134239",
+                    "helm.sh/chart": "fio-benchmark-1.0.0",
+                    "pod-index": "6"
+                },
+                "name": "fio-test2-10pods-30k-5050-32kb-6",
+                "namespace": "fio-tests",
+                "resourceVersion": "14985901",
+                "uid": "d637cd7c-f40b-4d2c-b3e5-ad9441931a94"
+            },
+            "spec": {
+                "affinity": {
+                    "podAntiAffinity": {
+                        "preferredDuringSchedulingIgnoredDuringExecution": [
+                            {
+                                "podAffinityTerm": {
+                                    "labelSelector": {
+                                        "matchLabels": {
+                                            "fio.benchmark/run-id": "test2-10pods-30k-5050-32kb-20260910-134239"
+                                        }
+                                    },
+                                    "topologyKey": "kubernetes.io/hostname"
+                                },
+                                "weight": 100
+                            }
+                        ]
+                    }
+                },
+                "containers": [
+                    {
+                        "args": [
+                            "set -o pipefail\necho \"pod 6 of 10, run test2-10pods-30k-5050-32kb-20260910-134239\"\ncp /fio-config/fio.job /tmp/fio.job\nsed -i 's|directory=.*|directory=/mnt/fio-data|g' /tmp/fio.job\nmkdir -p /tmp/fiolog\n\necho \"=== environment ===\"\necho \"node=${NODE_NAME} pod=${POD_NAME}\"\nfio --version\ndf -h /mnt/fio-data\ngrep \"/mnt/fio-data\" /proc/mounts || true\n\necho \"=== fio job ===\"\ncat /tmp/fio.job\n\n# Capacity gate. size is per clone, so the dataset is size x clones.\n# This runs inside the pod on purpose: scripts/deploy_test.sh checks\n# the same thing beforehand, but a bare `helm install` bypasses it,\n# and this is the failure that killed results/test4_*.\nNUMJOBS=$(sed -n 's/^[[:space:]]*numjobs[[:space:]]*=[[:space:]]*\\([0-9]\\+\\).*/\\1/p' /tmp/fio.job | head -1)\nSECTIONS=$(grep -c '^\\[' /tmp/fio.job)\nSECTIONS=$((SECTIONS \u003e 1 ? SECTIONS - 1 : 1))\nif [ -n \"$NUMJOBS\" ]; then CLONES=$((NUMJOBS * SECTIONS)); else CLONES=$SECTIONS; fi\nSIZE_RAW=$(sed -n 's/^[[:space:]]*size[[:space:]]*=[[:space:]]*\\([0-9]\\+[KMGTkmgt]\\?\\).*/\\1/p' /tmp/fio.job | head -1)\nSIZE_NUM=$(echo \"$SIZE_RAW\" | tr -cd '0-9')\ncase \"$(echo \"$SIZE_RAW\" | tr -cd 'KMGTkmgt' | tr '[:lower:]' '[:upper:]')\" in\n  K) MULT=1 ;; M) MULT=1024 ;; G) MULT=$((1024*1024)) ;;\n  T) MULT=$((1024*1024*1024)) ;; *) MULT=1 ;;\nesac\nNEED_KB=$((SIZE_NUM * MULT * CLONES))\nAVAIL_KB=$(df -Pk /mnt/fio-data | awk 'NR==2 {print $4}')\necho \"=== capacity ===\"\necho \"dataset: size=${SIZE_RAW} x ${CLONES} clones = $((NEED_KB/1024/1024)) GiB\"\necho \"mount:   $((AVAIL_KB/1024/1024)) GiB free\"\nif [ \"$NEED_KB\" -gt \"$AVAIL_KB\" ]; then\n  echo \"FATAL: PVC is too small for this job.\"\n  echo \"  fio would lay out files until ENOSPC, kill part of the workload,\"\n  echo \"  and still exit having produced a plausible-looking log.\"\n  echo \"  Set pvc.size to at least $(( (NEED_KB * 12 / 10) / 1024 / 1024 ))Gi and re-run.\"\n  exit 28\nfi\n\n# cgroup CPU pressure, before. If the client is throttled during the\n# run then its tail latency describes the CFS scheduler, not NFS.\nCG=\"\"\nif [ -r /sys/fs/cgroup/cpu.stat ]; then CG=/sys/fs/cgroup/cpu.stat\nelif [ -r /sys/fs/cgroup/cpu/cpu.stat ]; then CG=/sys/fs/cgroup/cpu/cpu.stat\nfi\nCG_BEFORE=$([ -n \"$CG\" ] \u0026\u0026 tr '\\n' ' ' \u003c \"$CG\" || echo \"\")\n# Absolute-time barrier. Every pod in every release of this run waits\n# for the same instant, so a burst phase actually overlaps the phase\n# it is meant to burst against, rather than starting whenever helm\n# happened to return.\nTARGET=1789062339\nNOW=$(date +%s)\nif [ \"$NOW\" -lt \"$TARGET\" ]; then\n  echo \"barrier: waiting $((TARGET - NOW))s until $(date -d @$TARGET)\"\n  while [ \"$(date +%s)\" -lt \"$TARGET\" ]; do sleep 0.2; done\nelse\n  echo \"barrier: WARNING started $((NOW - TARGET))s late; overlap is not guaranteed\"\nfi\n\necho \"=== fio start $(date -u +%Y-%m-%dT%H:%M:%SZ) epoch=$(date +%s) ===\"\nfio /tmp/fio.job --output-format=json+ --output=/tmp/fio.json\nFIO_RC=$?\necho \"=== fio end $(date -u +%Y-%m-%dT%H:%M:%SZ) epoch=$(date +%s) rc=$FIO_RC ===\"\n\necho \"===FIO_CGROUP_BEGIN===\"\necho \"before: ${CG_BEFORE}\"\necho \"after: $([ -n \"$CG\" ] \u0026\u0026 tr '\\n' ' ' \u003c \"$CG\" || echo \"\")\"\necho \"===FIO_CGROUP_END===\"\n# Markers let collect_results.sh extract the JSON from kubectl logs\n# without needing a shared volume or a sidecar.\necho \"===FIO_JSON_BEGIN===\"\ncat /tmp/fio.json\necho \"===FIO_JSON_END===\"\necho \"===FIO_TSLOG_BEGIN===\"\nfor l in /tmp/fiolog/*.log; do\n  [ -f \"$l\" ] || continue\n  echo \"--- $(basename \"$l\") ---\"\n  cat \"$l\"\ndone\necho \"===FIO_TSLOG_END===\"\n\n# Propagate the real result. Without this the container exits 0 on a\n# failed fio and kubectl reports Completed for a run that died.\nexit $FIO_RC\n"
+                        ],
+                        "command": [
+                            "/bin/bash",
+                            "-c"
+                        ],
+                        "env": [
+                            {
+                                "name": "NODE_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "spec.nodeName"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "POD_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "metadata.name"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "rafmoshe2500/fio:3.41",
+                        "imagePullPolicy": "IfNotPresent",
+                        "name": "fio",
+                        "resources": {
+                            "limits": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            },
+                            "requests": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            }
+                        },
+                        "securityContext": {
+                            "capabilities": {
+                                "drop": [
+                                    "MKNOD"
+                                ]
+                            }
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/mnt/fio-data",
+                                "name": "fio-data"
+                            },
+                            {
+                                "mountPath": "/fio-config",
+                                "name": "fio-config"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-phkr5",
+                                "readOnly": true
+                            }
+                        ]
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "enableServiceLinks": true,
+                "nodeName": "s1",
+                "preemptionPolicy": "PreemptLowerPriority",
+                "priority": 0,
+                "restartPolicy": "Never",
+                "schedulerName": "default-scheduler",
+                "securityContext": {
+                    "seLinuxOptions": {
+                        "level": "s0:c32,c14"
+                    }
+                },
+                "serviceAccount": "default",
+                "serviceAccountName": "default",
+                "terminationGracePeriodSeconds": 30,
+                "tolerations": [
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoSchedule",
+                        "key": "node.kubernetes.io/memory-pressure",
+                        "operator": "Exists"
+                    }
+                ],
+                "volumes": [
+                    {
+                        "name": "fio-data",
+                        "persistentVolumeClaim": {
+                            "claimName": "fio-test2-10pods-30k-5050-32kb-pvc-6"
+                        }
+                    },
+                    {
+                        "configMap": {
+                            "defaultMode": 420,
+                            "name": "fio-test2-10pods-30k-5050-32kb-fio-benchmark-config"
+                        },
+                        "name": "fio-config"
+                    },
+                    {
+                        "name": "kube-api-access-phkr5",
+                        "projected": {
+                            "defaultMode": 420,
+                            "sources": [
+                                {
+                                    "serviceAccountToken": {
+                                        "expirationSeconds": 3607,
+                                        "path": "token"
+                                    }
+                                },
+                                {
+                                    "configMap": {
+                                        "items": [
+                                            {
+                                                "key": "ca.crt",
+                                                "path": "ca.crt"
+                                            }
+                                        ],
+                                        "name": "kube-root-ca.crt"
+                                    }
+                                },
+                                {
+                                    "downwardAPI": {
+                                        "items": [
+                                            {
+                                                "fieldRef": {
+                                                    "apiVersion": "v1",
+                                                    "fieldPath": "metadata.namespace"
+                                                },
+                                                "path": "namespace"
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "configMap": {
+                                        "items": [
+                                            {
+                                                "key": "service-ca.crt",
+                                                "path": "service-ca.crt"
+                                            }
+                                        ],
+                                        "name": "openshift-service-ca.crt"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:24Z",
+                        "observedGeneration": 1,
+                        "status": "False",
+                        "type": "PodReadyToStartContainers"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:43:24Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "True",
+                        "type": "Initialized"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:23Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "False",
+                        "type": "Ready"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:23Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "False",
+                        "type": "ContainersReady"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:43:24Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodScheduled"
+                    }
+                ],
+                "containerStatuses": [
+                    {
+                        "allocatedResources": {
+                            "cpu": "4",
+                            "memory": "4Gi"
+                        },
+                        "containerID": "cri-o://5ca5d376d4b2b8486559ad22cf84ef4fe7ab5088b88d5c3f36a472b2dd6a2f65",
+                        "image": "docker.io/rafmoshe2500/fio:3.41",
+                        "imageID": "docker.io/rafmoshe2500/fio@sha256:5fe85a0bb0ae82616cd1aa0825ca13f692a14623a82a2f4ad31d01fd8c1f8766",
+                        "lastState": {},
+                        "name": "fio",
+                        "ready": false,
+                        "resources": {
+                            "limits": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            },
+                            "requests": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            }
+                        },
+                        "restartCount": 0,
+                        "started": false,
+                        "state": {
+                            "terminated": {
+                                "containerID": "cri-o://5ca5d376d4b2b8486559ad22cf84ef4fe7ab5088b88d5c3f36a472b2dd6a2f65",
+                                "exitCode": 0,
+                                "finishedAt": "2026-09-10T17:57:22Z",
+                                "reason": "Completed",
+                                "startedAt": "2026-09-10T17:43:43Z"
+                            }
+                        },
+                        "user": {
+                            "linux": {
+                                "gid": 0,
+                                "supplementalGroups": [
+                                    0
+                                ],
+                                "uid": 0
+                            }
+                        },
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/mnt/fio-data",
+                                "name": "fio-data"
+                            },
+                            {
+                                "mountPath": "/fio-config",
+                                "name": "fio-config"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-phkr5",
+                                "readOnly": true,
+                                "recursiveReadOnly": "Disabled"
+                            }
+                        ]
+                    }
+                ],
+                "hostIP": "10.61.103.155",
+                "hostIPs": [
+                    {
+                        "ip": "10.61.103.155"
+                    }
+                ],
+                "observedGeneration": 1,
+                "phase": "Succeeded",
+                "podIP": "10.130.0.104",
+                "podIPs": [
+                    {
+                        "ip": "10.130.0.104"
+                    }
+                ],
+                "qosClass": "Guaranteed",
+                "startTime": "2026-09-10T17:43:24Z"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "annotations": {
+                    "k8s.ovn.org/pod-networks": "{\"default\":{\"ip_addresses\":[\"10.129.0.223/23\"],\"mac_address\":\"0a:58:0a:81:00:df\",\"gateway_ips\":[\"10.129.0.1\"],\"routes\":[{\"dest\":\"10.128.0.0/14\",\"nextHop\":\"10.129.0.1\"},{\"dest\":\"172.30.0.0/16\",\"nextHop\":\"10.129.0.1\"},{\"dest\":\"169.254.0.5/32\",\"nextHop\":\"10.129.0.1\"},{\"dest\":\"100.64.0.0/16\",\"nextHop\":\"10.129.0.1\"}],\"ip_address\":\"10.129.0.223/23\",\"gateway_ip\":\"10.129.0.1\",\"role\":\"primary\"}}",
+                    "k8s.v1.cni.cncf.io/network-status": "[{\n    \"name\": \"ovn-kubernetes\",\n    \"interface\": \"eth0\",\n    \"ips\": [\n        \"10.129.0.223\"\n    ],\n    \"mac\": \"0a:58:0a:81:00:df\",\n    \"default\": true,\n    \"dns\": {}\n}]",
+                    "meta.helm.sh/release-name": "fio-test2-10pods-30k-5050-32kb",
+                    "meta.helm.sh/release-namespace": "fio-tests",
+                    "openshift.io/scc": "anyuid",
+                    "security.openshift.io/validated-scc-subject-type": "user"
+                },
+                "creationTimestamp": "2026-09-10T17:42:40Z",
+                "generation": 1,
+                "labels": {
+                    "app": "fio-benchmark",
+                    "app.kubernetes.io/instance": "fio-test2-10pods-30k-5050-32kb",
+                    "app.kubernetes.io/managed-by": "Helm",
+                    "app.kubernetes.io/name": "fio-benchmark",
+                    "app.kubernetes.io/version": "3.41",
+                    "component": "storage-test",
+                    "fio.benchmark/run-id": "test2-10pods-30k-5050-32kb-20260910-134239",
+                    "helm.sh/chart": "fio-benchmark-1.0.0",
+                    "pod-index": "7"
+                },
+                "name": "fio-test2-10pods-30k-5050-32kb-7",
+                "namespace": "fio-tests",
+                "resourceVersion": "14985837",
+                "uid": "41c98f34-81e4-4ab9-a641-937fdbe11441"
+            },
+            "spec": {
+                "affinity": {
+                    "podAntiAffinity": {
+                        "preferredDuringSchedulingIgnoredDuringExecution": [
+                            {
+                                "podAffinityTerm": {
+                                    "labelSelector": {
+                                        "matchLabels": {
+                                            "fio.benchmark/run-id": "test2-10pods-30k-5050-32kb-20260910-134239"
+                                        }
+                                    },
+                                    "topologyKey": "kubernetes.io/hostname"
+                                },
+                                "weight": 100
+                            }
+                        ]
+                    }
+                },
+                "containers": [
+                    {
+                        "args": [
+                            "set -o pipefail\necho \"pod 7 of 10, run test2-10pods-30k-5050-32kb-20260910-134239\"\ncp /fio-config/fio.job /tmp/fio.job\nsed -i 's|directory=.*|directory=/mnt/fio-data|g' /tmp/fio.job\nmkdir -p /tmp/fiolog\n\necho \"=== environment ===\"\necho \"node=${NODE_NAME} pod=${POD_NAME}\"\nfio --version\ndf -h /mnt/fio-data\ngrep \"/mnt/fio-data\" /proc/mounts || true\n\necho \"=== fio job ===\"\ncat /tmp/fio.job\n\n# Capacity gate. size is per clone, so the dataset is size x clones.\n# This runs inside the pod on purpose: scripts/deploy_test.sh checks\n# the same thing beforehand, but a bare `helm install` bypasses it,\n# and this is the failure that killed results/test4_*.\nNUMJOBS=$(sed -n 's/^[[:space:]]*numjobs[[:space:]]*=[[:space:]]*\\([0-9]\\+\\).*/\\1/p' /tmp/fio.job | head -1)\nSECTIONS=$(grep -c '^\\[' /tmp/fio.job)\nSECTIONS=$((SECTIONS \u003e 1 ? SECTIONS - 1 : 1))\nif [ -n \"$NUMJOBS\" ]; then CLONES=$((NUMJOBS * SECTIONS)); else CLONES=$SECTIONS; fi\nSIZE_RAW=$(sed -n 's/^[[:space:]]*size[[:space:]]*=[[:space:]]*\\([0-9]\\+[KMGTkmgt]\\?\\).*/\\1/p' /tmp/fio.job | head -1)\nSIZE_NUM=$(echo \"$SIZE_RAW\" | tr -cd '0-9')\ncase \"$(echo \"$SIZE_RAW\" | tr -cd 'KMGTkmgt' | tr '[:lower:]' '[:upper:]')\" in\n  K) MULT=1 ;; M) MULT=1024 ;; G) MULT=$((1024*1024)) ;;\n  T) MULT=$((1024*1024*1024)) ;; *) MULT=1 ;;\nesac\nNEED_KB=$((SIZE_NUM * MULT * CLONES))\nAVAIL_KB=$(df -Pk /mnt/fio-data | awk 'NR==2 {print $4}')\necho \"=== capacity ===\"\necho \"dataset: size=${SIZE_RAW} x ${CLONES} clones = $((NEED_KB/1024/1024)) GiB\"\necho \"mount:   $((AVAIL_KB/1024/1024)) GiB free\"\nif [ \"$NEED_KB\" -gt \"$AVAIL_KB\" ]; then\n  echo \"FATAL: PVC is too small for this job.\"\n  echo \"  fio would lay out files until ENOSPC, kill part of the workload,\"\n  echo \"  and still exit having produced a plausible-looking log.\"\n  echo \"  Set pvc.size to at least $(( (NEED_KB * 12 / 10) / 1024 / 1024 ))Gi and re-run.\"\n  exit 28\nfi\n\n# cgroup CPU pressure, before. If the client is throttled during the\n# run then its tail latency describes the CFS scheduler, not NFS.\nCG=\"\"\nif [ -r /sys/fs/cgroup/cpu.stat ]; then CG=/sys/fs/cgroup/cpu.stat\nelif [ -r /sys/fs/cgroup/cpu/cpu.stat ]; then CG=/sys/fs/cgroup/cpu/cpu.stat\nfi\nCG_BEFORE=$([ -n \"$CG\" ] \u0026\u0026 tr '\\n' ' ' \u003c \"$CG\" || echo \"\")\n# Absolute-time barrier. Every pod in every release of this run waits\n# for the same instant, so a burst phase actually overlaps the phase\n# it is meant to burst against, rather than starting whenever helm\n# happened to return.\nTARGET=1789062339\nNOW=$(date +%s)\nif [ \"$NOW\" -lt \"$TARGET\" ]; then\n  echo \"barrier: waiting $((TARGET - NOW))s until $(date -d @$TARGET)\"\n  while [ \"$(date +%s)\" -lt \"$TARGET\" ]; do sleep 0.2; done\nelse\n  echo \"barrier: WARNING started $((NOW - TARGET))s late; overlap is not guaranteed\"\nfi\n\necho \"=== fio start $(date -u +%Y-%m-%dT%H:%M:%SZ) epoch=$(date +%s) ===\"\nfio /tmp/fio.job --output-format=json+ --output=/tmp/fio.json\nFIO_RC=$?\necho \"=== fio end $(date -u +%Y-%m-%dT%H:%M:%SZ) epoch=$(date +%s) rc=$FIO_RC ===\"\n\necho \"===FIO_CGROUP_BEGIN===\"\necho \"before: ${CG_BEFORE}\"\necho \"after: $([ -n \"$CG\" ] \u0026\u0026 tr '\\n' ' ' \u003c \"$CG\" || echo \"\")\"\necho \"===FIO_CGROUP_END===\"\n# Markers let collect_results.sh extract the JSON from kubectl logs\n# without needing a shared volume or a sidecar.\necho \"===FIO_JSON_BEGIN===\"\ncat /tmp/fio.json\necho \"===FIO_JSON_END===\"\necho \"===FIO_TSLOG_BEGIN===\"\nfor l in /tmp/fiolog/*.log; do\n  [ -f \"$l\" ] || continue\n  echo \"--- $(basename \"$l\") ---\"\n  cat \"$l\"\ndone\necho \"===FIO_TSLOG_END===\"\n\n# Propagate the real result. Without this the container exits 0 on a\n# failed fio and kubectl reports Completed for a run that died.\nexit $FIO_RC\n"
+                        ],
+                        "command": [
+                            "/bin/bash",
+                            "-c"
+                        ],
+                        "env": [
+                            {
+                                "name": "NODE_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "spec.nodeName"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "POD_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "metadata.name"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "rafmoshe2500/fio:3.41",
+                        "imagePullPolicy": "IfNotPresent",
+                        "name": "fio",
+                        "resources": {
+                            "limits": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            },
+                            "requests": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            }
+                        },
+                        "securityContext": {
+                            "capabilities": {
+                                "drop": [
+                                    "MKNOD"
+                                ]
+                            }
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/mnt/fio-data",
+                                "name": "fio-data"
+                            },
+                            {
+                                "mountPath": "/fio-config",
+                                "name": "fio-config"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-w8h5h",
+                                "readOnly": true
+                            }
+                        ]
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "enableServiceLinks": true,
+                "nodeName": "s2",
+                "preemptionPolicy": "PreemptLowerPriority",
+                "priority": 0,
+                "restartPolicy": "Never",
+                "schedulerName": "default-scheduler",
+                "securityContext": {
+                    "seLinuxOptions": {
+                        "level": "s0:c32,c14"
+                    }
+                },
+                "serviceAccount": "default",
+                "serviceAccountName": "default",
+                "terminationGracePeriodSeconds": 30,
+                "tolerations": [
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoSchedule",
+                        "key": "node.kubernetes.io/memory-pressure",
+                        "operator": "Exists"
+                    }
+                ],
+                "volumes": [
+                    {
+                        "name": "fio-data",
+                        "persistentVolumeClaim": {
+                            "claimName": "fio-test2-10pods-30k-5050-32kb-pvc-7"
+                        }
+                    },
+                    {
+                        "configMap": {
+                            "defaultMode": 420,
+                            "name": "fio-test2-10pods-30k-5050-32kb-fio-benchmark-config"
+                        },
+                        "name": "fio-config"
+                    },
+                    {
+                        "name": "kube-api-access-w8h5h",
+                        "projected": {
+                            "defaultMode": 420,
+                            "sources": [
+                                {
+                                    "serviceAccountToken": {
+                                        "expirationSeconds": 3607,
+                                        "path": "token"
+                                    }
+                                },
+                                {
+                                    "configMap": {
+                                        "items": [
+                                            {
+                                                "key": "ca.crt",
+                                                "path": "ca.crt"
+                                            }
+                                        ],
+                                        "name": "kube-root-ca.crt"
+                                    }
+                                },
+                                {
+                                    "downwardAPI": {
+                                        "items": [
+                                            {
+                                                "fieldRef": {
+                                                    "apiVersion": "v1",
+                                                    "fieldPath": "metadata.namespace"
+                                                },
+                                                "path": "namespace"
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "configMap": {
+                                        "items": [
+                                            {
+                                                "key": "service-ca.crt",
+                                                "path": "service-ca.crt"
+                                            }
+                                        ],
+                                        "name": "openshift-service-ca.crt"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:15Z",
+                        "observedGeneration": 1,
+                        "status": "False",
+                        "type": "PodReadyToStartContainers"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:43:30Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "True",
+                        "type": "Initialized"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:14Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "False",
+                        "type": "Ready"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:14Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "False",
+                        "type": "ContainersReady"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:43:30Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodScheduled"
+                    }
+                ],
+                "containerStatuses": [
+                    {
+                        "allocatedResources": {
+                            "cpu": "4",
+                            "memory": "4Gi"
+                        },
+                        "containerID": "cri-o://1e4b4c345d1a948d88da6721eb262c8ca2cad57509d87673f1669335be3112cb",
+                        "image": "docker.io/rafmoshe2500/fio:3.41",
+                        "imageID": "docker.io/rafmoshe2500/fio@sha256:5fe85a0bb0ae82616cd1aa0825ca13f692a14623a82a2f4ad31d01fd8c1f8766",
+                        "lastState": {},
+                        "name": "fio",
+                        "ready": false,
+                        "resources": {
+                            "limits": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            },
+                            "requests": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            }
+                        },
+                        "restartCount": 0,
+                        "started": false,
+                        "state": {
+                            "terminated": {
+                                "containerID": "cri-o://1e4b4c345d1a948d88da6721eb262c8ca2cad57509d87673f1669335be3112cb",
+                                "exitCode": 0,
+                                "finishedAt": "2026-09-10T17:57:13Z",
+                                "reason": "Completed",
+                                "startedAt": "2026-09-10T17:43:43Z"
+                            }
+                        },
+                        "user": {
+                            "linux": {
+                                "gid": 0,
+                                "supplementalGroups": [
+                                    0
+                                ],
+                                "uid": 0
+                            }
+                        },
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/mnt/fio-data",
+                                "name": "fio-data"
+                            },
+                            {
+                                "mountPath": "/fio-config",
+                                "name": "fio-config"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-w8h5h",
+                                "readOnly": true,
+                                "recursiveReadOnly": "Disabled"
+                            }
+                        ]
+                    }
+                ],
+                "hostIP": "10.61.103.156",
+                "hostIPs": [
+                    {
+                        "ip": "10.61.103.156"
+                    }
+                ],
+                "observedGeneration": 1,
+                "phase": "Succeeded",
+                "podIP": "10.129.0.223",
+                "podIPs": [
+                    {
+                        "ip": "10.129.0.223"
+                    }
+                ],
+                "qosClass": "Guaranteed",
+                "startTime": "2026-09-10T17:43:30Z"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "annotations": {
+                    "k8s.ovn.org/pod-networks": "{\"default\":{\"ip_addresses\":[\"10.130.0.103/23\"],\"mac_address\":\"0a:58:0a:82:00:67\",\"gateway_ips\":[\"10.130.0.1\"],\"routes\":[{\"dest\":\"10.128.0.0/14\",\"nextHop\":\"10.130.0.1\"},{\"dest\":\"172.30.0.0/16\",\"nextHop\":\"10.130.0.1\"},{\"dest\":\"169.254.0.5/32\",\"nextHop\":\"10.130.0.1\"},{\"dest\":\"100.64.0.0/16\",\"nextHop\":\"10.130.0.1\"}],\"ip_address\":\"10.130.0.103/23\",\"gateway_ip\":\"10.130.0.1\",\"role\":\"primary\"}}",
+                    "k8s.v1.cni.cncf.io/network-status": "[{\n    \"name\": \"ovn-kubernetes\",\n    \"interface\": \"eth0\",\n    \"ips\": [\n        \"10.130.0.103\"\n    ],\n    \"mac\": \"0a:58:0a:82:00:67\",\n    \"default\": true,\n    \"dns\": {}\n}]",
+                    "meta.helm.sh/release-name": "fio-test2-10pods-30k-5050-32kb",
+                    "meta.helm.sh/release-namespace": "fio-tests",
+                    "openshift.io/scc": "anyuid",
+                    "security.openshift.io/validated-scc-subject-type": "user"
+                },
+                "creationTimestamp": "2026-09-10T17:42:40Z",
+                "generation": 1,
+                "labels": {
+                    "app": "fio-benchmark",
+                    "app.kubernetes.io/instance": "fio-test2-10pods-30k-5050-32kb",
+                    "app.kubernetes.io/managed-by": "Helm",
+                    "app.kubernetes.io/name": "fio-benchmark",
+                    "app.kubernetes.io/version": "3.41",
+                    "component": "storage-test",
+                    "fio.benchmark/run-id": "test2-10pods-30k-5050-32kb-20260910-134239",
+                    "helm.sh/chart": "fio-benchmark-1.0.0",
+                    "pod-index": "8"
+                },
+                "name": "fio-test2-10pods-30k-5050-32kb-8",
+                "namespace": "fio-tests",
+                "resourceVersion": "14985903",
+                "uid": "78668498-e5ca-4174-a303-d1390bd17fc6"
+            },
+            "spec": {
+                "affinity": {
+                    "podAntiAffinity": {
+                        "preferredDuringSchedulingIgnoredDuringExecution": [
+                            {
+                                "podAffinityTerm": {
+                                    "labelSelector": {
+                                        "matchLabels": {
+                                            "fio.benchmark/run-id": "test2-10pods-30k-5050-32kb-20260910-134239"
+                                        }
+                                    },
+                                    "topologyKey": "kubernetes.io/hostname"
+                                },
+                                "weight": 100
+                            }
+                        ]
+                    }
+                },
+                "containers": [
+                    {
+                        "args": [
+                            "set -o pipefail\necho \"pod 8 of 10, run test2-10pods-30k-5050-32kb-20260910-134239\"\ncp /fio-config/fio.job /tmp/fio.job\nsed -i 's|directory=.*|directory=/mnt/fio-data|g' /tmp/fio.job\nmkdir -p /tmp/fiolog\n\necho \"=== environment ===\"\necho \"node=${NODE_NAME} pod=${POD_NAME}\"\nfio --version\ndf -h /mnt/fio-data\ngrep \"/mnt/fio-data\" /proc/mounts || true\n\necho \"=== fio job ===\"\ncat /tmp/fio.job\n\n# Capacity gate. size is per clone, so the dataset is size x clones.\n# This runs inside the pod on purpose: scripts/deploy_test.sh checks\n# the same thing beforehand, but a bare `helm install` bypasses it,\n# and this is the failure that killed results/test4_*.\nNUMJOBS=$(sed -n 's/^[[:space:]]*numjobs[[:space:]]*=[[:space:]]*\\([0-9]\\+\\).*/\\1/p' /tmp/fio.job | head -1)\nSECTIONS=$(grep -c '^\\[' /tmp/fio.job)\nSECTIONS=$((SECTIONS \u003e 1 ? SECTIONS - 1 : 1))\nif [ -n \"$NUMJOBS\" ]; then CLONES=$((NUMJOBS * SECTIONS)); else CLONES=$SECTIONS; fi\nSIZE_RAW=$(sed -n 's/^[[:space:]]*size[[:space:]]*=[[:space:]]*\\([0-9]\\+[KMGTkmgt]\\?\\).*/\\1/p' /tmp/fio.job | head -1)\nSIZE_NUM=$(echo \"$SIZE_RAW\" | tr -cd '0-9')\ncase \"$(echo \"$SIZE_RAW\" | tr -cd 'KMGTkmgt' | tr '[:lower:]' '[:upper:]')\" in\n  K) MULT=1 ;; M) MULT=1024 ;; G) MULT=$((1024*1024)) ;;\n  T) MULT=$((1024*1024*1024)) ;; *) MULT=1 ;;\nesac\nNEED_KB=$((SIZE_NUM * MULT * CLONES))\nAVAIL_KB=$(df -Pk /mnt/fio-data | awk 'NR==2 {print $4}')\necho \"=== capacity ===\"\necho \"dataset: size=${SIZE_RAW} x ${CLONES} clones = $((NEED_KB/1024/1024)) GiB\"\necho \"mount:   $((AVAIL_KB/1024/1024)) GiB free\"\nif [ \"$NEED_KB\" -gt \"$AVAIL_KB\" ]; then\n  echo \"FATAL: PVC is too small for this job.\"\n  echo \"  fio would lay out files until ENOSPC, kill part of the workload,\"\n  echo \"  and still exit having produced a plausible-looking log.\"\n  echo \"  Set pvc.size to at least $(( (NEED_KB * 12 / 10) / 1024 / 1024 ))Gi and re-run.\"\n  exit 28\nfi\n\n# cgroup CPU pressure, before. If the client is throttled during the\n# run then its tail latency describes the CFS scheduler, not NFS.\nCG=\"\"\nif [ -r /sys/fs/cgroup/cpu.stat ]; then CG=/sys/fs/cgroup/cpu.stat\nelif [ -r /sys/fs/cgroup/cpu/cpu.stat ]; then CG=/sys/fs/cgroup/cpu/cpu.stat\nfi\nCG_BEFORE=$([ -n \"$CG\" ] \u0026\u0026 tr '\\n' ' ' \u003c \"$CG\" || echo \"\")\n# Absolute-time barrier. Every pod in every release of this run waits\n# for the same instant, so a burst phase actually overlaps the phase\n# it is meant to burst against, rather than starting whenever helm\n# happened to return.\nTARGET=1789062339\nNOW=$(date +%s)\nif [ \"$NOW\" -lt \"$TARGET\" ]; then\n  echo \"barrier: waiting $((TARGET - NOW))s until $(date -d @$TARGET)\"\n  while [ \"$(date +%s)\" -lt \"$TARGET\" ]; do sleep 0.2; done\nelse\n  echo \"barrier: WARNING started $((NOW - TARGET))s late; overlap is not guaranteed\"\nfi\n\necho \"=== fio start $(date -u +%Y-%m-%dT%H:%M:%SZ) epoch=$(date +%s) ===\"\nfio /tmp/fio.job --output-format=json+ --output=/tmp/fio.json\nFIO_RC=$?\necho \"=== fio end $(date -u +%Y-%m-%dT%H:%M:%SZ) epoch=$(date +%s) rc=$FIO_RC ===\"\n\necho \"===FIO_CGROUP_BEGIN===\"\necho \"before: ${CG_BEFORE}\"\necho \"after: $([ -n \"$CG\" ] \u0026\u0026 tr '\\n' ' ' \u003c \"$CG\" || echo \"\")\"\necho \"===FIO_CGROUP_END===\"\n# Markers let collect_results.sh extract the JSON from kubectl logs\n# without needing a shared volume or a sidecar.\necho \"===FIO_JSON_BEGIN===\"\ncat /tmp/fio.json\necho \"===FIO_JSON_END===\"\necho \"===FIO_TSLOG_BEGIN===\"\nfor l in /tmp/fiolog/*.log; do\n  [ -f \"$l\" ] || continue\n  echo \"--- $(basename \"$l\") ---\"\n  cat \"$l\"\ndone\necho \"===FIO_TSLOG_END===\"\n\n# Propagate the real result. Without this the container exits 0 on a\n# failed fio and kubectl reports Completed for a run that died.\nexit $FIO_RC\n"
+                        ],
+                        "command": [
+                            "/bin/bash",
+                            "-c"
+                        ],
+                        "env": [
+                            {
+                                "name": "NODE_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "spec.nodeName"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "POD_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "metadata.name"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "rafmoshe2500/fio:3.41",
+                        "imagePullPolicy": "IfNotPresent",
+                        "name": "fio",
+                        "resources": {
+                            "limits": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            },
+                            "requests": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            }
+                        },
+                        "securityContext": {
+                            "capabilities": {
+                                "drop": [
+                                    "MKNOD"
+                                ]
+                            }
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/mnt/fio-data",
+                                "name": "fio-data"
+                            },
+                            {
+                                "mountPath": "/fio-config",
+                                "name": "fio-config"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-xxqdc",
+                                "readOnly": true
+                            }
+                        ]
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "enableServiceLinks": true,
+                "nodeName": "s1",
+                "preemptionPolicy": "PreemptLowerPriority",
+                "priority": 0,
+                "restartPolicy": "Never",
+                "schedulerName": "default-scheduler",
+                "securityContext": {
+                    "seLinuxOptions": {
+                        "level": "s0:c32,c14"
+                    }
+                },
+                "serviceAccount": "default",
+                "serviceAccountName": "default",
+                "terminationGracePeriodSeconds": 30,
+                "tolerations": [
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoSchedule",
+                        "key": "node.kubernetes.io/memory-pressure",
+                        "operator": "Exists"
+                    }
+                ],
+                "volumes": [
+                    {
+                        "name": "fio-data",
+                        "persistentVolumeClaim": {
+                            "claimName": "fio-test2-10pods-30k-5050-32kb-pvc-8"
+                        }
+                    },
+                    {
+                        "configMap": {
+                            "defaultMode": 420,
+                            "name": "fio-test2-10pods-30k-5050-32kb-fio-benchmark-config"
+                        },
+                        "name": "fio-config"
+                    },
+                    {
+                        "name": "kube-api-access-xxqdc",
+                        "projected": {
+                            "defaultMode": 420,
+                            "sources": [
+                                {
+                                    "serviceAccountToken": {
+                                        "expirationSeconds": 3607,
+                                        "path": "token"
+                                    }
+                                },
+                                {
+                                    "configMap": {
+                                        "items": [
+                                            {
+                                                "key": "ca.crt",
+                                                "path": "ca.crt"
+                                            }
+                                        ],
+                                        "name": "kube-root-ca.crt"
+                                    }
+                                },
+                                {
+                                    "downwardAPI": {
+                                        "items": [
+                                            {
+                                                "fieldRef": {
+                                                    "apiVersion": "v1",
+                                                    "fieldPath": "metadata.namespace"
+                                                },
+                                                "path": "namespace"
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "configMap": {
+                                        "items": [
+                                            {
+                                                "key": "service-ca.crt",
+                                                "path": "service-ca.crt"
+                                            }
+                                        ],
+                                        "name": "openshift-service-ca.crt"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:24Z",
+                        "observedGeneration": 1,
+                        "status": "False",
+                        "type": "PodReadyToStartContainers"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:43:05Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "True",
+                        "type": "Initialized"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:23Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "False",
+                        "type": "Ready"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:23Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "False",
+                        "type": "ContainersReady"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:43:05Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodScheduled"
+                    }
+                ],
+                "containerStatuses": [
+                    {
+                        "allocatedResources": {
+                            "cpu": "4",
+                            "memory": "4Gi"
+                        },
+                        "containerID": "cri-o://dea537423e6aae33c9b7e83f5728d9d4acb9ecdabba92d4bc7380a5094d3dc6e",
+                        "image": "docker.io/rafmoshe2500/fio:3.41",
+                        "imageID": "docker.io/rafmoshe2500/fio@sha256:5fe85a0bb0ae82616cd1aa0825ca13f692a14623a82a2f4ad31d01fd8c1f8766",
+                        "lastState": {},
+                        "name": "fio",
+                        "ready": false,
+                        "resources": {
+                            "limits": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            },
+                            "requests": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            }
+                        },
+                        "restartCount": 0,
+                        "started": false,
+                        "state": {
+                            "terminated": {
+                                "containerID": "cri-o://dea537423e6aae33c9b7e83f5728d9d4acb9ecdabba92d4bc7380a5094d3dc6e",
+                                "exitCode": 0,
+                                "finishedAt": "2026-09-10T17:57:22Z",
+                                "reason": "Completed",
+                                "startedAt": "2026-09-10T17:43:43Z"
+                            }
+                        },
+                        "user": {
+                            "linux": {
+                                "gid": 0,
+                                "supplementalGroups": [
+                                    0
+                                ],
+                                "uid": 0
+                            }
+                        },
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/mnt/fio-data",
+                                "name": "fio-data"
+                            },
+                            {
+                                "mountPath": "/fio-config",
+                                "name": "fio-config"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-xxqdc",
+                                "readOnly": true,
+                                "recursiveReadOnly": "Disabled"
+                            }
+                        ]
+                    }
+                ],
+                "hostIP": "10.61.103.155",
+                "hostIPs": [
+                    {
+                        "ip": "10.61.103.155"
+                    }
+                ],
+                "observedGeneration": 1,
+                "phase": "Succeeded",
+                "podIP": "10.130.0.103",
+                "podIPs": [
+                    {
+                        "ip": "10.130.0.103"
+                    }
+                ],
+                "qosClass": "Guaranteed",
+                "startTime": "2026-09-10T17:43:05Z"
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "annotations": {
+                    "k8s.ovn.org/pod-networks": "{\"default\":{\"ip_addresses\":[\"10.128.0.193/23\"],\"mac_address\":\"0a:58:0a:80:00:c1\",\"gateway_ips\":[\"10.128.0.1\"],\"routes\":[{\"dest\":\"10.128.0.0/14\",\"nextHop\":\"10.128.0.1\"},{\"dest\":\"172.30.0.0/16\",\"nextHop\":\"10.128.0.1\"},{\"dest\":\"169.254.0.5/32\",\"nextHop\":\"10.128.0.1\"},{\"dest\":\"100.64.0.0/16\",\"nextHop\":\"10.128.0.1\"}],\"ip_address\":\"10.128.0.193/23\",\"gateway_ip\":\"10.128.0.1\",\"role\":\"primary\"}}",
+                    "k8s.v1.cni.cncf.io/network-status": "[{\n    \"name\": \"ovn-kubernetes\",\n    \"interface\": \"eth0\",\n    \"ips\": [\n        \"10.128.0.193\"\n    ],\n    \"mac\": \"0a:58:0a:80:00:c1\",\n    \"default\": true,\n    \"dns\": {}\n}]",
+                    "meta.helm.sh/release-name": "fio-test2-10pods-30k-5050-32kb",
+                    "meta.helm.sh/release-namespace": "fio-tests",
+                    "openshift.io/scc": "anyuid",
+                    "security.openshift.io/validated-scc-subject-type": "user"
+                },
+                "creationTimestamp": "2026-09-10T17:42:40Z",
+                "generation": 1,
+                "labels": {
+                    "app": "fio-benchmark",
+                    "app.kubernetes.io/instance": "fio-test2-10pods-30k-5050-32kb",
+                    "app.kubernetes.io/managed-by": "Helm",
+                    "app.kubernetes.io/name": "fio-benchmark",
+                    "app.kubernetes.io/version": "3.41",
+                    "component": "storage-test",
+                    "fio.benchmark/run-id": "test2-10pods-30k-5050-32kb-20260910-134239",
+                    "helm.sh/chart": "fio-benchmark-1.0.0",
+                    "pod-index": "9"
+                },
+                "name": "fio-test2-10pods-30k-5050-32kb-9",
+                "namespace": "fio-tests",
+                "resourceVersion": "14985888",
+                "uid": "7d77ee8e-e1fb-4d6c-a1a7-71cabed77c8c"
+            },
+            "spec": {
+                "affinity": {
+                    "podAntiAffinity": {
+                        "preferredDuringSchedulingIgnoredDuringExecution": [
+                            {
+                                "podAffinityTerm": {
+                                    "labelSelector": {
+                                        "matchLabels": {
+                                            "fio.benchmark/run-id": "test2-10pods-30k-5050-32kb-20260910-134239"
+                                        }
+                                    },
+                                    "topologyKey": "kubernetes.io/hostname"
+                                },
+                                "weight": 100
+                            }
+                        ]
+                    }
+                },
+                "containers": [
+                    {
+                        "args": [
+                            "set -o pipefail\necho \"pod 9 of 10, run test2-10pods-30k-5050-32kb-20260910-134239\"\ncp /fio-config/fio.job /tmp/fio.job\nsed -i 's|directory=.*|directory=/mnt/fio-data|g' /tmp/fio.job\nmkdir -p /tmp/fiolog\n\necho \"=== environment ===\"\necho \"node=${NODE_NAME} pod=${POD_NAME}\"\nfio --version\ndf -h /mnt/fio-data\ngrep \"/mnt/fio-data\" /proc/mounts || true\n\necho \"=== fio job ===\"\ncat /tmp/fio.job\n\n# Capacity gate. size is per clone, so the dataset is size x clones.\n# This runs inside the pod on purpose: scripts/deploy_test.sh checks\n# the same thing beforehand, but a bare `helm install` bypasses it,\n# and this is the failure that killed results/test4_*.\nNUMJOBS=$(sed -n 's/^[[:space:]]*numjobs[[:space:]]*=[[:space:]]*\\([0-9]\\+\\).*/\\1/p' /tmp/fio.job | head -1)\nSECTIONS=$(grep -c '^\\[' /tmp/fio.job)\nSECTIONS=$((SECTIONS \u003e 1 ? SECTIONS - 1 : 1))\nif [ -n \"$NUMJOBS\" ]; then CLONES=$((NUMJOBS * SECTIONS)); else CLONES=$SECTIONS; fi\nSIZE_RAW=$(sed -n 's/^[[:space:]]*size[[:space:]]*=[[:space:]]*\\([0-9]\\+[KMGTkmgt]\\?\\).*/\\1/p' /tmp/fio.job | head -1)\nSIZE_NUM=$(echo \"$SIZE_RAW\" | tr -cd '0-9')\ncase \"$(echo \"$SIZE_RAW\" | tr -cd 'KMGTkmgt' | tr '[:lower:]' '[:upper:]')\" in\n  K) MULT=1 ;; M) MULT=1024 ;; G) MULT=$((1024*1024)) ;;\n  T) MULT=$((1024*1024*1024)) ;; *) MULT=1 ;;\nesac\nNEED_KB=$((SIZE_NUM * MULT * CLONES))\nAVAIL_KB=$(df -Pk /mnt/fio-data | awk 'NR==2 {print $4}')\necho \"=== capacity ===\"\necho \"dataset: size=${SIZE_RAW} x ${CLONES} clones = $((NEED_KB/1024/1024)) GiB\"\necho \"mount:   $((AVAIL_KB/1024/1024)) GiB free\"\nif [ \"$NEED_KB\" -gt \"$AVAIL_KB\" ]; then\n  echo \"FATAL: PVC is too small for this job.\"\n  echo \"  fio would lay out files until ENOSPC, kill part of the workload,\"\n  echo \"  and still exit having produced a plausible-looking log.\"\n  echo \"  Set pvc.size to at least $(( (NEED_KB * 12 / 10) / 1024 / 1024 ))Gi and re-run.\"\n  exit 28\nfi\n\n# cgroup CPU pressure, before. If the client is throttled during the\n# run then its tail latency describes the CFS scheduler, not NFS.\nCG=\"\"\nif [ -r /sys/fs/cgroup/cpu.stat ]; then CG=/sys/fs/cgroup/cpu.stat\nelif [ -r /sys/fs/cgroup/cpu/cpu.stat ]; then CG=/sys/fs/cgroup/cpu/cpu.stat\nfi\nCG_BEFORE=$([ -n \"$CG\" ] \u0026\u0026 tr '\\n' ' ' \u003c \"$CG\" || echo \"\")\n# Absolute-time barrier. Every pod in every release of this run waits\n# for the same instant, so a burst phase actually overlaps the phase\n# it is meant to burst against, rather than starting whenever helm\n# happened to return.\nTARGET=1789062339\nNOW=$(date +%s)\nif [ \"$NOW\" -lt \"$TARGET\" ]; then\n  echo \"barrier: waiting $((TARGET - NOW))s until $(date -d @$TARGET)\"\n  while [ \"$(date +%s)\" -lt \"$TARGET\" ]; do sleep 0.2; done\nelse\n  echo \"barrier: WARNING started $((NOW - TARGET))s late; overlap is not guaranteed\"\nfi\n\necho \"=== fio start $(date -u +%Y-%m-%dT%H:%M:%SZ) epoch=$(date +%s) ===\"\nfio /tmp/fio.job --output-format=json+ --output=/tmp/fio.json\nFIO_RC=$?\necho \"=== fio end $(date -u +%Y-%m-%dT%H:%M:%SZ) epoch=$(date +%s) rc=$FIO_RC ===\"\n\necho \"===FIO_CGROUP_BEGIN===\"\necho \"before: ${CG_BEFORE}\"\necho \"after: $([ -n \"$CG\" ] \u0026\u0026 tr '\\n' ' ' \u003c \"$CG\" || echo \"\")\"\necho \"===FIO_CGROUP_END===\"\n# Markers let collect_results.sh extract the JSON from kubectl logs\n# without needing a shared volume or a sidecar.\necho \"===FIO_JSON_BEGIN===\"\ncat /tmp/fio.json\necho \"===FIO_JSON_END===\"\necho \"===FIO_TSLOG_BEGIN===\"\nfor l in /tmp/fiolog/*.log; do\n  [ -f \"$l\" ] || continue\n  echo \"--- $(basename \"$l\") ---\"\n  cat \"$l\"\ndone\necho \"===FIO_TSLOG_END===\"\n\n# Propagate the real result. Without this the container exits 0 on a\n# failed fio and kubectl reports Completed for a run that died.\nexit $FIO_RC\n"
+                        ],
+                        "command": [
+                            "/bin/bash",
+                            "-c"
+                        ],
+                        "env": [
+                            {
+                                "name": "NODE_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "spec.nodeName"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "POD_NAME",
+                                "valueFrom": {
+                                    "fieldRef": {
+                                        "apiVersion": "v1",
+                                        "fieldPath": "metadata.name"
+                                    }
+                                }
+                            }
+                        ],
+                        "image": "rafmoshe2500/fio:3.41",
+                        "imagePullPolicy": "IfNotPresent",
+                        "name": "fio",
+                        "resources": {
+                            "limits": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            },
+                            "requests": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            }
+                        },
+                        "securityContext": {
+                            "capabilities": {
+                                "drop": [
+                                    "MKNOD"
+                                ]
+                            }
+                        },
+                        "terminationMessagePath": "/dev/termination-log",
+                        "terminationMessagePolicy": "File",
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/mnt/fio-data",
+                                "name": "fio-data"
+                            },
+                            {
+                                "mountPath": "/fio-config",
+                                "name": "fio-config"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-f46wq",
+                                "readOnly": true
+                            }
+                        ]
+                    }
+                ],
+                "dnsPolicy": "ClusterFirst",
+                "enableServiceLinks": true,
+                "nodeName": "s3",
+                "preemptionPolicy": "PreemptLowerPriority",
+                "priority": 0,
+                "restartPolicy": "Never",
+                "schedulerName": "default-scheduler",
+                "securityContext": {
+                    "seLinuxOptions": {
+                        "level": "s0:c32,c14"
+                    }
+                },
+                "serviceAccount": "default",
+                "serviceAccountName": "default",
+                "terminationGracePeriodSeconds": 30,
+                "tolerations": [
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/not-ready",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoExecute",
+                        "key": "node.kubernetes.io/unreachable",
+                        "operator": "Exists",
+                        "tolerationSeconds": 300
+                    },
+                    {
+                        "effect": "NoSchedule",
+                        "key": "node.kubernetes.io/memory-pressure",
+                        "operator": "Exists"
+                    }
+                ],
+                "volumes": [
+                    {
+                        "name": "fio-data",
+                        "persistentVolumeClaim": {
+                            "claimName": "fio-test2-10pods-30k-5050-32kb-pvc-9"
+                        }
+                    },
+                    {
+                        "configMap": {
+                            "defaultMode": 420,
+                            "name": "fio-test2-10pods-30k-5050-32kb-fio-benchmark-config"
+                        },
+                        "name": "fio-config"
+                    },
+                    {
+                        "name": "kube-api-access-f46wq",
+                        "projected": {
+                            "defaultMode": 420,
+                            "sources": [
+                                {
+                                    "serviceAccountToken": {
+                                        "expirationSeconds": 3607,
+                                        "path": "token"
+                                    }
+                                },
+                                {
+                                    "configMap": {
+                                        "items": [
+                                            {
+                                                "key": "ca.crt",
+                                                "path": "ca.crt"
+                                            }
+                                        ],
+                                        "name": "kube-root-ca.crt"
+                                    }
+                                },
+                                {
+                                    "downwardAPI": {
+                                        "items": [
+                                            {
+                                                "fieldRef": {
+                                                    "apiVersion": "v1",
+                                                    "fieldPath": "metadata.namespace"
+                                                },
+                                                "path": "namespace"
+                                            }
+                                        ]
+                                    }
+                                },
+                                {
+                                    "configMap": {
+                                        "items": [
+                                            {
+                                                "key": "service-ca.crt",
+                                                "path": "service-ca.crt"
+                                            }
+                                        ],
+                                        "name": "openshift-service-ca.crt"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "status": {
+                "conditions": [
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:22Z",
+                        "observedGeneration": 1,
+                        "status": "False",
+                        "type": "PodReadyToStartContainers"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:43:35Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "True",
+                        "type": "Initialized"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:21Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "False",
+                        "type": "Ready"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:57:21Z",
+                        "observedGeneration": 1,
+                        "reason": "PodCompleted",
+                        "status": "False",
+                        "type": "ContainersReady"
+                    },
+                    {
+                        "lastProbeTime": null,
+                        "lastTransitionTime": "2026-09-10T17:43:35Z",
+                        "observedGeneration": 1,
+                        "status": "True",
+                        "type": "PodScheduled"
+                    }
+                ],
+                "containerStatuses": [
+                    {
+                        "allocatedResources": {
+                            "cpu": "4",
+                            "memory": "4Gi"
+                        },
+                        "containerID": "cri-o://b0401238619adf919df6318039b2ee8be109a9f9774f3dea0a706d1681778279",
+                        "image": "docker.io/rafmoshe2500/fio:3.41",
+                        "imageID": "docker.io/rafmoshe2500/fio@sha256:5fe85a0bb0ae82616cd1aa0825ca13f692a14623a82a2f4ad31d01fd8c1f8766",
+                        "lastState": {},
+                        "name": "fio",
+                        "ready": false,
+                        "resources": {
+                            "limits": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            },
+                            "requests": {
+                                "cpu": "4",
+                                "memory": "4Gi"
+                            }
+                        },
+                        "restartCount": 0,
+                        "started": false,
+                        "state": {
+                            "terminated": {
+                                "containerID": "cri-o://b0401238619adf919df6318039b2ee8be109a9f9774f3dea0a706d1681778279",
+                                "exitCode": 0,
+                                "finishedAt": "2026-09-10T17:57:21Z",
+                                "reason": "Completed",
+                                "startedAt": "2026-09-10T17:43:46Z"
+                            }
+                        },
+                        "user": {
+                            "linux": {
+                                "gid": 0,
+                                "supplementalGroups": [
+                                    0
+                                ],
+                                "uid": 0
+                            }
+                        },
+                        "volumeMounts": [
+                            {
+                                "mountPath": "/mnt/fio-data",
+                                "name": "fio-data"
+                            },
+                            {
+                                "mountPath": "/fio-config",
+                                "name": "fio-config"
+                            },
+                            {
+                                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount",
+                                "name": "kube-api-access-f46wq",
+                                "readOnly": true,
+                                "recursiveReadOnly": "Disabled"
+                            }
+                        ]
+                    }
+                ],
+                "hostIP": "10.61.103.157",
+                "hostIPs": [
+                    {
+                        "ip": "10.61.103.157"
+                    }
+                ],
+                "observedGeneration": 1,
+                "phase": "Succeeded",
+                "podIP": "10.128.0.193",
+                "podIPs": [
+                    {
+                        "ip": "10.128.0.193"
+                    }
+                ],
+                "qosClass": "Guaranteed",
+                "startTime": "2026-09-10T17:43:35Z"
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}

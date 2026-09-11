@@ -1,0 +1,12 @@
+{
+  "run_id": "test4-10pods-50k-5050-32kb-20260910-135838",
+  "test_id": "test4_10pods_50k_5050_32kb",
+  "namespace": "fio-tests",
+  "storage_class": "sc-nas-nfs3",
+  "releases": ["fio-test4-10pods-50k-5050-32kb"],
+  "start_epoch": 1789063298,
+  "barrier_lead_s": 180,
+  "git_commit": "8a851d1fc9451c591f53daace053e7a5f1dd5930",
+  "git_dirty": true,
+  "deployed_at": "2026-09-10T17:59:52Z"
+}

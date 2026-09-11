@@ -1,0 +1,10 @@
+{
+  "run_id": "test2-10pods-30k-5050-32kb-20260910-193549",
+  "namespace": "fio-tests",
+  "collected_at": "2026-09-10T23:51:00Z",
+  "pods_expected": 10,
+  "pods_collected": 10,
+  "pods_log_failed": 0,
+  "pods_restarted": 0,
+  "pods_bad_exit": 0
+}

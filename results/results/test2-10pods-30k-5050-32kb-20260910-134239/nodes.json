@@ -1,0 +1,1527 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "v1",
+            "kind": "Node",
+            "metadata": {
+                "annotations": {
+                    "csi.volume.kubernetes.io/nodeid": "{\"csi.trident.netapp.io\":\"s1\"}",
+                    "k8s.ovn.org/host-cidrs": "[\"10.61.103.155/24\",\"10.61.103.170/32\",\"192.168.103.155/24\"]",
+                    "k8s.ovn.org/l3-gateway-config": "{\"default\":{\"mode\":\"local\",\"bridge-id\":\"br-ex\",\"interface-id\":\"br-ex_s1\",\"mac-address\":\"38:68:dd:25:ae:90\",\"ip-addresses\":[\"10.61.103.155/24\"],\"ip-address\":\"10.61.103.155/24\",\"next-hops\":[\"10.61.103.1\"],\"next-hop\":\"10.61.103.1\",\"node-port-enable\":\"true\",\"vlan-id\":\"0\"}}",
+                    "k8s.ovn.org/layer2-topology-version": "2.0",
+                    "k8s.ovn.org/node-chassis-id": "406bc402-d34e-49bd-87e7-13d83d6b7263",
+                    "k8s.ovn.org/node-encap-ips": "[\"10.61.103.155\"]",
+                    "k8s.ovn.org/node-id": "4",
+                    "k8s.ovn.org/node-masquerade-subnet": "{\"ipv4\":\"169.254.0.0/17\",\"ipv6\":\"fd69::/112\"}",
+                    "k8s.ovn.org/node-primary-ifaddr": "{\"ipv4\":\"10.61.103.155/24\"}",
+                    "k8s.ovn.org/node-subnets": "{\"default\":[\"10.130.0.0/23\"]}",
+                    "k8s.ovn.org/node-transit-switch-port-ifaddr": "{\"ipv4\":\"100.88.0.4/16\"}",
+                    "k8s.ovn.org/zone-name": "s1",
+                    "machine.openshift.io/machine": "openshift-machine-api/ocp1-jgf6g-master-0",
+                    "machineconfiguration.openshift.io/controlPlaneTopology": "HighlyAvailable",
+                    "machineconfiguration.openshift.io/currentConfig": "rendered-master-a1e9950f8f98a9bb358024f2061bafc3",
+                    "machineconfiguration.openshift.io/desiredConfig": "rendered-master-a1e9950f8f98a9bb358024f2061bafc3",
+                    "machineconfiguration.openshift.io/desiredDrain": "uncordon-rendered-master-a1e9950f8f98a9bb358024f2061bafc3",
+                    "machineconfiguration.openshift.io/firstPivotConfig": "rendered-master-a1e9950f8f98a9bb358024f2061bafc3",
+                    "machineconfiguration.openshift.io/lastAppliedDrain": "uncordon-rendered-master-a1e9950f8f98a9bb358024f2061bafc3",
+                    "machineconfiguration.openshift.io/lastObservedServerCAAnnotation": "false",
+                    "machineconfiguration.openshift.io/lastSyncedControllerConfigResourceVersion": "7905058",
+                    "machineconfiguration.openshift.io/reason": "",
+                    "machineconfiguration.openshift.io/state": "Done",
+                    "tuned.openshift.io/bootcmdline": "",
+                    "tuned.openshift.io/bootcmdline-deps": "4.22.5,default:1",
+                    "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+                },
+                "creationTimestamp": "2026-08-13T16:03:10Z",
+                "labels": {
+                    "beta.kubernetes.io/arch": "amd64",
+                    "beta.kubernetes.io/os": "linux",
+                    "kubernetes.io/arch": "amd64",
+                    "kubernetes.io/hostname": "s1",
+                    "kubernetes.io/os": "linux",
+                    "node-role.kubernetes.io/control-plane": "",
+                    "node-role.kubernetes.io/master": "",
+                    "node-role.kubernetes.io/worker": "",
+                    "node.openshift.io/os_id": "rhel"
+                },
+                "name": "s1",
+                "resourceVersion": "14985925",
+                "uid": "d0cd82ce-6b31-42c3-a8f1-21b68255e4a6"
+            },
+            "spec": {
+                "providerID": "baremetalhost:///openshift-machine-api/s1/5dd7db89-5240-4962-8222-ceb87b29805e"
+            },
+            "status": {
+                "addresses": [
+                    {
+                        "address": "10.61.103.155",
+                        "type": "InternalIP"
+                    },
+                    {
+                        "address": "s1",
+                        "type": "Hostname"
+                    }
+                ],
+                "allocatable": {
+                    "cpu": "71500m",
+                    "ephemeral-storage": "214433382453",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "memory": "394740952Ki",
+                    "pods": "250"
+                },
+                "capacity": {
+                    "cpu": "72",
+                    "ephemeral-storage": "233840196Ki",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "memory": "395891928Ki",
+                    "pods": "250"
+                },
+                "conditions": [
+                    {
+                        "lastHeartbeatTime": "2026-09-10T17:57:26Z",
+                        "lastTransitionTime": "2026-08-13T16:03:10Z",
+                        "message": "kubelet has sufficient memory available",
+                        "reason": "KubeletHasSufficientMemory",
+                        "status": "False",
+                        "type": "MemoryPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-09-10T17:57:26Z",
+                        "lastTransitionTime": "2026-08-13T16:03:10Z",
+                        "message": "kubelet has no disk pressure",
+                        "reason": "KubeletHasNoDiskPressure",
+                        "status": "False",
+                        "type": "DiskPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-09-10T17:57:26Z",
+                        "lastTransitionTime": "2026-08-13T16:03:10Z",
+                        "message": "kubelet has sufficient PID available",
+                        "reason": "KubeletHasSufficientPID",
+                        "status": "False",
+                        "type": "PIDPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-09-10T17:57:26Z",
+                        "lastTransitionTime": "2026-08-13T16:04:12Z",
+                        "message": "kubelet is posting ready status",
+                        "reason": "KubeletReady",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "daemonEndpoints": {
+                    "kubeletEndpoint": {
+                        "Port": 10250
+                    }
+                },
+                "features": {
+                    "supplementalGroupsPolicy": true
+                },
+                "images": [
+                    {
+                        "names": [
+                            "quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:fb9d2b0ab694fd5bd2325d717e4d415fe9caa2bf34ff99c9f38502bc00778fff"
+                        ],
+                        "sizeBytes": 2091883736
+                    },
+                    {
+                        "names": [
+                            "docker.elastic.co/elasticsearch/elasticsearch@sha256:4dd70111e8be29321bb7cdbc621032a77d5aec426e5f46522e05072056f912f7",
+                            "docker.elastic.co/elasticsearch/elasticsearch@sha256:9c1e1afc2bda921b35025e21c72ec6e392266995aa35ad6a47887363592718be",
+                            "docker.elastic.co/elasticsearch/elasticsearch:9.5.2"
+                        ],
+                        "sizeBytes": 1632129992
+                    },
+                    {
+                        "names": [
+                            "quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:6cbc5389281689c3c2f7e50ef8d40733d8694f77d91f502fd0eb21713b4d72f3"
+                        ],
+                        "sizeBytes": 1448401664
+                    },
+                    {
+                        "names": [
+                            "quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:891cd5910993022d5477583e3e1851edd4a271f3bb32155258700ff52a441e46"
+                        ],
+                        "sizeBytes": 1348259643
+                    },
+                    {
+                        "names": [
+                            "docker.elastic.co/elasticsearch/elasticsearch@sha256:224c75e346bd745ce908f06a1cbad7bf10988961dcdcdfccb22556b3f856b3f0",
+                            "docker.elastic.co/elasticsearch/elasticsearch@sha256:37355f13f3112b0991a29c91bd90e91c95b0fb08104e86e184445f63c169f441",
+                            "docker.elastic.co/elasticsearch/elasticsearch:8.17.3"
+                        ],
+                        "sizeBytes": 1327344284
+                    },
+                    {
+                        "names": [
+                            "docker.io/apache/nifi@sha256:337e5122b0785e712050c609f5722155656b64908666340878f397a06f70fe4a",
+                            "docker.io/apache/nifi@sha256:74aebc23308be2b68ad8163b1f8f45c37bba506c569a1f9e0de25af9183430ea",
+                            "docker.io/apache/nifi:2.11.0"
+                        ],
+                        "sizeBytes": 1292594571
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:016a490bf94bc3971fd4a9524b4d34e37b811fb7438bec83a3edaa29779ff111"
+                        ],
+                        "sizeBytes": 1088942013
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:c3b17963563c9624bfdf486530826554d829b8deac836af790b39dc6ad565111"
+                        ],
+                        "sizeBytes": 1088912323
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:4730effda1205561e24405baaec3f25eaff85efc695a8e096fb2440d507b8914"
+                        ],
+                        "sizeBytes": 1088885693
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:272dfe1832914e7dca56e7ab8b63678820954f9301626a5218b8a32b7c86f3fd"
+                        ],
+                        "sizeBytes": 1088851908
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:fa4aed53c32de478ad52062d511e58f83fd540d2c93c62f538c63cd1c477a708"
+                        ],
+                        "sizeBytes": 1088829371
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:fe036c9d5e36f6e0b852dcb225928f5542512e62181277d14926652aeb71bf5b"
+                        ],
+                        "sizeBytes": 1088806849
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:6a699dc6ec4c34db18f11d06062836cc7b7bae88e50c568c1d8bad6cd3442e59"
+                        ],
+                        "sizeBytes": 1088771007
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:704fad5ac08121791903982d1c08025a785e10ae95bfd09277cc9032602961a9"
+                        ],
+                        "sizeBytes": 1088715711
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:b65d3c68d8904788f34822c470d9ec0f3b448edf658e7601c2c7be852d9f50fd"
+                        ],
+                        "sizeBytes": 1088672697
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:8a842833c2c6bb76d72082bc7a4fe92d02610ed86b70e90cdde04080b948d927"
+                        ],
+                        "sizeBytes": 1088655807
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:5f4e5fcdf4cfb26c1ddf309c0f8b8661794957bd8c4e4e5a69f75908d23cd8fb"
+                        ],
+                        "sizeBytes": 1088259522
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:9f59c066463082a4f8d36fde3d73595303f4b99fa85845cd121052a934da1b88"
+                        ],
+                        "sizeBytes": 1088166847
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:4eee245e9801e7e9f69e2cb6c2c6e12c67e58188ae855e793528cdd3cae56e01"
+                        ],
+                        "sizeBytes": 1084950984
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:f76bc2bc1701ce9b8f2c7970231d4e694a593c90224f7fba0512553e0a91e18f"
+                        ],
+                        "sizeBytes": 1084864969
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:72762e409af0145c3b91454400ce1e1fbc275e65a3bacf2e641d56ed16daf6a9"
+                        ],
+                        "sizeBytes": 1084812737
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:3e0f29f49abc0baaf746318f7a4e80c9d1588f32e1e8266cf869a94719c4b5a8"
+                        ],
+                        "sizeBytes": 1084700612
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:77082873c03ea598f54427033e59c2b36d9d3606a12489d4b129c23d7632b06c"
+                        ],
+                        "sizeBytes": 1084691399
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:c6a68914369b6056bc8c66e157069e438a75c2c85cefe7a263c89f23c4e10957"
+                        ],
+                        "sizeBytes": 1084678079
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:5a122361af382eba7c23d00cd4673ef169712830bf3b67367750f5d5329a240b"
+                        ],
+                        "sizeBytes": 1084672462
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:fcaff1a752be291d25c3a86ddafd7d1e4b0662b85799dc02a5694c1906a4a136"
+                        ],
+                        "sizeBytes": 1084645839
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:efa7b38b51e2a0324db122f22e309dbd4c2a61359bde13ee964b1b99c4ba6512"
+                        ],
+                        "sizeBytes": 1084636097
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:5151ad5e55f69748bd18e13446c6598b99308d03863ae50b2a48a096ed7f4e8d"
+                        ],
+                        "sizeBytes": 1084627918
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:d589367678f0fc9ef80d7e7d2da8c2399e0cb3d6424ef102bfda29d784ce76ce"
+                        ],
+                        "sizeBytes": 1084617678
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:90311c792bba151a6d9ae568d656886609cfa30790543f3268be142acb396a4d"
+                        ],
+                        "sizeBytes": 1084607954
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:9f754a786cc5c5458c0a67d9cc2b4b4f7f2e94bd97c27c8c86a53274742a9997"
+                        ],
+                        "sizeBytes": 1082188732
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:a6b825bb842a9dfea3a42fba08e749b6d7deb120331c9540ef7004d9b9edcc74"
+                        ],
+                        "sizeBytes": 1082171840
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:fc1a4c09f47b8c8e962d738343fa7d36d2ba30af2f331bf5ca4375765b818cc4"
+                        ],
+                        "sizeBytes": 1082065349
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:fd5e5f4b5ef4544a1fae92cb40cb5bc82e5ecfd49855ad1e8c998604d26782d5"
+                        ],
+                        "sizeBytes": 1082002875
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:6709bdc84159ce28fc6b1eef950f9a8fe5841200df8eeaceb1fddb5fd8e7e2be"
+                        ],
+                        "sizeBytes": 1082001340
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:84d52d19f2f967a2682620d4c5226f9c111e5c87b39e8fe8cb7613ffa65b3686"
+                        ],
+                        "sizeBytes": 1081997240
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:c9f4ef4a7b7b9b97a7ce520d31c587e365647e0ea58acae9a20793e13c56597d"
+                        ],
+                        "sizeBytes": 1081929150
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:829e2ca9f15cdf4538b8a00a2abfcb228936f5ce1e8b2722772cf98571d77556"
+                        ],
+                        "sizeBytes": 1081919932
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:a4d4d3ac031bf999715a5c22e47bb5687e241868f038e47e48a09710a39a9e71",
+                            "registry.redhat.io/redhat/community-operator-index@sha256:a7a4bd45d123f6c47ef2e16de5db9ece7c10d644fdda854ed4545c1925a257c4",
+                            "registry.redhat.io/redhat/community-operator-index:v4.22"
+                        ],
+                        "sizeBytes": 1076324801
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:06696d9391be8c57d6656c0c87ff29cb923776cf6b6608b597107698a0c2ada4"
+                        ],
+                        "sizeBytes": 1076285371
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:7569e302528de7f8f811a21ba4b512f1eb50a3e717d4d7e347c5d6fab206a8a2"
+                        ],
+                        "sizeBytes": 1076023239
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:4a5716b1b374ddf59383d5ddb506bbfc5d2656d36a1f1c419ed76cc6cb9fa6aa"
+                        ],
+                        "sizeBytes": 1075993543
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:9c91ed3ad96ac1170be334984f7dbacee56e2ea9e959732505220c8b3ff720c6"
+                        ],
+                        "sizeBytes": 1075986368
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:13eec96b92c16d3a6de21d1478d1264ebfc87af50786448ac9c3f386efbab4c7"
+                        ],
+                        "sizeBytes": 1075915712
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:77b1784d3ef8e59ad57c5f75c7992fa8f8c0c52605b49aa7ad6bb6af2b73d34a"
+                        ],
+                        "sizeBytes": 1075908030
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:a13df2c002ab96514e8b98dbcf2d5eb1bb64de4b1f5104313784e1a75c923560"
+                        ],
+                        "sizeBytes": 1075849659
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:bddcc1d6c8cd83832a6ccd0c13c14272cba661b530ff0b3b64d8762029df12fb"
+                        ],
+                        "sizeBytes": 1075834305
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:1a4424afc8f19677e708028c839652875cea65b6cc6abccf3a14181760cefa41"
+                        ],
+                        "sizeBytes": 1075625917
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/certified-operator-index@sha256:f25d50307d674e228a21323cc24ff9bed859310b9e30f83feff5ee250b90eae5"
+                        ],
+                        "sizeBytes": 1041515961
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/certified-operator-index@sha256:6282a1509d1b1011d44cf5436dc20aff44fd09c2a5444de6d904a280b2dfdba7"
+                        ],
+                        "sizeBytes": 1040770502
+                    }
+                ],
+                "nodeInfo": {
+                    "architecture": "amd64",
+                    "bootID": "a10d56ff-39e1-4d73-b7bf-db03fde59dcc",
+                    "containerRuntimeVersion": "cri-o://1.35.5-2.rhaos4.22.git78f87e5.el9",
+                    "kernelVersion": "5.14.0-687.23.1.el9_8.x86_64",
+                    "kubeProxyVersion": "",
+                    "kubeletVersion": "v1.35.5",
+                    "machineID": "80fbb667892c4d48862bcf36a6cd3670",
+                    "operatingSystem": "linux",
+                    "osImage": "Red Hat Enterprise Linux CoreOS 9.8.20260708-0 (Plow)",
+                    "systemUUID": "47bbc31a-4aa8-11eb-8224-3a68dd25ae97"
+                },
+                "runtimeHandlers": [
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": "crun"
+                    },
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": ""
+                    },
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": "runc"
+                    }
+                ],
+                "volumesAttached": [
+                    {
+                        "devicePath": "",
+                        "name": "kubernetes.io/csi/csi.trident.netapp.io^pvc-f97c1fff-58c0-463c-9b69-6259b45a67a6"
+                    },
+                    {
+                        "devicePath": "",
+                        "name": "kubernetes.io/csi/csi.trident.netapp.io^pvc-c85e5fc2-af56-45a6-9ba3-630961fe94f4"
+                    },
+                    {
+                        "devicePath": "",
+                        "name": "kubernetes.io/csi/csi.trident.netapp.io^pvc-8f35cf1b-b30a-41b8-968f-4b82c83cfc77"
+                    },
+                    {
+                        "devicePath": "",
+                        "name": "kubernetes.io/csi/csi.trident.netapp.io^pvc-1def0e69-50cf-41f1-9882-94563451c560"
+                    }
+                ],
+                "volumesInUse": [
+                    "kubernetes.io/csi/csi.trident.netapp.io^pvc-1def0e69-50cf-41f1-9882-94563451c560",
+                    "kubernetes.io/csi/csi.trident.netapp.io^pvc-8f35cf1b-b30a-41b8-968f-4b82c83cfc77",
+                    "kubernetes.io/csi/csi.trident.netapp.io^pvc-c85e5fc2-af56-45a6-9ba3-630961fe94f4",
+                    "kubernetes.io/csi/csi.trident.netapp.io^pvc-f97c1fff-58c0-463c-9b69-6259b45a67a6"
+                ]
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Node",
+            "metadata": {
+                "annotations": {
+                    "csi.volume.kubernetes.io/nodeid": "{\"csi.trident.netapp.io\":\"s2\"}",
+                    "k8s.ovn.org/host-cidrs": "[\"10.61.103.156/24\",\"10.61.103.161/32\",\"192.168.103.156/24\"]",
+                    "k8s.ovn.org/l3-gateway-config": "{\"default\":{\"mode\":\"local\",\"bridge-id\":\"br-ex\",\"interface-id\":\"br-ex_s2\",\"mac-address\":\"38:68:dd:44:8e:00\",\"ip-addresses\":[\"10.61.103.156/24\"],\"ip-address\":\"10.61.103.156/24\",\"next-hops\":[\"10.61.103.1\"],\"next-hop\":\"10.61.103.1\",\"node-port-enable\":\"true\",\"vlan-id\":\"0\"}}",
+                    "k8s.ovn.org/layer2-topology-version": "2.0",
+                    "k8s.ovn.org/node-chassis-id": "e531ae98-666a-4ad2-80ef-c5510daaaaf1",
+                    "k8s.ovn.org/node-encap-ips": "[\"10.61.103.156\"]",
+                    "k8s.ovn.org/node-id": "3",
+                    "k8s.ovn.org/node-masquerade-subnet": "{\"ipv4\":\"169.254.0.0/17\",\"ipv6\":\"fd69::/112\"}",
+                    "k8s.ovn.org/node-primary-ifaddr": "{\"ipv4\":\"10.61.103.156/24\"}",
+                    "k8s.ovn.org/node-subnets": "{\"default\":[\"10.129.0.0/23\"]}",
+                    "k8s.ovn.org/node-transit-switch-port-ifaddr": "{\"ipv4\":\"100.88.0.3/16\"}",
+                    "k8s.ovn.org/zone-name": "s2",
+                    "machine.openshift.io/machine": "openshift-machine-api/ocp1-jgf6g-master-1",
+                    "machineconfiguration.openshift.io/controlPlaneTopology": "HighlyAvailable",
+                    "machineconfiguration.openshift.io/currentConfig": "rendered-master-a1e9950f8f98a9bb358024f2061bafc3",
+                    "machineconfiguration.openshift.io/desiredConfig": "rendered-master-a1e9950f8f98a9bb358024f2061bafc3",
+                    "machineconfiguration.openshift.io/desiredDrain": "uncordon-rendered-master-a1e9950f8f98a9bb358024f2061bafc3",
+                    "machineconfiguration.openshift.io/firstPivotConfig": "rendered-master-a1e9950f8f98a9bb358024f2061bafc3",
+                    "machineconfiguration.openshift.io/lastAppliedDrain": "uncordon-rendered-master-a1e9950f8f98a9bb358024f2061bafc3",
+                    "machineconfiguration.openshift.io/lastObservedServerCAAnnotation": "false",
+                    "machineconfiguration.openshift.io/lastSyncedControllerConfigResourceVersion": "7905058",
+                    "machineconfiguration.openshift.io/reason": "",
+                    "machineconfiguration.openshift.io/state": "Done",
+                    "tuned.openshift.io/bootcmdline": "",
+                    "tuned.openshift.io/bootcmdline-deps": "4.22.5,default:1",
+                    "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+                },
+                "creationTimestamp": "2026-08-13T15:42:30Z",
+                "labels": {
+                    "beta.kubernetes.io/arch": "amd64",
+                    "beta.kubernetes.io/os": "linux",
+                    "kubernetes.io/arch": "amd64",
+                    "kubernetes.io/hostname": "s2",
+                    "kubernetes.io/os": "linux",
+                    "node-role.kubernetes.io/control-plane": "",
+                    "node-role.kubernetes.io/master": "",
+                    "node-role.kubernetes.io/worker": "",
+                    "node.openshift.io/os_id": "rhel"
+                },
+                "name": "s2",
+                "resourceVersion": "14985961",
+                "uid": "f3537918-38fe-4b64-96e1-7e4d1a0e0cd0"
+            },
+            "spec": {
+                "providerID": "baremetalhost:///openshift-machine-api/s2/e1026106-a178-4f4b-aed2-2ad8e161663e"
+            },
+            "status": {
+                "addresses": [
+                    {
+                        "address": "10.61.103.156",
+                        "type": "InternalIP"
+                    },
+                    {
+                        "address": "s2",
+                        "type": "Hostname"
+                    }
+                ],
+                "allocatable": {
+                    "cpu": "71500m",
+                    "ephemeral-storage": "214433382453",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "memory": "394741392Ki",
+                    "pods": "250"
+                },
+                "capacity": {
+                    "cpu": "72",
+                    "ephemeral-storage": "233840196Ki",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "memory": "395892368Ki",
+                    "pods": "250"
+                },
+                "conditions": [
+                    {
+                        "lastHeartbeatTime": "2026-09-10T17:57:31Z",
+                        "lastTransitionTime": "2026-08-13T15:42:30Z",
+                        "message": "kubelet has sufficient memory available",
+                        "reason": "KubeletHasSufficientMemory",
+                        "status": "False",
+                        "type": "MemoryPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-09-10T17:57:31Z",
+                        "lastTransitionTime": "2026-08-13T15:42:30Z",
+                        "message": "kubelet has no disk pressure",
+                        "reason": "KubeletHasNoDiskPressure",
+                        "status": "False",
+                        "type": "DiskPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-09-10T17:57:31Z",
+                        "lastTransitionTime": "2026-08-13T15:42:30Z",
+                        "message": "kubelet has sufficient PID available",
+                        "reason": "KubeletHasSufficientPID",
+                        "status": "False",
+                        "type": "PIDPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-09-10T17:57:31Z",
+                        "lastTransitionTime": "2026-08-13T15:45:55Z",
+                        "message": "kubelet is posting ready status",
+                        "reason": "KubeletReady",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "daemonEndpoints": {
+                    "kubeletEndpoint": {
+                        "Port": 10250
+                    }
+                },
+                "features": {
+                    "supplementalGroupsPolicy": true
+                },
+                "images": [
+                    {
+                        "names": [
+                            "quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:fb9d2b0ab694fd5bd2325d717e4d415fe9caa2bf34ff99c9f38502bc00778fff"
+                        ],
+                        "sizeBytes": 2091883736
+                    },
+                    {
+                        "names": [
+                            "docker.elastic.co/kibana/kibana@sha256:4f69cec8b6010f0247dc2d338c2bf002a244569e81b9e3ddac40095c8912238b",
+                            "docker.elastic.co/kibana/kibana@sha256:861d93114b756dd214f6d5c8824f90ac92e07d5b6223fd4a20212f7504eec2ad",
+                            "docker.elastic.co/kibana/kibana:9.5.2"
+                        ],
+                        "sizeBytes": 1890598534
+                    },
+                    {
+                        "names": [
+                            "quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:2c45e55e54e27728855d7a02748ed32ce3f60cb6442305fe9e3fc1a4420f6d83"
+                        ],
+                        "sizeBytes": 1778988082
+                    },
+                    {
+                        "names": [
+                            "docker.elastic.co/elasticsearch/elasticsearch@sha256:4dd70111e8be29321bb7cdbc621032a77d5aec426e5f46522e05072056f912f7",
+                            "docker.elastic.co/elasticsearch/elasticsearch@sha256:9c1e1afc2bda921b35025e21c72ec6e392266995aa35ad6a47887363592718be",
+                            "docker.elastic.co/elasticsearch/elasticsearch:9.5.2"
+                        ],
+                        "sizeBytes": 1632129992
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:d5ce6243a0cf46f047a17db9f8212d163a2b47a52e79fe9e4f80e629882fae62"
+                        ],
+                        "sizeBytes": 1558516759
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:f43b3d0493a79c3abf142bc156328b3cfd25a66f8d627e50e01f6a7f6f8a0b3e"
+                        ],
+                        "sizeBytes": 1558455751
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:bd191d03054edb926f98851a9c0ddfe15e5af6e957263becced3f7eef8534b66"
+                        ],
+                        "sizeBytes": 1558448647
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:e45ed2af10c6e0ab2ced94561db5b4d9c5c9e679b1b36dd95b000db745537368"
+                        ],
+                        "sizeBytes": 1557047229
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:d0f9506e76636815b9e5be470b1120a100ed39fbe85ab6652ee3fa7fbc171fb9"
+                        ],
+                        "sizeBytes": 1556972566
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:35cd10c3cc764de1bc378819166a2847b82b7f0616bb7043a79f447ec9ec36ae"
+                        ],
+                        "sizeBytes": 1556771268
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:f684ade6568b7db1faa2c764f69ce0c5d466aed89ad80b29bcb059e2b482fab4"
+                        ],
+                        "sizeBytes": 1555959309
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:ec89c993ca2a72366e7f95db7bb9099cdd92edc548f1f99dec7b60a36d151696"
+                        ],
+                        "sizeBytes": 1555633689
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:37ed0d1fe34bbab0381c5e387163a76801570af91ba4441a5abfd86bc4efcd10"
+                        ],
+                        "sizeBytes": 1555371023
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:c4223355d60bd6d22f4c821f1e11f3bdfd4411102a4f5ea8fbc2ffb2a49df042"
+                        ],
+                        "sizeBytes": 1554931211
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:d5437c7839431d9b60ee8227ce2fe7745a8d2e6a5190be1544142f65b566edc2"
+                        ],
+                        "sizeBytes": 1554826767
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:5137335567af0a03a68d1a2b917ab8e24401202cf174dd526d37e3f881ca7a33"
+                        ],
+                        "sizeBytes": 1554801685
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:acfe2f825fb2b6b42b304425d1f9ca857bdd87c2469057af1c7f1cdabafb4b8e"
+                        ],
+                        "sizeBytes": 1554579380
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:e25fc86893afa80a00d944ae16af9aa03e7b835c75848909f02addfb2d52274c"
+                        ],
+                        "sizeBytes": 1554448892
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:8cc710772c452d82d914afaa76a077cd3e61d18466ed939603df26df1c46a387"
+                        ],
+                        "sizeBytes": 1554289100
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:85ff403dcb70e5f73101a4cb9571adec18c7aa601d4d7c0977765e05ba494892"
+                        ],
+                        "sizeBytes": 1553826328
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:1952eb802a708dbacd0892ace59b768cb0f99a8a6328a6e9282cac249b9251b4"
+                        ],
+                        "sizeBytes": 1553260500
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:0f9cd1c6fd1641b48daf689a6e6ce9eaf3d498aa349f2c2401b276fd2c3788de"
+                        ],
+                        "sizeBytes": 1553068577
+                    },
+                    {
+                        "names": [
+                            "docker.io/bitnamilegacy/elasticsearch@sha256:00176a47afa0c0cfc9d11bdbafda13cbad7c9098ff1e6092112df2c751de301a",
+                            "docker.io/bitnamilegacy/elasticsearch@sha256:5d376ef48aef4015e1e0af1875287504dac20b0373031f38baee0ad862b057c6",
+                            "docker.io/bitnamilegacy/elasticsearch:9.1.2-debian-12-r0"
+                        ],
+                        "sizeBytes": 1552354044
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:4013d4023c34623e69671feb7eae1ba439f985937d87f5781c1db836c83e967b",
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:adec682802e52a25b96fdfd09ea651bb56504f1c871e953f45169218a20b6e82",
+                            "registry.redhat.io/redhat/redhat-operator-index:v4.22"
+                        ],
+                        "sizeBytes": 1550245905
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:88ff2e9f5f6ca5c7a5d414a3a781605a89d104ede2ee17ec16e48458a74307fa"
+                        ],
+                        "sizeBytes": 1547471356
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:b5e324e9c5b0f3e4620689ca57a733ceb855f18054a5db8fb7a09b7c6ace5091"
+                        ],
+                        "sizeBytes": 1547209738
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:f3024e57c86abee8c73d07aa244acf581d8f092955bc90855c4c4ebeac32af77"
+                        ],
+                        "sizeBytes": 1547186190
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:162e70efc638f39a02afd93fe098d9c3e4ad2108efadea072a973e0f6b8ecddd"
+                        ],
+                        "sizeBytes": 1542320077
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:d46827d0917f3b0aafd1e5b0222d52e7e04ef2e5b0ba342319ebb058cef0bc6d"
+                        ],
+                        "sizeBytes": 1541770718
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:b19468e16510e00905db548fe5cce746cd3a4159e8ea6711d35571fcdfb3c186"
+                        ],
+                        "sizeBytes": 1540884957
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:9cc455575cfd0ca1ac6eb6557f65499247dc6f344cf35e4c19593ec4264b2b20"
+                        ],
+                        "sizeBytes": 1540657681
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:57f55f208f4d0389445db68ccce56be05b8e38454227b3260b56973f2ebac7ce"
+                        ],
+                        "sizeBytes": 1540631067
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:08959ac22321d20defaa6678f152e3f2b83c23984d4e36ea97b1bb54527c6f3e"
+                        ],
+                        "sizeBytes": 1540607710
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:2946b51fd58f60e85c9ef39cbb8037957776b5258e988fdc830e3d9d1e522513"
+                        ],
+                        "sizeBytes": 1540272338
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:093e1622353d43632b194567c4bf1bccf993776693a5c27dc890ff5dc6be913b"
+                        ],
+                        "sizeBytes": 1540047067
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:eea62efed8765be3fb6bcd1d17cf6b9685c803ca02d79b0f9cd25b9b65af8ad6"
+                        ],
+                        "sizeBytes": 1538896387
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:76560684f73e0789513d5738720eb58af954c4df00d7db8b0e85b83a80ec789b"
+                        ],
+                        "sizeBytes": 1538724376
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:35b2882f98d14f3fe1a7099284b935d22e99a3bed0814bf5fa5cdbd0f2c01a22"
+                        ],
+                        "sizeBytes": 1538619417
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:3de8e40506a26cc5cadb39bfa50b83a00582524f111060bf8c1a51be253beed9"
+                        ],
+                        "sizeBytes": 1537275403
+                    },
+                    {
+                        "names": [
+                            "quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:6cbc5389281689c3c2f7e50ef8d40733d8694f77d91f502fd0eb21713b4d72f3"
+                        ],
+                        "sizeBytes": 1448401664
+                    },
+                    {
+                        "names": [
+                            "quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:891cd5910993022d5477583e3e1851edd4a271f3bb32155258700ff52a441e46"
+                        ],
+                        "sizeBytes": 1348259643
+                    },
+                    {
+                        "names": [
+                            "docker.elastic.co/elasticsearch/elasticsearch@sha256:224c75e346bd745ce908f06a1cbad7bf10988961dcdcdfccb22556b3f856b3f0",
+                            "docker.elastic.co/elasticsearch/elasticsearch@sha256:37355f13f3112b0991a29c91bd90e91c95b0fb08104e86e184445f63c169f441",
+                            "docker.elastic.co/elasticsearch/elasticsearch:8.17.3"
+                        ],
+                        "sizeBytes": 1327344284
+                    },
+                    {
+                        "names": [
+                            "docker.io/apache/nifi@sha256:337e5122b0785e712050c609f5722155656b64908666340878f397a06f70fe4a",
+                            "docker.io/apache/nifi@sha256:74aebc23308be2b68ad8163b1f8f45c37bba506c569a1f9e0de25af9183430ea",
+                            "docker.io/apache/nifi:2.11.0"
+                        ],
+                        "sizeBytes": 1292594571
+                    },
+                    {
+                        "names": [
+                            "docker.elastic.co/elasticsearch/elasticsearch@sha256:c00ffbda25f43fb24ab9ec199b0f162087cd0a7d2fa8d17fd0dd926b97f8e4e3",
+                            "docker.elastic.co/elasticsearch/elasticsearch@sha256:d784066422aec9f66ae424f692d2416057e78853ab015915a04530570c955cc8",
+                            "docker.elastic.co/elasticsearch/elasticsearch:8.5.1"
+                        ],
+                        "sizeBytes": 1289989144
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:02571e01361dcde5452c73749059c604eee1623f9819afa440bbd036cba08a24",
+                            "registry.redhat.io/redhat/community-operator-index@sha256:8a842833c2c6bb76d72082bc7a4fe92d02610ed86b70e90cdde04080b948d927",
+                            "registry.redhat.io/redhat/community-operator-index:v4.22"
+                        ],
+                        "sizeBytes": 1088655807
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:723e5263eeb30d67be8f4349a993ae360935fa6cb2a75fc5a52624fd07090973"
+                        ],
+                        "sizeBytes": 1088176581
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:4fb00daafa29fbfd4ea9696082bf3e237be3a32f05c737921bffd72069db939f"
+                        ],
+                        "sizeBytes": 1083162051
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:6d28442b36193922628cc4a5f3075425674c13b41636bd9068f8d7a983a3f3ff"
+                        ],
+                        "sizeBytes": 1083151317
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:2d406baebd8ef44c9dbbe57e361aae3cfb9af39fc72c7003f8db1f69b6abd732"
+                        ],
+                        "sizeBytes": 1083130306
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:11d088cc25b736aab0ba31253c08f8966eafa43101302eee18e06fc9882052c7"
+                        ],
+                        "sizeBytes": 1083123141
+                    }
+                ],
+                "nodeInfo": {
+                    "architecture": "amd64",
+                    "bootID": "d3c47d6c-27a9-453c-8ea2-ecfbf6eb7fcb",
+                    "containerRuntimeVersion": "cri-o://1.35.5-2.rhaos4.22.git78f87e5.el9",
+                    "kernelVersion": "5.14.0-687.23.1.el9_8.x86_64",
+                    "kubeProxyVersion": "",
+                    "kubeletVersion": "v1.35.5",
+                    "machineID": "67ec948d60174f9f84d38c26a938e7c1",
+                    "operatingSystem": "linux",
+                    "osImage": "Red Hat Enterprise Linux CoreOS 9.8.20260708-0 (Plow)",
+                    "systemUUID": "55240e76-4a73-11eb-8031-3a68dd448e07"
+                },
+                "runtimeHandlers": [
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": "crun"
+                    },
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": ""
+                    },
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": "runc"
+                    }
+                ],
+                "volumesAttached": [
+                    {
+                        "devicePath": "",
+                        "name": "kubernetes.io/csi/csi.trident.netapp.io^pvc-85f6b96c-1cf3-40cf-a78e-c1f4a56b1176"
+                    }
+                ],
+                "volumesInUse": [
+                    "kubernetes.io/csi/csi.trident.netapp.io^pvc-85f6b96c-1cf3-40cf-a78e-c1f4a56b1176"
+                ]
+            }
+        },
+        {
+            "apiVersion": "v1",
+            "kind": "Node",
+            "metadata": {
+                "annotations": {
+                    "csi.volume.kubernetes.io/nodeid": "{\"csi.trident.netapp.io\":\"s3\"}",
+                    "k8s.ovn.org/host-cidrs": "[\"10.61.103.157/24\",\"192.168.103.157/24\"]",
+                    "k8s.ovn.org/l3-gateway-config": "{\"default\":{\"mode\":\"local\",\"bridge-id\":\"br-ex\",\"interface-id\":\"br-ex_s3\",\"mac-address\":\"38:68:dd:44:8c:68\",\"ip-addresses\":[\"10.61.103.157/24\"],\"ip-address\":\"10.61.103.157/24\",\"next-hops\":[\"10.61.103.1\"],\"next-hop\":\"10.61.103.1\",\"node-port-enable\":\"true\",\"vlan-id\":\"0\"}}",
+                    "k8s.ovn.org/layer2-topology-version": "2.0",
+                    "k8s.ovn.org/node-chassis-id": "2907af5a-5baa-4ee1-99ba-87bb520bb242",
+                    "k8s.ovn.org/node-encap-ips": "[\"10.61.103.157\"]",
+                    "k8s.ovn.org/node-id": "2",
+                    "k8s.ovn.org/node-masquerade-subnet": "{\"ipv4\":\"169.254.0.0/17\",\"ipv6\":\"fd69::/112\"}",
+                    "k8s.ovn.org/node-primary-ifaddr": "{\"ipv4\":\"10.61.103.157/24\"}",
+                    "k8s.ovn.org/node-subnets": "{\"default\":[\"10.128.0.0/23\"]}",
+                    "k8s.ovn.org/node-transit-switch-port-ifaddr": "{\"ipv4\":\"100.88.0.2/16\"}",
+                    "k8s.ovn.org/zone-name": "s3",
+                    "machine.openshift.io/machine": "openshift-machine-api/ocp1-jgf6g-master-2",
+                    "machineconfiguration.openshift.io/controlPlaneTopology": "HighlyAvailable",
+                    "machineconfiguration.openshift.io/currentConfig": "rendered-master-a1e9950f8f98a9bb358024f2061bafc3",
+                    "machineconfiguration.openshift.io/desiredConfig": "rendered-master-a1e9950f8f98a9bb358024f2061bafc3",
+                    "machineconfiguration.openshift.io/desiredDrain": "uncordon-rendered-master-a1e9950f8f98a9bb358024f2061bafc3",
+                    "machineconfiguration.openshift.io/firstPivotConfig": "rendered-master-a1e9950f8f98a9bb358024f2061bafc3",
+                    "machineconfiguration.openshift.io/lastAppliedDrain": "uncordon-rendered-master-a1e9950f8f98a9bb358024f2061bafc3",
+                    "machineconfiguration.openshift.io/lastObservedServerCAAnnotation": "false",
+                    "machineconfiguration.openshift.io/lastSyncedControllerConfigResourceVersion": "7905058",
+                    "machineconfiguration.openshift.io/reason": "",
+                    "machineconfiguration.openshift.io/state": "Done",
+                    "tuned.openshift.io/bootcmdline": "",
+                    "tuned.openshift.io/bootcmdline-deps": "4.22.5,default:1",
+                    "volumes.kubernetes.io/controller-managed-attach-detach": "true"
+                },
+                "creationTimestamp": "2026-08-13T15:42:56Z",
+                "labels": {
+                    "beta.kubernetes.io/arch": "amd64",
+                    "beta.kubernetes.io/os": "linux",
+                    "kubernetes.io/arch": "amd64",
+                    "kubernetes.io/hostname": "s3",
+                    "kubernetes.io/os": "linux",
+                    "node-role.kubernetes.io/control-plane": "",
+                    "node-role.kubernetes.io/master": "",
+                    "node-role.kubernetes.io/worker": "",
+                    "node.openshift.io/os_id": "rhel"
+                },
+                "name": "s3",
+                "resourceVersion": "14985883",
+                "uid": "e6849d0b-887b-4bd3-9bef-682ca7b0d441"
+            },
+            "spec": {
+                "providerID": "baremetalhost:///openshift-machine-api/s3/bc0e2c2a-997c-4f8f-8288-5d386dd7d1c9"
+            },
+            "status": {
+                "addresses": [
+                    {
+                        "address": "10.61.103.157",
+                        "type": "InternalIP"
+                    },
+                    {
+                        "address": "s3",
+                        "type": "Hostname"
+                    }
+                ],
+                "allocatable": {
+                    "cpu": "71500m",
+                    "ephemeral-storage": "214433382453",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "memory": "394736320Ki",
+                    "pods": "250"
+                },
+                "capacity": {
+                    "cpu": "72",
+                    "ephemeral-storage": "233840196Ki",
+                    "hugepages-1Gi": "0",
+                    "hugepages-2Mi": "0",
+                    "memory": "395887296Ki",
+                    "pods": "250"
+                },
+                "conditions": [
+                    {
+                        "lastHeartbeatTime": "2026-09-10T17:57:22Z",
+                        "lastTransitionTime": "2026-08-13T15:42:56Z",
+                        "message": "kubelet has sufficient memory available",
+                        "reason": "KubeletHasSufficientMemory",
+                        "status": "False",
+                        "type": "MemoryPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-09-10T17:57:22Z",
+                        "lastTransitionTime": "2026-08-13T15:42:56Z",
+                        "message": "kubelet has no disk pressure",
+                        "reason": "KubeletHasNoDiskPressure",
+                        "status": "False",
+                        "type": "DiskPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-09-10T17:57:22Z",
+                        "lastTransitionTime": "2026-08-13T15:42:56Z",
+                        "message": "kubelet has sufficient PID available",
+                        "reason": "KubeletHasSufficientPID",
+                        "status": "False",
+                        "type": "PIDPressure"
+                    },
+                    {
+                        "lastHeartbeatTime": "2026-09-10T17:57:22Z",
+                        "lastTransitionTime": "2026-08-13T15:46:00Z",
+                        "message": "kubelet is posting ready status",
+                        "reason": "KubeletReady",
+                        "status": "True",
+                        "type": "Ready"
+                    }
+                ],
+                "daemonEndpoints": {
+                    "kubeletEndpoint": {
+                        "Port": 10250
+                    }
+                },
+                "features": {
+                    "supplementalGroupsPolicy": true
+                },
+                "images": [
+                    {
+                        "names": [
+                            "quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:fb9d2b0ab694fd5bd2325d717e4d415fe9caa2bf34ff99c9f38502bc00778fff"
+                        ],
+                        "sizeBytes": 2091883736
+                    },
+                    {
+                        "names": [
+                            "docker.elastic.co/kibana/kibana@sha256:4f69cec8b6010f0247dc2d338c2bf002a244569e81b9e3ddac40095c8912238b",
+                            "docker.elastic.co/kibana/kibana@sha256:861d93114b756dd214f6d5c8824f90ac92e07d5b6223fd4a20212f7504eec2ad",
+                            "docker.elastic.co/kibana/kibana:9.5.2"
+                        ],
+                        "sizeBytes": 1890598534
+                    },
+                    {
+                        "names": [
+                            "quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:2c45e55e54e27728855d7a02748ed32ce3f60cb6442305fe9e3fc1a4420f6d83"
+                        ],
+                        "sizeBytes": 1778988082
+                    },
+                    {
+                        "names": [
+                            "docker.elastic.co/elasticsearch/elasticsearch@sha256:4dd70111e8be29321bb7cdbc621032a77d5aec426e5f46522e05072056f912f7",
+                            "docker.elastic.co/elasticsearch/elasticsearch@sha256:9c1e1afc2bda921b35025e21c72ec6e392266995aa35ad6a47887363592718be",
+                            "docker.elastic.co/elasticsearch/elasticsearch:9.5.2"
+                        ],
+                        "sizeBytes": 1632129992
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:439e114170fc799d79ab3fc6fbf68d99fd5ee0fbd8e696c06a94798aa514200b"
+                        ],
+                        "sizeBytes": 1558609927
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:f43b3d0493a79c3abf142bc156328b3cfd25a66f8d627e50e01f6a7f6f8a0b3e"
+                        ],
+                        "sizeBytes": 1558455751
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:e45ed2af10c6e0ab2ced94561db5b4d9c5c9e679b1b36dd95b000db745537368"
+                        ],
+                        "sizeBytes": 1557047229
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:f1a3c4aef33f934f055af726a519d6f9649606ae6a1dd086e66f046f7586aa30"
+                        ],
+                        "sizeBytes": 1556899349
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:0c02ba3222f6c8518ea77989de1fa120d79f90baad828fba7222fbf74e1d97cc"
+                        ],
+                        "sizeBytes": 1556870159
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:35cd10c3cc764de1bc378819166a2847b82b7f0616bb7043a79f447ec9ec36ae"
+                        ],
+                        "sizeBytes": 1556771268
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:51816c16c78382a86c8713ab3834cecace21ead83a9e746092a6003ebcc084dd"
+                        ],
+                        "sizeBytes": 1556604424
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:72a1f199c5cd8180011aadb2eb160eb5f86e52f56d842cfaa41bb2d6ae7ddbc6"
+                        ],
+                        "sizeBytes": 1555414042
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:37ed0d1fe34bbab0381c5e387163a76801570af91ba4441a5abfd86bc4efcd10"
+                        ],
+                        "sizeBytes": 1555371023
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:d7ba03c45cb7021b2fca4e2bd97b2816c093b7f81ff024c5986cbda393e6f71a"
+                        ],
+                        "sizeBytes": 1554724363
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:f99e854f3cca9f6b1c366b4822ea6843ceb13d3cf354e3b126d618ca4a1115fe"
+                        ],
+                        "sizeBytes": 1554086402
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:20eaf71b78633aaa6ba31fe4ecc696d8904f6784b37b05f299693d5019656157"
+                        ],
+                        "sizeBytes": 1553904095
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:62efd0bd0a1854bcdac692228619da1dcc9d7a3a13d5069f8dcd349e3197e00d",
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:d07191bbb1adc4d61162a8409bff8974d99cb6ce8277ebbd282f87ac527cdd1b",
+                            "registry.redhat.io/redhat/redhat-operator-index:v4.22"
+                        ],
+                        "sizeBytes": 1547103767
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:818f6087638d99e478328f378f5220e4d7fa5e3e116014e6fa317601f7c8dc09"
+                        ],
+                        "sizeBytes": 1546602007
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:54248ea7760a9f9d4e744441fd1a620fa97f57143d6687aa4432c252d89a5316"
+                        ],
+                        "sizeBytes": 1546596379
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:fbda4e7bee5ca276724caf182b53294df01b5f5fed187f26ade29b604b1f2ea9"
+                        ],
+                        "sizeBytes": 1546545679
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:dcc10ff6b33ff342a3668123c497cec69d8241b6a1875d7a83d163b0c8986c18"
+                        ],
+                        "sizeBytes": 1545966075
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:ed06de6b6718c91fa28fcf4c55d518227bbffb17b85ddce3ec8000f718f3f62b"
+                        ],
+                        "sizeBytes": 1545522195
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:43e194dc32cfc8b4711bf5b55409c70a0f5e50189bd488b457cbabf047071f9d"
+                        ],
+                        "sizeBytes": 1540757977
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:15e7d8ae2498c1dc31db8e94e364f5875684c953ed3966d75d60cefc8d46139f"
+                        ],
+                        "sizeBytes": 1540556827
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:86e51d6ce53c6d2b694360ebf992c35649a3b6ec4d373628ab89c73febaa7359"
+                        ],
+                        "sizeBytes": 1540555785
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:29a5f4776a6dba5ebb7fd9a6e3aedae10564f06c6c8a31138ccd1602131263db"
+                        ],
+                        "sizeBytes": 1540528077
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:5411a14cf080071898b081df26d882c96f8549e93571d5e222411e25c76d3489"
+                        ],
+                        "sizeBytes": 1540161039
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:43ac24aa2f57ea30119014d9d3e993da53ad29ed17900033de8511f82310e801"
+                        ],
+                        "sizeBytes": 1540077580
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:9371b96e180f7979adf53c2b72f2c8a95fa29344124a115b049ad04992468737"
+                        ],
+                        "sizeBytes": 1540021765
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/redhat-operator-index@sha256:eea62efed8765be3fb6bcd1d17cf6b9685c803ca02d79b0f9cd25b9b65af8ad6"
+                        ],
+                        "sizeBytes": 1538896387
+                    },
+                    {
+                        "names": [
+                            "quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:6cbc5389281689c3c2f7e50ef8d40733d8694f77d91f502fd0eb21713b4d72f3"
+                        ],
+                        "sizeBytes": 1448401664
+                    },
+                    {
+                        "names": [
+                            "quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:891cd5910993022d5477583e3e1851edd4a271f3bb32155258700ff52a441e46"
+                        ],
+                        "sizeBytes": 1348259643
+                    },
+                    {
+                        "names": [
+                            "docker.elastic.co/elasticsearch/elasticsearch@sha256:224c75e346bd745ce908f06a1cbad7bf10988961dcdcdfccb22556b3f856b3f0",
+                            "docker.elastic.co/elasticsearch/elasticsearch@sha256:37355f13f3112b0991a29c91bd90e91c95b0fb08104e86e184445f63c169f441",
+                            "docker.elastic.co/elasticsearch/elasticsearch:8.17.3"
+                        ],
+                        "sizeBytes": 1327344284
+                    },
+                    {
+                        "names": [
+                            "docker.io/apache/nifi@sha256:337e5122b0785e712050c609f5722155656b64908666340878f397a06f70fe4a",
+                            "docker.io/apache/nifi@sha256:74aebc23308be2b68ad8163b1f8f45c37bba506c569a1f9e0de25af9183430ea",
+                            "docker.io/apache/nifi:2.11.0"
+                        ],
+                        "sizeBytes": 1292594571
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:78330f84883d01db3f7be10d6d2a864d9172c3ab02c66eab3ee86551e91d83c0"
+                        ],
+                        "sizeBytes": 1091284935
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:4df009425eecb1dd33830befa07366a4e50ee9915120dcbc568ce319380f4b25"
+                        ],
+                        "sizeBytes": 1090916792
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:c58a2a8786db00c18cb91932c711eafa0eaf00c589be773bda0687d7eb8b3ca7"
+                        ],
+                        "sizeBytes": 1090495432
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:926f87a407306be4b9906adc82322c504eed9978843ee2624be0d2afe7738d8a"
+                        ],
+                        "sizeBytes": 1084560843
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:ff9a2e218fdee7266a540d0e5ec6552c50e2a258bcc85bbb3828febf15535f26"
+                        ],
+                        "sizeBytes": 1084553162
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:11eddd221c9a3ccd3116ea95c0d05dc094e27ec98e1802964d8fccb57e15b426"
+                        ],
+                        "sizeBytes": 1084476871
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:cb07943b7bffa5dac8226d476614c220adcf297bab572a1855762d6086f859ba"
+                        ],
+                        "sizeBytes": 1084471232
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:fe8ef113900eba3dcf564d11f7b2002e71ebcb9f24909d91147a4bb114461fc1"
+                        ],
+                        "sizeBytes": 1084463045
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:f94148860f85d46c2e7a9fe59281e77004f8ef98925bd906e897001be1811c30"
+                        ],
+                        "sizeBytes": 1084452296
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:99365c94409438e55f303dba918faff63894493032534cd57286e0221035ac89"
+                        ],
+                        "sizeBytes": 1084451781
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:d5a9d70f32eee2d4bfa555e63d05d138a7b51defa1223f55ad3e6925b797cf27"
+                        ],
+                        "sizeBytes": 1084451273
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:a32c7270ee465d350547553bee102e01fc0e513f4c9260d770a9213715e69b85"
+                        ],
+                        "sizeBytes": 1084442066
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:1f280bacf2e346f366965fc5c75ce3ee988e060af71725909bf0548887f35424"
+                        ],
+                        "sizeBytes": 1084434377
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:c438678fdd7a9ada54817fb35d9e8f81ff92e49e65d235bdd98bcabe9d1de40d"
+                        ],
+                        "sizeBytes": 1084423109
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:19c8db5183343aab3d928d6f6952b2417ac9b9cb2a9275f04a6f9d59000a30bb"
+                        ],
+                        "sizeBytes": 1084416450
+                    },
+                    {
+                        "names": [
+                            "registry.redhat.io/redhat/community-operator-index@sha256:be945f7c2480e6d8f031b0750852caf06f242c5156db820e7939de34e4829125"
+                        ],
+                        "sizeBytes": 1084398034
+                    }
+                ],
+                "nodeInfo": {
+                    "architecture": "amd64",
+                    "bootID": "e719cc2b-6f83-4059-ada7-efefc9b81c1a",
+                    "containerRuntimeVersion": "cri-o://1.35.5-2.rhaos4.22.git78f87e5.el9",
+                    "kernelVersion": "5.14.0-687.23.1.el9_8.x86_64",
+                    "kubeProxyVersion": "",
+                    "kubeletVersion": "v1.35.5",
+                    "machineID": "35973d0bce2744479fa17e571fcdb486",
+                    "operatingSystem": "linux",
+                    "osImage": "Red Hat Enterprise Linux CoreOS 9.8.20260708-0 (Plow)",
+                    "systemUUID": "fa6085c0-4add-11eb-9caa-3a68dd448c6f"
+                },
+                "runtimeHandlers": [
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": "crun"
+                    },
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": ""
+                    },
+                    {
+                        "features": {
+                            "recursiveReadOnlyMounts": true,
+                            "userNamespaces": true
+                        },
+                        "name": "runc"
+                    }
+                ],
+                "volumesAttached": [
+                    {
+                        "devicePath": "",
+                        "name": "kubernetes.io/csi/csi.trident.netapp.io^pvc-582b7d25-8c21-418d-b106-07a5284b3279"
+                    },
+                    {
+                        "devicePath": "",
+                        "name": "kubernetes.io/csi/csi.trident.netapp.io^pvc-5a6486a3-7c80-4b66-ac5d-caf45fe883d3"
+                    },
+                    {
+                        "devicePath": "",
+                        "name": "kubernetes.io/csi/csi.trident.netapp.io^pvc-7f3e4842-9c6c-4cd3-aaed-86de91f76487"
+                    },
+                    {
+                        "devicePath": "",
+                        "name": "kubernetes.io/csi/csi.trident.netapp.io^pvc-2fa463ea-7d20-4b6a-ac96-0520d1db97ab"
+                    },
+                    {
+                        "devicePath": "",
+                        "name": "kubernetes.io/csi/csi.trident.netapp.io^pvc-97718066-ebb6-4acb-bbc2-054bf2da667f"
+                    },
+                    {
+                        "devicePath": "",
+                        "name": "kubernetes.io/csi/csi.trident.netapp.io^pvc-11273b78-496e-44fb-ad61-8886b8561180"
+                    },
+                    {
+                        "devicePath": "",
+                        "name": "kubernetes.io/csi/csi.trident.netapp.io^pvc-bb8531bb-9bd8-4ae8-9934-890c62531567"
+                    },
+                    {
+                        "devicePath": "",
+                        "name": "kubernetes.io/csi/csi.trident.netapp.io^pvc-d33ff4a1-2efd-41de-9193-bf1aa61f97c5"
+                    },
+                    {
+                        "devicePath": "",
+                        "name": "kubernetes.io/csi/csi.trident.netapp.io^pvc-e22792b1-9b2b-433c-b6d0-08c6411b0fb1"
+                    },
+                    {
+                        "devicePath": "",
+                        "name": "kubernetes.io/csi/csi.trident.netapp.io^pvc-ff7101ec-ccfd-42fe-9ef3-cfbc87984fc1"
+                    },
+                    {
+                        "devicePath": "",
+                        "name": "kubernetes.io/csi/csi.trident.netapp.io^pvc-66bb0a13-6f22-4b1e-98ba-51ae95242ded"
+                    },
+                    {
+                        "devicePath": "",
+                        "name": "kubernetes.io/csi/csi.trident.netapp.io^pvc-2f6b42e3-5fd2-4500-b283-8c1a12dc9d6d"
+                    },
+                    {
+                        "devicePath": "",
+                        "name": "kubernetes.io/csi/csi.trident.netapp.io^pvc-766322e8-94af-4325-a174-ec36cd30be78"
+                    },
+                    {
+                        "devicePath": "",
+                        "name": "kubernetes.io/csi/csi.trident.netapp.io^pvc-41a0369b-e145-4408-8ba8-4e1dea644e89"
+                    }
+                ],
+                "volumesInUse": [
+                    "kubernetes.io/csi/csi.trident.netapp.io^pvc-11273b78-496e-44fb-ad61-8886b8561180",
+                    "kubernetes.io/csi/csi.trident.netapp.io^pvc-2f6b42e3-5fd2-4500-b283-8c1a12dc9d6d",
+                    "kubernetes.io/csi/csi.trident.netapp.io^pvc-2fa463ea-7d20-4b6a-ac96-0520d1db97ab",
+                    "kubernetes.io/csi/csi.trident.netapp.io^pvc-41a0369b-e145-4408-8ba8-4e1dea644e89",
+                    "kubernetes.io/csi/csi.trident.netapp.io^pvc-582b7d25-8c21-418d-b106-07a5284b3279",
+                    "kubernetes.io/csi/csi.trident.netapp.io^pvc-5a6486a3-7c80-4b66-ac5d-caf45fe883d3",
+                    "kubernetes.io/csi/csi.trident.netapp.io^pvc-66bb0a13-6f22-4b1e-98ba-51ae95242ded",
+                    "kubernetes.io/csi/csi.trident.netapp.io^pvc-766322e8-94af-4325-a174-ec36cd30be78",
+                    "kubernetes.io/csi/csi.trident.netapp.io^pvc-7f3e4842-9c6c-4cd3-aaed-86de91f76487",
+                    "kubernetes.io/csi/csi.trident.netapp.io^pvc-97718066-ebb6-4acb-bbc2-054bf2da667f",
+                    "kubernetes.io/csi/csi.trident.netapp.io^pvc-bb8531bb-9bd8-4ae8-9934-890c62531567",
+                    "kubernetes.io/csi/csi.trident.netapp.io^pvc-d33ff4a1-2efd-41de-9193-bf1aa61f97c5",
+                    "kubernetes.io/csi/csi.trident.netapp.io^pvc-e22792b1-9b2b-433c-b6d0-08c6411b0fb1",
+                    "kubernetes.io/csi/csi.trident.netapp.io^pvc-ff7101ec-ccfd-42fe-9ef3-cfbc87984fc1"
+                ]
+            }
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}

@@ -1,0 +1,154 @@
+{
+  "test_id": "test4_10pods_50k_5050_32kb",
+  "valid": true,
+  "failures": [],
+  "warnings": [
+    "fio-test4-10pods-50k-5050-32kb-0: CPU cgroup throttled 1.4s of 661s (0.2%); throughput and p99 are usable, the p99.9 tail is not -- some of it is the CFS scheduler, not the array",
+    "fio-test4-10pods-50k-5050-32kb-1: CPU cgroup throttled 5.8s of 661s (0.9%); throughput and p99 are usable, the p99.9 tail is not -- some of it is the CFS scheduler, not the array",
+    "fio-test4-10pods-50k-5050-32kb-2: CPU cgroup throttled 0.6s of 661s (0.1%); throughput and p99 are usable, the p99.9 tail is not -- some of it is the CFS scheduler, not the array",
+    "fio-test4-10pods-50k-5050-32kb-3: CPU cgroup throttled 5.5s of 661s (0.8%); throughput and p99 are usable, the p99.9 tail is not -- some of it is the CFS scheduler, not the array",
+    "fio-test4-10pods-50k-5050-32kb-4: CPU cgroup throttled 1.7s of 661s (0.3%); throughput and p99 are usable, the p99.9 tail is not -- some of it is the CFS scheduler, not the array",
+    "fio-test4-10pods-50k-5050-32kb-5: CPU cgroup throttled 7.4s of 661s (1.1%); throughput and p99 are usable, the p99.9 tail is not -- some of it is the CFS scheduler, not the array",
+    "fio-test4-10pods-50k-5050-32kb-6: CPU cgroup throttled 5.0s of 661s (0.8%); throughput and p99 are usable, the p99.9 tail is not -- some of it is the CFS scheduler, not the array",
+    "fio-test4-10pods-50k-5050-32kb-7: CPU cgroup throttled 2.9s of 661s (0.4%); throughput and p99 are usable, the p99.9 tail is not -- some of it is the CFS scheduler, not the array",
+    "fio-test4-10pods-50k-5050-32kb-8: CPU cgroup throttled 2.3s of 661s (0.4%); throughput and p99 are usable, the p99.9 tail is not -- some of it is the CFS scheduler, not the array",
+    "fio-test4-10pods-50k-5050-32kb-9: CPU cgroup throttled 4.2s of 661s (0.6%); throughput and p99 are usable, the p99.9 tail is not -- some of it is the CFS scheduler, not the array"
+  ],
+  "declared": {
+    "replicas": 10,
+    "target_iops_total": 500000,
+    "target_bw_mibps_total": null,
+    "expected_directions": [
+      "read",
+      "write"
+    ],
+    "rate_limited": true
+  },
+  "verdict": {
+    "pass": null,
+    "breaches": [],
+    "reason": "no SLO file; figures only, no verdict"
+  },
+  "observations": [
+    "cgroup CPU throttling on 10 pod(s), worst 7.4s: the tail latency measured here is the CFS scheduler and cannot be attributed to storage"
+  ],
+  "aggregate": {
+    "pods": 10,
+    "read_iops_total": 215672.038712,
+    "write_iops_total": 215725.156406,
+    "total_iops": 431397.19511800003,
+    "read_bw_mibps_total": 6739.804487228394,
+    "write_bw_mibps_total": 6741.474673271179,
+    "total_bw_mibps": 13481.279160499573,
+    "read_p99_worst_ms": 30.80192,
+    "write_p99_worst_ms": 36.438016,
+    "read_p999_worst_ms": 70.77888,
+    "write_p999_worst_ms": 320.864256,
+    "read_p99_merged_ms": 21.62688,
+    "write_p99_merged_ms": 23.724032,
+    "iops_attainment_pct": 86.2794390236,
+    "bw_attainment_pct": null
+  },
+  "pods": [
+    {
+      "pod": "fio-test4-10pods-50k-5050-32kb-0",
+      "error": 0,
+      "elapsed_s": 661,
+      "read_iops": 24999.780001,
+      "write_iops": 24999.773335,
+      "read_p99_ms": 30.80192,
+      "write_p99_ms": 35.913728,
+      "throttled_usec": 1366470
+    },
+    {
+      "pod": "fio-test4-10pods-50k-5050-32kb-1",
+      "error": 0,
+      "elapsed_s": 661,
+      "read_iops": 24999.933333,
+      "write_iops": 24999.935,
+      "read_p99_ms": 10.027008,
+      "write_p99_ms": 10.15808,
+      "throttled_usec": 5826758
+    },
+    {
+      "pod": "fio-test4-10pods-50k-5050-32kb-2",
+      "error": 0,
+      "elapsed_s": 661,
+      "read_iops": 24991.922111,
+      "write_iops": 24991.840449,
+      "read_p99_ms": 27.918336,
+      "write_p99_ms": 33.816576,
+      "throttled_usec": 624907
+    },
+    {
+      "pod": "fio-test4-10pods-50k-5050-32kb-3",
+      "error": 0,
+      "elapsed_s": 661,
+      "read_iops": 24999.946667,
+      "write_iops": 24999.946667,
+      "read_p99_ms": 10.027008,
+      "write_p99_ms": 10.15808,
+      "throttled_usec": 5540908
+    },
+    {
+      "pod": "fio-test4-10pods-50k-5050-32kb-4",
+      "error": 0,
+      "elapsed_s": 661,
+      "read_iops": 24997.481793,
+      "write_iops": 24997.440128,
+      "read_p99_ms": 30.539776,
+      "write_p99_ms": 36.438016,
+      "throttled_usec": 1748333
+    },
+    {
+      "pod": "fio-test4-10pods-50k-5050-32kb-5",
+      "error": 0,
+      "elapsed_s": 661,
+      "read_iops": 14419.713869,
+      "write_iops": 14432.285451,
+      "read_p99_ms": 19.791872,
+      "write_p99_ms": 32.899072,
+      "throttled_usec": 7380540
+    },
+    {
+      "pod": "fio-test4-10pods-50k-5050-32kb-6",
+      "error": 0,
+      "elapsed_s": 661,
+      "read_iops": 17588.238921,
+      "write_iops": 17597.555386,
+      "read_p99_ms": 18.481152,
+      "write_p99_ms": 18.743296,
+      "throttled_usec": 5044260
+    },
+    {
+      "pod": "fio-test4-10pods-50k-5050-32kb-7",
+      "error": 0,
+      "elapsed_s": 661,
+      "read_iops": 17579.612006,
+      "write_iops": 17589.035183,
+      "read_p99_ms": 18.481152,
+      "write_p99_ms": 18.743296,
+      "throttled_usec": 2918709
+    },
+    {
+      "pod": "fio-test4-10pods-50k-5050-32kb-8",
+      "error": 0,
+      "elapsed_s": 661,
+      "read_iops": 17579.106841,
+      "write_iops": 17588.473429,
+      "read_p99_ms": 18.481152,
+      "write_p99_ms": 18.743296,
+      "throttled_usec": 2341970
+    },
+    {
+      "pod": "fio-test4-10pods-50k-5050-32kb-9",
+      "error": 0,
+      "elapsed_s": 661,
+      "read_iops": 23516.30317,
+      "write_iops": 23528.871378,
+      "read_p99_ms": 25.821184,
+      "write_p99_ms": 36.438016,
+      "throttled_usec": 4236953
+    }
+  ]
+}

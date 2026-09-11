@@ -1,0 +1,16 @@
+{
+  "suite_id": "manual-nfs3-20260910-134239",
+  "suite": "manual",
+  "selection": "2,4,7-9,17",
+  "environment": "nfs3",
+  "storage_class": "sc-nas-nfs3",
+  "namespace": "fio-tests",
+  "tests": ["test2_10pods_30k_5050_32kb","test4_10pods_50k_5050_32kb","test7_1pod_max_write_4kb","test8_1pod_max_read_4kb","test9_1pod_max_rw_7030_4kb","test17_mixed_workload_256k"],
+  "repeats": 1,
+  "env_overrides": "",
+  "git_commit": "8a851d1fc9451c591f53daace053e7a5f1dd5930",
+  "git_dirty": true,
+  "started_at": "2026-09-10T19:18:30Z",
+  "passed": 4,
+  "rejected": 2
+}

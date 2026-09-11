@@ -1,0 +1,241 @@
+LAST SEEN   TYPE      REASON                   OBJECT                                                       MESSAGE
+32m         Warning   FailedScheduling         pod/fio-test2-10pods-30k-5050-32kb-7                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+31m         Normal    Scheduled                pod/fio-test2-10pods-30k-5050-32kb-1                         Successfully assigned fio-tests/fio-test2-10pods-30k-5050-32kb-1 to s2
+31m         Normal    Scheduled                pod/fio-test2-10pods-30k-5050-32kb-0                         Successfully assigned fio-tests/fio-test2-10pods-30k-5050-32kb-0 to s3
+16m         Normal    Scheduled                pod/fio-test4-10pods-50k-5050-32kb-9                         Successfully assigned fio-tests/fio-test4-10pods-50k-5050-32kb-9 to s1
+16m         Warning   FailedScheduling         pod/fio-test4-10pods-50k-5050-32kb-9                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+16m         Warning   FailedScheduling         pod/fio-test4-10pods-50k-5050-32kb-9                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+15m         Normal    Scheduled                pod/fio-test4-10pods-50k-5050-32kb-8                         Successfully assigned fio-tests/fio-test4-10pods-50k-5050-32kb-8 to s3
+15m         Warning   FailedScheduling         pod/fio-test4-10pods-50k-5050-32kb-8                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+32m         Warning   FailedScheduling         pod/fio-test2-10pods-30k-5050-32kb-1                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+31m         Warning   FailedScheduling         pod/fio-test2-10pods-30k-5050-32kb-1                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+31m         Warning   FailedScheduling         pod/fio-test2-10pods-30k-5050-32kb-7                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+16m         Warning   FailedScheduling         pod/fio-test4-10pods-50k-5050-32kb-8                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+15m         Normal    Scheduled                pod/fio-test4-10pods-50k-5050-32kb-7                         Successfully assigned fio-tests/fio-test4-10pods-50k-5050-32kb-7 to s1
+15m         Warning   FailedScheduling         pod/fio-test4-10pods-50k-5050-32kb-7                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+16m         Warning   FailedScheduling         pod/fio-test4-10pods-50k-5050-32kb-7                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+15m         Normal    Scheduled                pod/fio-test4-10pods-50k-5050-32kb-6                         Successfully assigned fio-tests/fio-test4-10pods-50k-5050-32kb-6 to s2
+32m         Warning   FailedScheduling         pod/fio-test2-10pods-30k-5050-32kb-2                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+32m         Warning   FailedScheduling         pod/fio-test2-10pods-30k-5050-32kb-2                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+32m         Normal    Scheduled                pod/fio-test2-10pods-30k-5050-32kb-2                         Successfully assigned fio-tests/fio-test2-10pods-30k-5050-32kb-2 to s2
+15m         Warning   FailedScheduling         pod/fio-test4-10pods-50k-5050-32kb-6                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+16m         Warning   FailedScheduling         pod/fio-test4-10pods-50k-5050-32kb-6                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+15m         Normal    Scheduled                pod/fio-test4-10pods-50k-5050-32kb-5                         Successfully assigned fio-tests/fio-test4-10pods-50k-5050-32kb-5 to s3
+15m         Warning   FailedScheduling         pod/fio-test4-10pods-50k-5050-32kb-5                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+16m         Warning   FailedScheduling         pod/fio-test4-10pods-50k-5050-32kb-5                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+32m         Warning   FailedScheduling         pod/fio-test2-10pods-30k-5050-32kb-3                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+31m         Warning   FailedScheduling         pod/fio-test2-10pods-30k-5050-32kb-3                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+31m         Normal    Scheduled                pod/fio-test2-10pods-30k-5050-32kb-3                         Successfully assigned fio-tests/fio-test2-10pods-30k-5050-32kb-3 to s1
+31m         Normal    Scheduled                pod/fio-test2-10pods-30k-5050-32kb-7                         Successfully assigned fio-tests/fio-test2-10pods-30k-5050-32kb-7 to s1
+15m         Normal    Scheduled                pod/fio-test4-10pods-50k-5050-32kb-4                         Successfully assigned fio-tests/fio-test4-10pods-50k-5050-32kb-4 to s2
+15m         Warning   FailedScheduling         pod/fio-test4-10pods-50k-5050-32kb-4                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+16m         Warning   FailedScheduling         pod/fio-test4-10pods-50k-5050-32kb-4                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+15m         Normal    Scheduled                pod/fio-test4-10pods-50k-5050-32kb-3                         Successfully assigned fio-tests/fio-test4-10pods-50k-5050-32kb-3 to s3
+32m         Warning   FailedScheduling         pod/fio-test2-10pods-30k-5050-32kb-4                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+32m         Warning   FailedScheduling         pod/fio-test2-10pods-30k-5050-32kb-4                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+32m         Normal    Scheduled                pod/fio-test2-10pods-30k-5050-32kb-4                         Successfully assigned fio-tests/fio-test2-10pods-30k-5050-32kb-4 to s3
+15m         Warning   FailedScheduling         pod/fio-test4-10pods-50k-5050-32kb-3                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+16m         Warning   FailedScheduling         pod/fio-test4-10pods-50k-5050-32kb-3                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+15m         Normal    Scheduled                pod/fio-test4-10pods-50k-5050-32kb-2                         Successfully assigned fio-tests/fio-test4-10pods-50k-5050-32kb-2 to s2
+15m         Warning   FailedScheduling         pod/fio-test4-10pods-50k-5050-32kb-2                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+16m         Warning   FailedScheduling         pod/fio-test4-10pods-50k-5050-32kb-2                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+32m         Warning   FailedScheduling         pod/fio-test2-10pods-30k-5050-32kb-5                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+31m         Warning   FailedScheduling         pod/fio-test2-10pods-30k-5050-32kb-5                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+31m         Normal    Scheduled                pod/fio-test2-10pods-30k-5050-32kb-5                         Successfully assigned fio-tests/fio-test2-10pods-30k-5050-32kb-5 to s2
+31m         Normal    Scheduled                pod/fio-test2-10pods-30k-5050-32kb-9                         Successfully assigned fio-tests/fio-test2-10pods-30k-5050-32kb-9 to s1
+31m         Warning   FailedScheduling         pod/fio-test2-10pods-30k-5050-32kb-9                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+32m         Warning   FailedScheduling         pod/fio-test2-10pods-30k-5050-32kb-9                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+32m         Normal    Scheduled                pod/fio-test2-10pods-30k-5050-32kb-8                         Successfully assigned fio-tests/fio-test2-10pods-30k-5050-32kb-8 to s1
+32m         Warning   FailedScheduling         pod/fio-test2-10pods-30k-5050-32kb-8                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+32m         Warning   FailedScheduling         pod/fio-test2-10pods-30k-5050-32kb-6                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+31m         Warning   FailedScheduling         pod/fio-test2-10pods-30k-5050-32kb-6                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+32m         Warning   FailedScheduling         pod/fio-test2-10pods-30k-5050-32kb-8                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+16m         Warning   FailedScheduling         pod/fio-test4-10pods-50k-5050-32kb-0                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+15m         Normal    Scheduled                pod/fio-test4-10pods-50k-5050-32kb-1                         Successfully assigned fio-tests/fio-test4-10pods-50k-5050-32kb-1 to s1
+15m         Warning   FailedScheduling         pod/fio-test4-10pods-50k-5050-32kb-1                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+16m         Warning   FailedScheduling         pod/fio-test4-10pods-50k-5050-32kb-1                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+15m         Normal    Scheduled                pod/fio-test4-10pods-50k-5050-32kb-0                         Successfully assigned fio-tests/fio-test4-10pods-50k-5050-32kb-0 to s1
+31m         Normal    Scheduled                pod/fio-test2-10pods-30k-5050-32kb-6                         Successfully assigned fio-tests/fio-test2-10pods-30k-5050-32kb-6 to s3
+31m         Warning   FailedScheduling         pod/fio-test2-10pods-30k-5050-32kb-0                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+15m         Warning   FailedScheduling         pod/fio-test4-10pods-50k-5050-32kb-0                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+32m         Warning   FailedScheduling         pod/fio-test2-10pods-30k-5050-32kb-0                         0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. not found
+32m         Normal    Provisioning             persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-4   External provisioner is provisioning volume for claim "fio-tests/fio-test2-10pods-30k-5050-32kb-pvc-4"
+32m         Normal    Provisioning             persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-1   External provisioner is provisioning volume for claim "fio-tests/fio-test2-10pods-30k-5050-32kb-pvc-1"
+32m         Normal    Provisioning             persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-8   External provisioner is provisioning volume for claim "fio-tests/fio-test2-10pods-30k-5050-32kb-pvc-8"
+32m         Normal    Provisioning             persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-6   External provisioner is provisioning volume for claim "fio-tests/fio-test2-10pods-30k-5050-32kb-pvc-6"
+32m         Normal    Provisioning             persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-9   External provisioner is provisioning volume for claim "fio-tests/fio-test2-10pods-30k-5050-32kb-pvc-9"
+32m         Normal    ExternalProvisioning     persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-8   Waiting for a volume to be created either by the external provisioner 'csi.trident.netapp.io' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+32m         Normal    Provisioning             persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-3   External provisioner is provisioning volume for claim "fio-tests/fio-test2-10pods-30k-5050-32kb-pvc-3"
+32m         Normal    Provisioning             persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-5   External provisioner is provisioning volume for claim "fio-tests/fio-test2-10pods-30k-5050-32kb-pvc-5"
+32m         Normal    Provisioning             persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-7   External provisioner is provisioning volume for claim "fio-tests/fio-test2-10pods-30k-5050-32kb-pvc-7"
+32m         Normal    Provisioning             persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-0   External provisioner is provisioning volume for claim "fio-tests/fio-test2-10pods-30k-5050-32kb-pvc-0"
+32m         Normal    Provisioning             persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-2   External provisioner is provisioning volume for claim "fio-tests/fio-test2-10pods-30k-5050-32kb-pvc-2"
+32m         Normal    ProvisioningSuccess      persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-8   provisioned a volume
+32m         Normal    ProvisioningSucceeded    persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-8   Successfully provisioned volume pvc-53702cdc-b219-4585-8619-1681f6218a2a
+32m         Normal    ExternalProvisioning     persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-4   Waiting for a volume to be created either by the external provisioner 'csi.trident.netapp.io' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+32m         Normal    ExternalProvisioning     persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-2   Waiting for a volume to be created either by the external provisioner 'csi.trident.netapp.io' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+32m         Normal    ExternalProvisioning     persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-7   Waiting for a volume to be created either by the external provisioner 'csi.trident.netapp.io' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+32m         Normal    ProvisioningSuccess      persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-2   provisioned a volume
+32m         Normal    ProvisioningSucceeded    persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-2   Successfully provisioned volume pvc-40544396-f35c-4fdb-b83f-3d51f6ed7e74
+32m         Normal    ProvisioningSucceeded    persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-4   Successfully provisioned volume pvc-68d66ef8-50de-41ac-b825-752898129ac4
+32m         Normal    ProvisioningSuccess      persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-4   provisioned a volume
+31m         Normal    ProvisioningSucceeded    persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-7   Successfully provisioned volume pvc-fc46eec4-ad57-4f9f-8133-e6622d2149ca
+31m         Normal    ProvisioningSuccess      persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-7   provisioned a volume
+31m         Normal    ExternalProvisioning     persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-0   Waiting for a volume to be created either by the external provisioner 'csi.trident.netapp.io' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+31m         Normal    ExternalProvisioning     persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-1   Waiting for a volume to be created either by the external provisioner 'csi.trident.netapp.io' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+31m         Normal    ProvisioningSuccess      persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-1   provisioned a volume
+31m         Normal    ProvisioningSucceeded    persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-1   Successfully provisioned volume pvc-3701f981-3f78-42f1-b8fa-ba9af7152505
+31m         Normal    ProvisioningSuccess      persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-0   provisioned a volume
+31m         Normal    ProvisioningSucceeded    persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-0   Successfully provisioned volume pvc-aeb77465-62a4-4286-b369-3df36b28625c
+31m         Normal    ExternalProvisioning     persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-5   Waiting for a volume to be created either by the external provisioner 'csi.trident.netapp.io' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+31m         Normal    ExternalProvisioning     persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-3   Waiting for a volume to be created either by the external provisioner 'csi.trident.netapp.io' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+31m         Normal    ProvisioningSuccess      persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-3   provisioned a volume
+31m         Normal    ProvisioningSucceeded    persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-3   Successfully provisioned volume pvc-71b941f5-d340-423d-80cf-0f71e0b0ead0
+31m         Normal    ProvisioningSucceeded    persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-5   Successfully provisioned volume pvc-cc99db57-8017-430d-b364-737fd25b6adb
+31m         Normal    ProvisioningSuccess      persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-5   provisioned a volume
+31m         Normal    AddedInterface           pod/fio-test2-10pods-30k-5050-32kb-8                         Add eth0 [10.130.0.126/23] from ovn-kubernetes
+31m         Normal    SuccessfulAttachVolume   pod/fio-test2-10pods-30k-5050-32kb-8                         AttachVolume.Attach succeeded for volume "pvc-53702cdc-b219-4585-8619-1681f6218a2a"
+31m         Normal    Started                  pod/fio-test2-10pods-30k-5050-32kb-8                         Container started
+31m         Normal    Created                  pod/fio-test2-10pods-30k-5050-32kb-8                         Container created
+31m         Normal    Pulled                   pod/fio-test2-10pods-30k-5050-32kb-8                         Container image "rafmoshe2500/fio:3.41" already present on machine and can be accessed by the pod
+31m         Normal    ExternalProvisioning     persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-9   Waiting for a volume to be created either by the external provisioner 'csi.trident.netapp.io' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+31m         Normal    ExternalProvisioning     persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-6   Waiting for a volume to be created either by the external provisioner 'csi.trident.netapp.io' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+31m         Normal    ProvisioningSucceeded    persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-6   Successfully provisioned volume pvc-089ec67a-9cbd-4093-91ed-e17b3fc06721
+31m         Normal    ProvisioningSuccess      persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-6   provisioned a volume
+31m         Normal    ProvisioningSuccess      persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-9   provisioned a volume
+31m         Normal    ProvisioningSucceeded    persistentvolumeclaim/fio-test2-10pods-30k-5050-32kb-pvc-9   Successfully provisioned volume pvc-afb64035-9d52-463f-b936-626f03f57c0f
+31m         Normal    AddedInterface           pod/fio-test2-10pods-30k-5050-32kb-5                         Add eth0 [10.129.0.239/23] from ovn-kubernetes
+31m         Normal    SuccessfulAttachVolume   pod/fio-test2-10pods-30k-5050-32kb-3                         AttachVolume.Attach succeeded for volume "pvc-71b941f5-d340-423d-80cf-0f71e0b0ead0"
+31m         Normal    Created                  pod/fio-test2-10pods-30k-5050-32kb-5                         Container created
+31m         Normal    SuccessfulAttachVolume   pod/fio-test2-10pods-30k-5050-32kb-7                         AttachVolume.Attach succeeded for volume "pvc-fc46eec4-ad57-4f9f-8133-e6622d2149ca"
+31m         Normal    SuccessfulAttachVolume   pod/fio-test2-10pods-30k-5050-32kb-9                         AttachVolume.Attach succeeded for volume "pvc-afb64035-9d52-463f-b936-626f03f57c0f"
+31m         Normal    SuccessfulAttachVolume   pod/fio-test2-10pods-30k-5050-32kb-5                         AttachVolume.Attach succeeded for volume "pvc-cc99db57-8017-430d-b364-737fd25b6adb"
+31m         Normal    Pulled                   pod/fio-test2-10pods-30k-5050-32kb-5                         Container image "rafmoshe2500/fio:3.41" already present on machine and can be accessed by the pod
+31m         Normal    Started                  pod/fio-test2-10pods-30k-5050-32kb-5                         Container started
+31m         Normal    SuccessfulAttachVolume   pod/fio-test2-10pods-30k-5050-32kb-6                         AttachVolume.Attach succeeded for volume "pvc-089ec67a-9cbd-4093-91ed-e17b3fc06721"
+31m         Normal    AddedInterface           pod/fio-test2-10pods-30k-5050-32kb-7                         Add eth0 [10.130.0.127/23] from ovn-kubernetes
+31m         Normal    Pulled                   pod/fio-test2-10pods-30k-5050-32kb-1                         Container image "rafmoshe2500/fio:3.41" already present on machine and can be accessed by the pod
+31m         Normal    SuccessfulAttachVolume   pod/fio-test2-10pods-30k-5050-32kb-0                         AttachVolume.Attach succeeded for volume "pvc-aeb77465-62a4-4286-b369-3df36b28625c"
+31m         Normal    SuccessfulAttachVolume   pod/fio-test2-10pods-30k-5050-32kb-1                         AttachVolume.Attach succeeded for volume "pvc-3701f981-3f78-42f1-b8fa-ba9af7152505"
+31m         Normal    AddedInterface           pod/fio-test2-10pods-30k-5050-32kb-1                         Add eth0 [10.129.0.238/23] from ovn-kubernetes
+31m         Normal    Started                  pod/fio-test2-10pods-30k-5050-32kb-7                         Container started
+31m         Normal    Created                  pod/fio-test2-10pods-30k-5050-32kb-7                         Container created
+31m         Normal    Pulled                   pod/fio-test2-10pods-30k-5050-32kb-7                         Container image "rafmoshe2500/fio:3.41" already present on machine and can be accessed by the pod
+31m         Normal    Started                  pod/fio-test2-10pods-30k-5050-32kb-6                         Container started
+31m         Normal    Created                  pod/fio-test2-10pods-30k-5050-32kb-1                         Container created
+31m         Normal    Started                  pod/fio-test2-10pods-30k-5050-32kb-1                         Container started
+31m         Normal    AddedInterface           pod/fio-test2-10pods-30k-5050-32kb-3                         Add eth0 [10.130.0.128/23] from ovn-kubernetes
+31m         Normal    Pulled                   pod/fio-test2-10pods-30k-5050-32kb-3                         Container image "rafmoshe2500/fio:3.41" already present on machine and can be accessed by the pod
+31m         Normal    Created                  pod/fio-test2-10pods-30k-5050-32kb-3                         Container created
+31m         Normal    Created                  pod/fio-test2-10pods-30k-5050-32kb-6                         Container created
+31m         Normal    Pulled                   pod/fio-test2-10pods-30k-5050-32kb-6                         Container image "rafmoshe2500/fio:3.41" already present on machine and can be accessed by the pod
+31m         Normal    AddedInterface           pod/fio-test2-10pods-30k-5050-32kb-6                         Add eth0 [10.128.0.207/23] from ovn-kubernetes
+31m         Normal    Started                  pod/fio-test2-10pods-30k-5050-32kb-3                         Container started
+31m         Normal    SuccessfulAttachVolume   pod/fio-test2-10pods-30k-5050-32kb-4                         AttachVolume.Attach succeeded for volume "pvc-68d66ef8-50de-41ac-b825-752898129ac4"
+31m         Normal    Pulled                   pod/fio-test2-10pods-30k-5050-32kb-0                         Container image "rafmoshe2500/fio:3.41" already present on machine and can be accessed by the pod
+31m         Normal    SuccessfulAttachVolume   pod/fio-test2-10pods-30k-5050-32kb-2                         AttachVolume.Attach succeeded for volume "pvc-40544396-f35c-4fdb-b83f-3d51f6ed7e74"
+31m         Normal    Created                  pod/fio-test2-10pods-30k-5050-32kb-2                         Container created
+31m         Normal    Started                  pod/fio-test2-10pods-30k-5050-32kb-4                         Container started
+31m         Normal    Created                  pod/fio-test2-10pods-30k-5050-32kb-4                         Container created
+31m         Normal    Pulled                   pod/fio-test2-10pods-30k-5050-32kb-4                         Container image "rafmoshe2500/fio:3.41" already present on machine and can be accessed by the pod
+31m         Normal    Started                  pod/fio-test2-10pods-30k-5050-32kb-0                         Container started
+31m         Normal    Created                  pod/fio-test2-10pods-30k-5050-32kb-0                         Container created
+31m         Normal    Pulled                   pod/fio-test2-10pods-30k-5050-32kb-2                         Container image "rafmoshe2500/fio:3.41" already present on machine and can be accessed by the pod
+31m         Normal    AddedInterface           pod/fio-test2-10pods-30k-5050-32kb-2                         Add eth0 [10.129.0.237/23] from ovn-kubernetes
+31m         Normal    Started                  pod/fio-test2-10pods-30k-5050-32kb-2                         Container started
+31m         Normal    AddedInterface           pod/fio-test2-10pods-30k-5050-32kb-4                         Add eth0 [10.128.0.205/23] from ovn-kubernetes
+31m         Normal    AddedInterface           pod/fio-test2-10pods-30k-5050-32kb-0                         Add eth0 [10.128.0.206/23] from ovn-kubernetes
+31m         Normal    Created                  pod/fio-test2-10pods-30k-5050-32kb-9                         Container created
+31m         Normal    Started                  pod/fio-test2-10pods-30k-5050-32kb-9                         Container started
+31m         Normal    AddedInterface           pod/fio-test2-10pods-30k-5050-32kb-9                         Add eth0 [10.130.0.129/23] from ovn-kubernetes
+31m         Normal    Pulled                   pod/fio-test2-10pods-30k-5050-32kb-9                         Container image "rafmoshe2500/fio:3.41" already present on machine and can be accessed by the pod
+16m         Normal    Provisioning             persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-1   External provisioner is provisioning volume for claim "fio-tests/fio-test4-10pods-50k-5050-32kb-pvc-1"
+16m         Normal    ExternalProvisioning     persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-9   Waiting for a volume to be created either by the external provisioner 'csi.trident.netapp.io' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+16m         Normal    Provisioning             persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-5   External provisioner is provisioning volume for claim "fio-tests/fio-test4-10pods-50k-5050-32kb-pvc-5"
+16m         Normal    Provisioning             persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-9   External provisioner is provisioning volume for claim "fio-tests/fio-test4-10pods-50k-5050-32kb-pvc-9"
+16m         Normal    Provisioning             persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-4   External provisioner is provisioning volume for claim "fio-tests/fio-test4-10pods-50k-5050-32kb-pvc-4"
+16m         Normal    ExternalProvisioning     persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-4   Waiting for a volume to be created either by the external provisioner 'csi.trident.netapp.io' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+16m         Normal    Provisioning             persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-0   External provisioner is provisioning volume for claim "fio-tests/fio-test4-10pods-50k-5050-32kb-pvc-0"
+16m         Normal    Provisioning             persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-3   External provisioner is provisioning volume for claim "fio-tests/fio-test4-10pods-50k-5050-32kb-pvc-3"
+16m         Normal    Provisioning             persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-2   External provisioner is provisioning volume for claim "fio-tests/fio-test4-10pods-50k-5050-32kb-pvc-2"
+16m         Normal    Provisioning             persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-8   External provisioner is provisioning volume for claim "fio-tests/fio-test4-10pods-50k-5050-32kb-pvc-8"
+16m         Normal    Provisioning             persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-6   External provisioner is provisioning volume for claim "fio-tests/fio-test4-10pods-50k-5050-32kb-pvc-6"
+16m         Normal    Provisioning             persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-7   External provisioner is provisioning volume for claim "fio-tests/fio-test4-10pods-50k-5050-32kb-pvc-7"
+16m         Normal    ProvisioningSuccess      persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-9   provisioned a volume
+16m         Normal    ProvisioningSucceeded    persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-9   Successfully provisioned volume pvc-e5140d66-2896-44c9-8a49-a4e4a5fe8701
+15m         Normal    ProvisioningSuccess      persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-4   provisioned a volume
+15m         Normal    ProvisioningSucceeded    persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-4   Successfully provisioned volume pvc-4a2006e2-edfd-49e2-964f-c8ff0fd3f7de
+15m         Normal    ExternalProvisioning     persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-7   Waiting for a volume to be created either by the external provisioner 'csi.trident.netapp.io' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+15m         Normal    ExternalProvisioning     persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-8   Waiting for a volume to be created either by the external provisioner 'csi.trident.netapp.io' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+15m         Normal    ProvisioningSuccess      persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-8   provisioned a volume
+15m         Normal    ProvisioningSucceeded    persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-8   Successfully provisioned volume pvc-39d3c004-0275-44ff-a038-ceccc856f96e
+15m         Normal    ProvisioningSucceeded    persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-7   Successfully provisioned volume pvc-4f2fb07f-d524-40d3-9ccf-3123e93e90a7
+15m         Normal    ProvisioningSuccess      persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-7   provisioned a volume
+15m         Normal    ExternalProvisioning     persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-0   Waiting for a volume to be created either by the external provisioner 'csi.trident.netapp.io' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+15m         Normal    ExternalProvisioning     persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-2   Waiting for a volume to be created either by the external provisioner 'csi.trident.netapp.io' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+15m         Normal    ExternalProvisioning     persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-3   Waiting for a volume to be created either by the external provisioner 'csi.trident.netapp.io' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+15m         Normal    ProvisioningSuccess      persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-2   provisioned a volume
+15m         Normal    ProvisioningSucceeded    persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-2   Successfully provisioned volume pvc-b63d1bc2-5d5e-4621-ac91-5540b501e4cb
+15m         Normal    ProvisioningSucceeded    persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-3   Successfully provisioned volume pvc-fd6588d9-f2e7-4f0b-ad6d-6d7fc4e8ad2d
+15m         Normal    ProvisioningSuccess      persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-3   provisioned a volume
+15m         Normal    ProvisioningSuccess      persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-0   provisioned a volume
+15m         Normal    ProvisioningSucceeded    persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-0   Successfully provisioned volume pvc-060c2bad-ef6b-494b-971f-27dd4bd6a6ef
+15m         Normal    ExternalProvisioning     persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-5   Waiting for a volume to be created either by the external provisioner 'csi.trident.netapp.io' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+15m         Normal    ExternalProvisioning     persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-6   Waiting for a volume to be created either by the external provisioner 'csi.trident.netapp.io' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+15m         Normal    ProvisioningSucceeded    persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-6   Successfully provisioned volume pvc-3b2b948f-18ae-4984-80fe-0bc575016b21
+15m         Normal    ProvisioningSuccess      persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-6   provisioned a volume
+15m         Normal    ProvisioningSuccess      persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-5   provisioned a volume
+15m         Normal    ProvisioningSucceeded    persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-5   Successfully provisioned volume pvc-2c371b71-b885-4415-a658-6df5d35178e5
+15m         Normal    SuccessfulAttachVolume   pod/fio-test4-10pods-50k-5050-32kb-9                         AttachVolume.Attach succeeded for volume "pvc-e5140d66-2896-44c9-8a49-a4e4a5fe8701"
+15m         Normal    Pulled                   pod/fio-test4-10pods-50k-5050-32kb-4                         Container image "rafmoshe2500/fio:3.41" already present on machine and can be accessed by the pod
+15m         Normal    AddedInterface           pod/fio-test4-10pods-50k-5050-32kb-4                         Add eth0 [10.129.0.243/23] from ovn-kubernetes
+15m         Normal    SuccessfulAttachVolume   pod/fio-test4-10pods-50k-5050-32kb-4                         AttachVolume.Attach succeeded for volume "pvc-4a2006e2-edfd-49e2-964f-c8ff0fd3f7de"
+15m         Normal    Started                  pod/fio-test4-10pods-50k-5050-32kb-9                         Container started
+15m         Normal    Created                  pod/fio-test4-10pods-50k-5050-32kb-9                         Container created
+15m         Normal    Pulled                   pod/fio-test4-10pods-50k-5050-32kb-9                         Container image "rafmoshe2500/fio:3.41" already present on machine and can be accessed by the pod
+15m         Normal    AddedInterface           pod/fio-test4-10pods-50k-5050-32kb-9                         Add eth0 [10.130.0.130/23] from ovn-kubernetes
+15m         Normal    Created                  pod/fio-test4-10pods-50k-5050-32kb-4                         Container created
+15m         Normal    Started                  pod/fio-test4-10pods-50k-5050-32kb-4                         Container started
+15m         Normal    ExternalProvisioning     persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-1   Waiting for a volume to be created either by the external provisioner 'csi.trident.netapp.io' or manually by the system administrator. If volume creation is delayed, please verify that the provisioner is running and correctly registered.
+15m         Normal    SuccessfulAttachVolume   pod/fio-test4-10pods-50k-5050-32kb-5                         AttachVolume.Attach succeeded for volume "pvc-2c371b71-b885-4415-a658-6df5d35178e5"
+15m         Normal    SuccessfulAttachVolume   pod/fio-test4-10pods-50k-5050-32kb-1                         AttachVolume.Attach succeeded for volume "pvc-672ec540-ddf7-4d43-b802-7bd32825374a"
+15m         Normal    SuccessfulAttachVolume   pod/fio-test4-10pods-50k-5050-32kb-3                         AttachVolume.Attach succeeded for volume "pvc-fd6588d9-f2e7-4f0b-ad6d-6d7fc4e8ad2d"
+15m         Normal    SuccessfulAttachVolume   pod/fio-test4-10pods-50k-5050-32kb-6                         AttachVolume.Attach succeeded for volume "pvc-3b2b948f-18ae-4984-80fe-0bc575016b21"
+15m         Normal    ProvisioningSucceeded    persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-1   Successfully provisioned volume pvc-672ec540-ddf7-4d43-b802-7bd32825374a
+15m         Normal    ProvisioningSuccess      persistentvolumeclaim/fio-test4-10pods-50k-5050-32kb-pvc-1   provisioned a volume
+15m         Normal    AddedInterface           pod/fio-test4-10pods-50k-5050-32kb-3                         Add eth0 [10.128.0.209/23] from ovn-kubernetes
+15m         Normal    Created                  pod/fio-test4-10pods-50k-5050-32kb-5                         Container created
+15m         Normal    Started                  pod/fio-test4-10pods-50k-5050-32kb-5                         Container started
+15m         Normal    AddedInterface           pod/fio-test4-10pods-50k-5050-32kb-5                         Add eth0 [10.128.0.210/23] from ovn-kubernetes
+15m         Normal    Pulled                   pod/fio-test4-10pods-50k-5050-32kb-5                         Container image "rafmoshe2500/fio:3.41" already present on machine and can be accessed by the pod
+15m         Normal    SuccessfulAttachVolume   pod/fio-test4-10pods-50k-5050-32kb-0                         AttachVolume.Attach succeeded for volume "pvc-060c2bad-ef6b-494b-971f-27dd4bd6a6ef"
+15m         Normal    Pulled                   pod/fio-test4-10pods-50k-5050-32kb-3                         Container image "rafmoshe2500/fio:3.41" already present on machine and can be accessed by the pod
+15m         Normal    Started                  pod/fio-test4-10pods-50k-5050-32kb-6                         Container started
+15m         Normal    SuccessfulAttachVolume   pod/fio-test4-10pods-50k-5050-32kb-8                         AttachVolume.Attach succeeded for volume "pvc-39d3c004-0275-44ff-a038-ceccc856f96e"
+15m         Normal    Created                  pod/fio-test4-10pods-50k-5050-32kb-6                         Container created
+15m         Normal    AddedInterface           pod/fio-test4-10pods-50k-5050-32kb-6                         Add eth0 [10.129.0.245/23] from ovn-kubernetes
+15m         Normal    Pulled                   pod/fio-test4-10pods-50k-5050-32kb-6                         Container image "rafmoshe2500/fio:3.41" already present on machine and can be accessed by the pod
+15m         Normal    SuccessfulAttachVolume   pod/fio-test4-10pods-50k-5050-32kb-7                         AttachVolume.Attach succeeded for volume "pvc-4f2fb07f-d524-40d3-9ccf-3123e93e90a7"
+15m         Normal    Created                  pod/fio-test4-10pods-50k-5050-32kb-3                         Container created
+15m         Normal    Started                  pod/fio-test4-10pods-50k-5050-32kb-3                         Container started
+15m         Normal    Pulled                   pod/fio-test4-10pods-50k-5050-32kb-8                         Container image "rafmoshe2500/fio:3.41" already present on machine and can be accessed by the pod
+15m         Normal    AddedInterface           pod/fio-test4-10pods-50k-5050-32kb-0                         Add eth0 [10.130.0.132/23] from ovn-kubernetes
+15m         Normal    Created                  pod/fio-test4-10pods-50k-5050-32kb-0                         Container created
+15m         Normal    Pulled                   pod/fio-test4-10pods-50k-5050-32kb-7                         Container image "rafmoshe2500/fio:3.41" already present on machine and can be accessed by the pod
+15m         Normal    AddedInterface           pod/fio-test4-10pods-50k-5050-32kb-7                         Add eth0 [10.130.0.131/23] from ovn-kubernetes
+15m         Normal    Pulled                   pod/fio-test4-10pods-50k-5050-32kb-0                         Container image "rafmoshe2500/fio:3.41" already present on machine and can be accessed by the pod
+15m         Normal    Started                  pod/fio-test4-10pods-50k-5050-32kb-7                         Container started
+15m         Normal    Started                  pod/fio-test4-10pods-50k-5050-32kb-8                         Container started
+15m         Normal    AddedInterface           pod/fio-test4-10pods-50k-5050-32kb-8                         Add eth0 [10.128.0.208/23] from ovn-kubernetes
+15m         Normal    SuccessfulAttachVolume   pod/fio-test4-10pods-50k-5050-32kb-2                         AttachVolume.Attach succeeded for volume "pvc-b63d1bc2-5d5e-4621-ac91-5540b501e4cb"
+15m         Normal    Created                  pod/fio-test4-10pods-50k-5050-32kb-7                         Container created
+15m         Normal    Created                  pod/fio-test4-10pods-50k-5050-32kb-8                         Container created
+15m         Normal    Started                  pod/fio-test4-10pods-50k-5050-32kb-0                         Container started
+15m         Normal    AddedInterface           pod/fio-test4-10pods-50k-5050-32kb-2                         Add eth0 [10.129.0.244/23] from ovn-kubernetes
+15m         Normal    Started                  pod/fio-test4-10pods-50k-5050-32kb-2                         Container started
+15m         Normal    Created                  pod/fio-test4-10pods-50k-5050-32kb-2                         Container created
+15m         Normal    Pulled                   pod/fio-test4-10pods-50k-5050-32kb-2                         Container image "rafmoshe2500/fio:3.41" already present on machine and can be accessed by the pod
+14m         Normal    AddedInterface           pod/fio-test4-10pods-50k-5050-32kb-1                         Add eth0 [10.130.0.133/23] from ovn-kubernetes
+14m         Normal    Pulled                   pod/fio-test4-10pods-50k-5050-32kb-1                         Container image "rafmoshe2500/fio:3.41" already present on machine and can be accessed by the pod
+14m         Normal    Started                  pod/fio-test4-10pods-50k-5050-32kb-1                         Container started
+14m         Normal    Created                  pod/fio-test4-10pods-50k-5050-32kb-1                         Container created

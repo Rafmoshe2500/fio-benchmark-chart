@@ -1,0 +1,10 @@
+{
+  "run_id": "test9-1pod-max-rw-7030-4kb-20260910-203931",
+  "namespace": "fio-tests",
+  "collected_at": "2026-09-11T00:54:54Z",
+  "pods_expected": 1,
+  "pods_collected": 1,
+  "pods_log_failed": 0,
+  "pods_restarted": 0,
+  "pods_bad_exit": 0
+}
