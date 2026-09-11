@@ -112,10 +112,21 @@ def compare_suites(suites):
         warnings.append("at least one run was made from a dirty working tree")
 
     # Tests present in one environment but not another.
+    #
+    # Compared against what was *declared*, not against what came back. A
+    # test that failed in every environment has no results anywhere, so
+    # building this from s["results"] dropped it from the comparison without
+    # a word -- a six-test suite silently became a four-test one.
+    declared = sorted({t for s in suites for t in (s.get("tests") or [])})
     all_tests = sorted({t for s in suites for t in s["results"]})
-    for t in all_tests:
+    for t in declared:
         missing = [s["environment"] for s in suites if t not in s["results"]]
-        if missing:
+        if len(missing) == len(suites):
+            warnings.append(
+                "%s produced no valid result in ANY environment (%s) and is "
+                "absent from the table below -- it was selected but never "
+                "measured" % (t, ", ".join(missing)))
+        elif missing:
             warnings.append("%s has no valid result in: %s" % (t, ", ".join(missing)))
 
     baseline = suites[0]

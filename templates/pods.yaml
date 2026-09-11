@@ -51,6 +51,14 @@ spec:
         set -e
         cp /fio-config/fio.job /tmp/prep.job
         sed -i 's|directory=.*|directory={{ $.Values.mountPath }}|g' /tmp/prep.job
+        # The job files declare write_*_log=/tmp/fiolog/fio. The measured
+        # container creates that directory; this one did not, so fio could
+        # fail here on a path the job never meant to exercise. An init
+        # container that exits non-zero means the pod never goes Ready, and
+        # `helm --wait --atomic` answers that by sitting for its full timeout
+        # and then rolling the release back -- deleting the pod, its events
+        # and any explanation along with it.
+        mkdir -p /tmp/fiolog
         # create_only lays the files out at full size without measuring, so
         # the measured run reads a real dataset instead of sparse holes.
         echo "laying out dataset (not measured)"

@@ -108,6 +108,22 @@ class CompareSuitesTest(unittest.TestCase):
         self.assertFalse(r["rows"][0]["established"])
         self.assertTrue(any("repeat" in w.lower() for w in r["warnings"]))
 
+    def test_test_missing_from_every_environment_is_still_reported(self):
+        """A real nfs3-vs-nfs41 comparison declared six tests; two failed to
+        deploy in both environments, so they appeared in neither set of
+        results and the table was built from the results alone. The
+        comparison presented four tests as though four had been asked for.
+        """
+        a = _suite(self.root, "a", "nfs3", ["t1", "t_dead"],
+                   {"t1": [100.0, 101.0, 99.0]})
+        b = _suite(self.root, "b", "nfs41", ["t1", "t_dead"],
+                   {"t1": [100.0, 101.0, 99.0]})
+        r = compare_suites([load_suite(a), load_suite(b)])
+        joined = " ".join(r["warnings"])
+        self.assertIn("t_dead", joined)
+        self.assertIn("ANY environment", joined)
+        self.assertNotIn("t_dead", [row["test_id"] for row in r["rows"]])
+
     def test_test_missing_from_one_environment_is_flagged(self):
         a = _suite(self.root, "a", "nfs3", ["t1", "t2"],
                    {"t1": [100.0, 101.0, 99.0], "t2": [50.0, 51.0, 49.0]})

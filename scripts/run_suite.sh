@@ -151,18 +151,48 @@ log "repeats=$REPEATS namespace=$NAMESPACE"
 log "results -> results/suites/$SUITE_ID"
 echo
 
-PASSED=(); REJECTED=()
+PASSED=(); REJECTED=(); REASONS=()
+
+# record_rejection <test/rep> <reason>
+#
+# The reason used to exist only as a line on the terminal. suite.json stored
+# `"rejected": 2` and nothing else, and a failed deploy leaves an empty
+# results directory, which git does not store at all -- so a suite pushed to
+# a repository arrived with no trace of why two of its six tests produced
+# nothing. Both the count and the reason are recorded now.
+record_rejection() {
+  REJECTED+=("$1")
+  REASONS+=("$1: $2")
+}
 
 for test_id in "${TESTS[@]}"; do
   mkdir -p "$SUITE_DIR/$test_id"
   for rep in $(seq 1 "$REPEATS"); do
     log "=== $test_id  (repeat $rep/$REPEATS, $ENVNAME) ==="
 
+    # Keep the deploy output. When helm --wait --atomic gives up after 15
+    # minutes it rolls the release back, and with it every pod and event
+    # that would have said which resource could not be satisfied.
+    DEPLOY_LOG="$SUITE_DIR/$test_id/rep-${rep}-deploy.log"
+
     # shellcheck disable=SC2086
     if ! env STORAGE_CLASS="$SC" $ENV_EXTRA \
-         "$CHART_DIR/scripts/deploy_test.sh" "$test_id" "$NAMESPACE"; then
+         "$CHART_DIR/scripts/deploy_test.sh" "$test_id" "$NAMESPACE" \
+         2>&1 | tee "$DEPLOY_LOG"; then
       warn "$test_id repeat $rep: deploy failed, skipping"
-      REJECTED+=("$test_id/rep$rep(deploy)")
+      record_rejection "$test_id/rep$rep" \
+        "deploy failed -- see $(basename "$DEPLOY_LOG"): $(tail -n 3 "$DEPLOY_LOG" | tr '\n' ' ' | tr -d '"' | cut -c1-300)"
+
+      # helm --atomic rolls back only the release that failed. A test that
+      # deploys several (test17 deploys four) leaves the earlier ones
+      # running, and without this they keep loading the array underneath
+      # whatever runs next.
+      if [ -f "$CHART_DIR/results/.last_run_id" ]; then
+        STALE="$(cat "$CHART_DIR/results/.last_run_id")"
+        log "removing anything $test_id left behind"
+        FORCE=true "$CHART_DIR/scripts/cleanup_test.sh" "$STALE" "$NAMESPACE" \
+          >/dev/null 2>&1 || true
+      fi
       continue
     fi
 
@@ -170,13 +200,17 @@ for test_id in "${TESTS[@]}"; do
     "$CHART_DIR/scripts/collect_results.sh" "$RID" "$NAMESPACE" || \
       warn "$test_id repeat $rep: collection incomplete"
 
-    if ( cd "$CHART_DIR/scripts" && python3 parse_results.py "$CHART_DIR/results/$RID" ); then
+    PARSE_LOG="$SUITE_DIR/$test_id/rep-${rep}-parse.log"
+    if ( cd "$CHART_DIR/scripts" && python3 parse_results.py \
+           "$CHART_DIR/results/$RID" ) 2>&1 | tee "$PARSE_LOG"; then
       cp "$CHART_DIR/results/$RID/summary_report.json" \
          "$SUITE_DIR/$test_id/rep-${rep}.json"
       PASSED+=("$test_id/rep$rep")
+      rm -f "$PARSE_LOG" "$SUITE_DIR/$test_id/rep-${rep}-deploy.log"
     else
       warn "$test_id repeat $rep: REJECTED, excluded from the suite result"
-      REJECTED+=("$test_id/rep$rep")
+      record_rejection "$test_id/rep$rep" \
+        "$(grep -m3 '^  FAIL' "$PARSE_LOG" | sed 's/^ *//' | tr '\n' ';' | tr -d '"' | cut -c1-300)"
     fi
 
     FORCE=true "$CHART_DIR/scripts/cleanup_test.sh" "$RID" "$NAMESPACE" >/dev/null 2>&1 || true
@@ -191,6 +225,10 @@ done
 git_dirty=false
 [ -n "$(git -C "$CHART_DIR" status --porcelain 2>/dev/null)" ] && git_dirty=true
 tests_json=$(printf '"%s",' "${TESTS[@]}")
+reasons_json=""
+for r in ${REASONS[@]+"${REASONS[@]}"}; do
+  reasons_json="${reasons_json}\"${r}\","
+done
 
 cat > "$SUITE_DIR/suite.json" <<JSON
 {
@@ -207,7 +245,8 @@ cat > "$SUITE_DIR/suite.json" <<JSON
   "git_dirty": $git_dirty,
   "started_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
   "passed": ${#PASSED[@]},
-  "rejected": ${#REJECTED[@]}
+  "rejected": ${#REJECTED[@]},
+  "rejections": [${reasons_json%,}]
 }
 JSON
 

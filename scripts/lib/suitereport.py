@@ -26,6 +26,15 @@ def summarise_suite(suite):
             "%d run(s) were rejected by the parser and are excluded; the "
             "figures below describe only the runs that completed as declared"
             % suite["rejected"])
+        # A count on its own says a test produced nothing but not why, which
+        # is the one thing needed to get it to run next time.
+        for reason in (suite.get("rejections") or []):
+            warnings.append("  %s" % reason)
+        if not suite.get("rejections"):
+            warnings.append(
+                "  this suite predates rejection recording, so the reasons "
+                "were printed to the terminal and not kept. A re-run records "
+                "them in suite.json and keeps the deploy log.")
 
     if suite.get("repeats", 1) < 2:
         warnings.append(
