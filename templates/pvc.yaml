@@ -13,9 +13,6 @@ metadata:
 spec:
   accessModes:
     - {{ $.Values.pvc.accessMode }}
-  {{- if eq ($.Values.pvc.volumeMode | default "Filesystem") "Block" }}
-  volumeMode: Block
-  {{- end }}
   resources:
     requests:
       storage: {{ $.Values.pvc.size }}
