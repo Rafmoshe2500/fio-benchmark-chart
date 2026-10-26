@@ -1,0 +1,18 @@
+# Run ONCE per volume before any read test.
+# VAST block volumes are thin: reading never-written regions returns zeros fast and inflates results.
+# size must match the region the read tests use (all tests below use size=50G, offset 0).
+[global]
+ioengine=libaio
+direct=1
+filename=/dev/fio-block
+group_reporting=1
+randrepeat=0
+refill_buffers=1
+scramble_buffers=1
+
+[prefill]
+rw=write
+bs=1m
+size=50G
+iodepth=16
+numjobs=1

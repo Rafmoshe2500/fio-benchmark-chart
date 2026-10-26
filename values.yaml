@@ -23,9 +23,14 @@ pvc:
   size: 500Gi
   storageClassName: ""  # Leave empty for default storage class
   accessMode: ReadWriteOnce
+  # Filesystem (default, fio uses directory=) or Block (raw device, fio uses filename=<blockDevicePath>)
+  volumeMode: Filesystem
 
-# Mount path for the PVC inside the pod
+# Mount path for the PVC inside the pod (volumeMode: Filesystem)
 mountPath: /mnt/fio-data
+
+# Device path of the raw volume inside the pod (volumeMode: Block)
+blockDevicePath: /dev/fio-block
 
 # FIO job configuration
 # You can either provide inline FIO job content or use an external file

@@ -1,0 +1,26 @@
+# Max read BW. Sweep numjobs/iodepth to find the knee (BW stops growing, p99 latency starts climbing).
+[global]
+ioengine=libaio
+direct=1
+filename=/dev/fio-block
+size=50G
+runtime=300
+ramp_time=30
+time_based=1
+group_reporting=1
+numjobs=8
+iodepth=32
+
+refill_buffers=1
+scramble_buffers=1
+randrepeat=0
+norandommap=1
+cpus_allowed_policy=split
+
+lat_percentiles=1
+percentile_list=50:90:99:99.9:99.99
+
+[seq-read-1m]
+rw=read
+bs=1m
+# every job reads the whole region (no offset_increment) - fine for direct I/O on VAST

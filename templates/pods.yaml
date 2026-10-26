@@ -38,8 +38,13 @@ spec:
         echo "---"
         fio /tmp/fio.job
         echo "FIO benchmark completed on pod {{ $i }}"
+    {{- if and $.Values.pvc.enabled (eq ($.Values.pvc.volumeMode | default "Filesystem") "Block") }}
+    volumeDevices:
+    - name: fio-data
+      devicePath: {{ $.Values.blockDevicePath }}
+    {{- end }}
     volumeMounts:
-    {{- if $.Values.pvc.enabled }}
+    {{- if and $.Values.pvc.enabled (ne ($.Values.pvc.volumeMode | default "Filesystem") "Block") }}
     - name: fio-data
       mountPath: {{ $.Values.mountPath }}
     {{- end }}
