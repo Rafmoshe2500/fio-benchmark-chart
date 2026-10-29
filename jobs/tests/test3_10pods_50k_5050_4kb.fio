@@ -13,5 +13,4 @@ iodepth=32
 rw=randrw
 rwmixread=50
 bs=4k
-# Target 5000 IOPS per pod. 5000 / 8 jobs = 625 IOPS per thread
-rate_iops=625
+rate_iops=3125,3125
