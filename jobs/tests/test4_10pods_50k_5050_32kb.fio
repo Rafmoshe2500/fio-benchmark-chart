@@ -9,6 +9,11 @@ directory=/mnt/fio-data
 numjobs=8
 iodepth=32
 
+refill_buffers=1
+scramble_buffers=1
+randrepeat=0
+norandommap=1
+
 [test4-50k-5050-32k]
 rw=randrw
 rwmixread=50
